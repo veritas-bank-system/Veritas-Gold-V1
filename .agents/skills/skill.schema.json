@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skills.internetcomputer.org/skills/skill.schema.json",
+  "title": "IC Skill Frontmatter",
+  "description": "Schema for the YAML frontmatter in SKILL.md files. Aligns with the Agent Skills spec (agentskills.io/specification). Top-level fields (name, description, license, compatibility) plus metadata block (title, category).",
+  "type": "object",
+  "required": ["name", "description", "metadata"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Unique skill identifier. Lowercase, hyphenated. Must match the directory name under skills/."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "One-sentence summary. Describes when an agent should load this skill and what it covers. This is the primary triggering mechanism for agent skill selection."
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier (e.g., Apache-2.0)."
+    },
+    "compatibility": {
+      "type": "string",
+      "description": "Tool/version requirements (e.g., 'icp-cli >= 0.1.0')."
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["title", "category"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable display name for the skill."
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Skill category for browsing/filtering. Use an existing category when possible: Auth, CloudEngine, Core, DeFi, Frontend, Governance, Infrastructure, Integration, Motoko, Security."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

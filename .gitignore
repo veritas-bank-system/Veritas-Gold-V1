@@ -1,0 +1,15 @@
+# Local environment secrets
+.env
+.env.*
+!.env.example
+
+# Machine-local MCP configuration may contain credentials
+/mcp_config.json
+/ai-gateway/mcp_config.json
+
+# Local bare backup repo must not be embedded in the working repo
+/ICPMoneta-VeritasGold.backup.git/
+
+# Python bytecode
+__pycache__/
+*.pyc

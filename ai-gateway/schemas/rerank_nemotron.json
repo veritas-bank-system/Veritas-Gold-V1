@@ -1,0 +1,33 @@
+{
+  "name": "rerank_nemotron",
+  "description": "Cross-encoder document and visual reranking using nvidia/llama-nemotron-rerank-vl-1b-v2:free. Ranks input documents by relevance to the query with scores.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Search query or target context to rank against"
+      },
+      "documents": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of candidate documents to rerank"
+      },
+      "model": {
+        "type": "string",
+        "description": "NVIDIA reranking model. Default: nvidia/llama-nemotron-rerank-vl-1b-v2:free",
+        "default": "nvidia/llama-nemotron-rerank-vl-1b-v2:free"
+      },
+      "top_n": {
+        "type": "integer",
+        "description": "Optional maximum number of top results to return"
+      }
+    },
+    "required": [
+      "query",
+      "documents"
+    ]
+  }
+}

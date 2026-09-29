@@ -22,7 +22,7 @@ export type SystemEnvironment = 'SANDBOX' | 'DEMO' | 'PRODUCTION';
 export interface PersonaDefinition {
   id: string;
   roleTitle: string;
-  category: 'Central Bank' | 'Commercial Bank' | 'Custody & Issuance' | 'Supervisory & Audit' | 'Executive Mobile';
+  category: 'Central Bank' | 'Commercial Bank' | 'Custody & Issuance' | 'Supervisory & Audit';
   institutionName: string;
   bic: string;
   lei: string;
@@ -132,20 +132,6 @@ export const PERSONA_LIST: PersonaDefinition[] = [
     keyPermissions: ['Real-time ISO 20022 camt.053 GL', 'BIS CPMI-IOSCO Radar', 'ZK Solvency Proofs', 'Lawful Access Audit Logs'],
     icon: Scale,
     defaultMode: 'desktop',
-  },
-  {
-    id: 'persona_mobile_approver',
-    roleTitle: 'Executive Signer & Mobile Approver',
-    category: 'Executive Mobile',
-    institutionName: 'Executive Reserve Council (2-of-3 Multi-Sig)',
-    bic: 'EXECRESXXXX',
-    lei: '98450011223344556677',
-    jurisdiction: 'Secure Enclave Biometric Device',
-    clearanceLevel: 'Level 5 (2-of-3 Hardware Keyring)',
-    description: 'On-the-go biometric authorization for wire payments, emergency liquidity sweeps, and bond issuances.',
-    keyPermissions: ['Biometric FaceID Approvals', 'Mobile AUM Surveillance', 'One-Touch DvP Execution', 'Emergency Alerts'],
-    icon: Smartphone,
-    defaultMode: 'mobile',
   },
 ];
 
@@ -507,7 +493,6 @@ export const InstitutionalLoginSurface: React.FC<InstitutionalLoginSurfaceProps>
                     {selectedPersona.category === 'Commercial Bank' && '🏦 Primary Dealer & Clearing Credentials'}
                     {selectedPersona.category === 'Custody & Issuance' && '🔐 Vault Assayer & Custody Mandate'}
                     {selectedPersona.category === 'Supervisory & Audit' && '⚖️ Regulatory Audit Warrant & ZK Credentials'}
-                    {selectedPersona.category === 'Executive Mobile' && '📱 Secure Enclave 2-of-3 Hardware Keyring'}
                   </label>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -531,7 +516,7 @@ export const InstitutionalLoginSurface: React.FC<InstitutionalLoginSurfaceProps>
                             ? 'BLK-ALPHA-PM'
                             : selectedPersona.id === 'persona_supervisory_auditor'
                             ? 'BIS-AUDIT-992'
-                            : 'ENCLAVE-2OF3-SIGNER'
+                            : 'PLATFORM-OPERATOR-01'
                         }
                         className="input-dark"
                         style={{ padding: '6px 8px', fontSize: '11px', fontFamily: 'var(--font-mono)', width: '100%', color: 'var(--red-primary)' }}
@@ -635,7 +620,7 @@ export const InstitutionalLoginSurface: React.FC<InstitutionalLoginSurfaceProps>
                     }}
                   >
                     <Smartphone size={15} />
-                    Mobile Approver App
+                    Mobile Device View
                   </button>
                 </div>
               </div>

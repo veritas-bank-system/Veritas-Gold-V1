@@ -1,0 +1,25 @@
+const fs = require('fs');
+
+let page = fs.readFileSync('src/app/page.tsx', 'utf8');
+
+// Make it a client component
+if (!page.includes('"use client"')) {
+  page = '"use client";\nimport { useState } from "react";\n' + page;
+}
+
+// Replace the hardcoded "hidden" classes with conditional rendering
+// For view-register
+page = page.replace(/<div className="p-space-lg flex flex-col gap-space-lg" id="view-register">/, '<div className={`p-space-lg flex flex-col gap-space-lg ${view === "register" ? "block" : "hidden"}`} id="view-register">');
+
+// For view-login
+page = page.replace(/<div className="hidden p-space-lg flex flex-col gap-space-lg" id="view-login">/, '<div className={`p-space-lg flex flex-col gap-space-lg ${view === "login" ? "block" : "hidden"}`} id="view-login">');
+
+// Update buttons to trigger state change
+page = page.replace(/id="nav-btn-register"[^>]*>/, 'id="nav-btn-register" type="button" onClick={() => setView("register")} className={`px-space-md py-space-2xs rounded font-label-sm text-label-sm uppercase font-semibold transition-all ${view === "register" ? "bg-surface-canvas text-primary shadow-sm" : "text-text-secondary hover:text-on-surface"}`}>');
+
+page = page.replace(/id="nav-btn-login"[^>]*>/, 'id="nav-btn-login" type="button" onClick={() => setView("login")} className={`px-space-md py-space-2xs rounded font-label-sm text-label-sm uppercase font-medium transition-all ${view === "login" ? "bg-surface-canvas text-primary shadow-sm font-semibold" : "text-text-secondary hover:text-on-surface"}`}>');
+
+// Inject state into component
+page = page.replace(/export default function Home\(\) {/, 'export default function Home() {\n  const [view, setView] = useState("register");');
+
+fs.writeFileSync('src/app/page.tsx', page);

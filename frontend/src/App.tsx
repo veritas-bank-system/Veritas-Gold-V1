@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/smart/Sidebar';
 import { StitchExecutiveDashboard } from './components/views/StitchExecutiveDashboard';
@@ -35,6 +36,7 @@ import {
   fetchHoldings,
   fetchIdentities,
   fetchMarketRates,
+  fetchFxReferenceRates,
   fetchOffers,
   fetchTransactions,
   fetchCollateralPositions,
@@ -54,6 +56,7 @@ import type {
   PrincipalProfile,
   ProtocolLog,
   MarketRate,
+  FxReferenceRates,
   RwaOffer,
   InstitutionalTxn,
   CollateralPosition,
@@ -61,6 +64,7 @@ import type {
   CorporateAction,
   PendingApproval,
   SweepingRule,
+  SweepingRuleDraft,
   BridgeRoute,
   CanisterStatusInfo,
   LiquidityPool,
@@ -120,6 +124,9 @@ export function App() {
   const [holdings, setHoldings] = useState<FungibleAssetHolding[]>([]);
   const [identities, setIdentities] = useState<PrincipalProfile[]>([]);
   const [rates, setRates] = useState<MarketRate[]>([]);
+  const [fxReferenceRates, setFxReferenceRates] = useState<FxReferenceRates | null>(null);
+  const [fxReferenceStatus, setFxReferenceStatus] = useState<'loading' | 'available' | 'stale' | 'unavailable'>('loading');
+  const [fxReferenceError, setFxReferenceError] = useState<string | null>(null);
   const [offers, setOffers] = useState<RwaOffer[]>([]);
   const [transactions, setTransactions] = useState<InstitutionalTxn[]>([]);
   const [collateral, setCollateral] = useState<CollateralPosition[]>([]);
@@ -127,6 +134,16 @@ export function App() {
   const [corporateActions, setCorporateActions] = useState<CorporateAction[]>([]);
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [sweepingRules, setSweepingRules] = useState<SweepingRule[]>([]);
+  const [sweepingRulesStatus, setSweepingRulesStatus] = useState<'loading' | 'available' | 'stale' | 'unavailable'>('loading');
+  const [sweepingRulesFetchedAt, setSweepingRulesFetchedAt] = useState<number | null>(null);
+  const [sweepingRuleDrafts, setSweepingRuleDrafts] = useState<SweepingRuleDraft[]>(() => {
+    try {
+      const savedDrafts = sessionStorage.getItem('liquidity-sweeper-drafts');
+      return savedDrafts ? JSON.parse(savedDrafts) as SweepingRuleDraft[] : [];
+    } catch {
+      return [];
+    }
+  });
   const [bridgeRoutes, setBridgeRoutes] = useState<BridgeRoute[]>([]);
   const [canisters, setCanisters] = useState<CanisterStatusInfo[]>([]);
   const [liquidityPools, setLiquidityPools] = useState<LiquidityPool[]>([]);
@@ -169,12 +186,50 @@ export function App() {
   ]);
 
   const [networkStatus, setNetworkStatus] = useState<'healthy' | 'connecting' | 'offline'>('healthy');
+  const [accountDataStatus, setAccountDataStatus] = useState<'loading' | 'available' | 'stale' | 'unavailable'>('loading');
+  const [accountsFetchedAt, setAccountsFetchedAt] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
+  const fxRefreshStarted = useRef(false);
 
-  const loadData = async () => {
+  const refreshFxReferenceRates = useCallback(async () => {
     try {
-      const [accs, holds, ids, rts, ofrs, txns, cols, aucs, acts, apprs, sweeps, brgs, cans, pools, bonds] = await Promise.all([
-        fetchAccounts(),
+      const data = await fetchFxReferenceRates();
+      setFxReferenceRates(data);
+      setFxReferenceStatus('available');
+      setFxReferenceError(null);
+    } catch (error) {
+      setFxReferenceStatus((previous) => previous === 'available' || previous === 'stale' ? 'stale' : 'unavailable');
+      setFxReferenceError(error instanceof Error ? error.message : 'Reference rates could not be loaded.');
+    }
+  }, []);
+
+  const loadData = useCallback(async () => {
+    if (!fxRefreshStarted.current) {
+      fxRefreshStarted.current = true;
+      void refreshFxReferenceRates();
+    }
+    const rulesRequest = fetchSweepingRules()
+      .then((records) => {
+        setSweepingRules(records);
+        setSweepingRulesFetchedAt(Date.now());
+        setSweepingRulesStatus('available');
+      })
+      .catch(() => {
+        setSweepingRulesStatus((previous) => previous === 'available' || previous === 'stale' ? 'stale' : 'unavailable');
+      });
+
+    const accountRequest = fetchAccounts()
+      .then((accs) => {
+        setAccounts(accs);
+        setAccountsFetchedAt(Date.now());
+        setAccountDataStatus('available');
+      })
+      .catch(() => {
+        setAccountDataStatus((previous) => previous === 'available' || previous === 'stale' ? 'stale' : 'unavailable');
+      });
+
+    try {
+      const [holds, ids, rts, ofrs, txns, cols, aucs, acts, apprs, brgs, cans, pools, bonds] = await Promise.all([
         fetchHoldings(),
         fetchIdentities(),
         fetchMarketRates(),
@@ -184,13 +239,12 @@ export function App() {
         fetchAuctions(),
         fetchCorporateActions(),
         fetchApprovals(),
-        fetchSweepingRules(),
         fetchBridgeRoutes(),
         fetchCanisters(),
         fetchLiquidityPools(),
         fetchBondContracts(),
       ]);
-      setAccounts(accs);
+      await Promise.all([accountRequest, rulesRequest]);
       setHoldings(holds);
       setIdentities(ids);
       setRates(rts);
@@ -200,7 +254,6 @@ export function App() {
       setAuctions(aucs);
       setCorporateActions(acts);
       setApprovals(apprs);
-      setSweepingRules(sweeps);
       setBridgeRoutes(brgs);
       setCanisters(cans);
       setLiquidityPools(pools);
@@ -209,13 +262,18 @@ export function App() {
     } catch {
       setNetworkStatus('offline');
     }
-  };
+  }, [refreshFxReferenceRates]);
 
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
+
+  useEffect(() => {
+    const interval = setInterval(refreshFxReferenceRates, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [refreshFxReferenceRates]);
 
   const showToast = (message: string, isError = false) => {
     setToast({ message, isError });
@@ -244,7 +302,19 @@ export function App() {
       case 'mvp_verification':
         return <MvpVerificationSuiteView onNotify={showToast} />;
       case 'portfolio':
-        return <BankCardSurface accounts={accounts} onRefresh={loadData} onNotify={showToast} />;
+        return (
+          <BankCardSurface
+            accounts={accounts}
+            accountDataStatus={accountDataStatus}
+            accountsFetchedAt={accountsFetchedAt}
+            sessionPersona={authenticatedPersona?.roleTitle || 'Unspecified'}
+            sessionInstitution={authenticatedPersona?.institutionName || 'Unspecified'}
+            selectedInstitutionProfile={currentInstitution.name}
+            selectedEnvironment={systemEnv}
+            onRefresh={loadData}
+            onNotify={showToast}
+          />
+        );
       case 'settlement_instruments':
         return <SettlementInstrumentRegistryView />;
       case 'terminal':
@@ -276,7 +346,30 @@ export function App() {
       case 'vault_telemetry':
         return <ProofOfReserveTelemetry onNotify={showToast} />;
       case 'sweeper':
-        return <LiquiditySweeperView rules={sweepingRules} accounts={accounts} onRefresh={loadData} onNotify={showToast} />;
+        return (
+          <LiquiditySweeperView
+            rules={sweepingRules}
+            rulesDataStatus={sweepingRulesStatus}
+            rulesFetchedAt={sweepingRulesFetchedAt}
+            accountsDataStatus={accountDataStatus}
+            accountsFetchedAt={accountsFetchedAt}
+            accounts={accounts}
+            drafts={sweepingRuleDrafts.filter((draft) => authenticatedPersona?.category === 'Central Bank' || draft.creator_persona_id === authenticatedPersona?.id)}
+            persona={authenticatedPersona || PERSONA_LIST[0]}
+            onSaveDraft={(draft) => setSweepingRuleDrafts((current) => {
+              const next = [draft, ...current];
+              sessionStorage.setItem('liquidity-sweeper-drafts', JSON.stringify(next));
+              return next;
+            })}
+            onReviewDraft={(draftId, reviewer) => setSweepingRuleDrafts((current) => {
+              const next = current.map((draft) => draft.draft_id === draftId ? { ...draft, reviewed_at: Date.now(), reviewed_by: reviewer } : draft);
+              sessionStorage.setItem('liquidity-sweeper-drafts', JSON.stringify(next));
+              return next;
+            })}
+            onRefresh={loadData}
+            onNotify={showToast}
+          />
+        );
       case 'bridge':
         return <CrossChainBridgeView routes={bridgeRoutes} onNotify={showToast} />;
       case 'canister_mgmt':
@@ -286,7 +379,7 @@ export function App() {
       case 'interoperability':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <GoldFxExchange rates={rates} />
+            <GoldFxExchange rates={rates} referenceRates={fxReferenceRates} referenceStatus={fxReferenceStatus} referenceError={fxReferenceError} onRefresh={refreshFxReferenceRates} />
             <OpsDashboard logs={logs} onRefresh={loadData} />
           </div>
         );
@@ -298,6 +391,8 @@ export function App() {
             canisters={canisters}
             onSelectPersona={(p) => {
               setAuthenticatedPersona(p);
+              const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
+              if (matchingInstitution) setCurrentInstitution(matchingInstitution);
               showToast(`Switched active session to ${p.roleTitle}`);
             }}
             onNotify={showToast}
@@ -325,6 +420,8 @@ export function App() {
       <InstitutionalLoginSurface
         onLoginSuccess={(persona, env, mode) => {
           setAuthenticatedPersona(persona);
+          const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === persona.bic);
+          if (matchingInstitution) setCurrentInstitution(matchingInstitution);
           setSystemEnv(env);
           setRuntimeMode(mode);
           setShowLoginModal(false);
@@ -376,14 +473,14 @@ export function App() {
             style={{
               padding: '1px 6px',
               borderRadius: '3px',
-              backgroundColor: systemEnv === 'SANDBOX' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-              border: `1px solid ${systemEnv === 'SANDBOX' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
-              color: systemEnv === 'SANDBOX' ? '#f59e0b' : 'var(--green-valid)',
+              backgroundColor: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              color: '#f59e0b',
               fontSize: '9.5px',
               fontWeight: 800,
             }}
           >
-            ENV: {systemEnv} (sEURD / sUSDD)
+            REQUESTED MODE: {systemEnv} · DATA SOURCE: LOCAL SANDBOX
           </span>
         </div>
 
@@ -613,7 +710,7 @@ export function App() {
         />
       )}
 
-      {toast && (
+      {toast && createPortal(
         <div
           style={{
             position: 'fixed',
@@ -635,7 +732,8 @@ export function App() {
         >
           {toast.isError ? <AlertCircle size={16} /> : <CheckCircle size={16} color="var(--green-valid)" />}
           {toast.message}
-        </div>
+        </div>,
+        document.body,
       )}
 
       {runtimeMode === 'tablet' ? (
@@ -645,6 +743,8 @@ export function App() {
               currentPersona={authenticatedPersona || PERSONA_LIST[0]}
               onSelectPersona={(p) => {
                 setAuthenticatedPersona(p);
+                const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
+                if (matchingInstitution) setCurrentInstitution(matchingInstitution);
                 showToast(`Switched persona to ${p.roleTitle}`);
               }}
               accounts={accounts}
@@ -668,6 +768,8 @@ export function App() {
               currentPersona={authenticatedPersona || PERSONA_LIST[0]}
               onSelectPersona={(p) => {
                 setAuthenticatedPersona(p);
+                const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
+                if (matchingInstitution) setCurrentInstitution(matchingInstitution);
                 showToast(`Switched persona to ${p.roleTitle}`);
               }}
               accounts={accounts}
@@ -702,6 +804,8 @@ export function App() {
             currentPersona={authenticatedPersona || PERSONA_LIST[0]}
             onSelectPersona={(p) => {
               setAuthenticatedPersona(p);
+              const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
+              if (matchingInstitution) setCurrentInstitution(matchingInstitution);
               showToast(`Switched persona to ${p.roleTitle} (${p.institutionName})`);
             }}
             onOpenPersonaModal={() => setShowLoginModal(true)}
@@ -748,6 +852,8 @@ export function App() {
           <InstitutionalLoginSurface
             onLoginSuccess={(persona, env, mode) => {
               setAuthenticatedPersona(persona);
+              const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === persona.bic);
+              if (matchingInstitution) setCurrentInstitution(matchingInstitution);
               setSystemEnv(env);
               setRuntimeMode(mode);
               setShowLoginModal(false);

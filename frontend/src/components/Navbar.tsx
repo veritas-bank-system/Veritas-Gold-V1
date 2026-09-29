@@ -29,7 +29,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentInstitution = INSTITUTION_PROFILES[0],
   onSelectInstitution,
 }) => {
-  const [activeNetwork, setActiveNetwork] = useState<'mainnet' | 'sandbox'>('mainnet');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -45,11 +44,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     if (onNotify && searchQuery) {
       onNotify(`Searching StateRef / Transaction: "${searchQuery}"`);
     }
-  };
-
-  const handleNetworkSwitch = (net: 'mainnet' | 'sandbox') => {
-    setActiveNetwork(net);
-    if (onNotify) onNotify(`Switched to ${net.toUpperCase()} network partition`);
   };
 
   return (
@@ -187,51 +181,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Mainnet / Sandbox Switcher */}
-          <div
+          <span
+            role="status"
+            title="This application is connected to a local in-memory sandbox ledger; no mainnet connection is configured."
             style={{
-              display: 'flex',
-              backgroundColor: '#120c10',
+              padding: '6px 10px',
               borderRadius: 'var(--radius-sm)',
-              padding: '2px',
-              border: '1px solid var(--border-subtle)',
-              fontSize: '10.5px',
-              fontWeight: 700,
+              border: '1px solid rgba(245, 158, 11, .35)',
+              background: 'rgba(245, 158, 11, .1)',
+              color: '#fbbf24',
+              fontSize: '10px',
+              fontWeight: 800,
+              letterSpacing: '.04em',
+              whiteSpace: 'nowrap',
             }}
           >
-            <button
-              onClick={() => handleNetworkSwitch('mainnet')}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '4px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: activeNetwork === 'mainnet' ? '#ef4444' : 'transparent',
-                color: activeNetwork === 'mainnet' ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 800,
-                boxShadow: activeNetwork === 'mainnet' ? '0 0 10px var(--red-glow)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              MAINNET
-            </button>
-            <button
-              onClick={() => handleNetworkSwitch('sandbox')}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '4px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: activeNetwork === 'sandbox' ? '#ef4444' : 'transparent',
-                color: activeNetwork === 'sandbox' ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 700,
-                boxShadow: activeNetwork === 'sandbox' ? '0 0 10px var(--red-glow)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              SANDBOX
-            </button>
-          </div>
+            SANDBOX · LOCAL LEDGER
+          </span>
 
           {/* Smartphone Simulator Toggle */}
           <button

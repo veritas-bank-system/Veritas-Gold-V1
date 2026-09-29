@@ -97,6 +97,15 @@ export interface BlindedIdentity {
   created_at: number;
 }
 
+export interface FxReferenceRates {
+  base: string;
+  date: string;
+  rates: Record<string, number>;
+  source: string;
+  sourceUrl: string;
+  retrievedAt: number;
+}
+
 export interface MarketRate {
   symbol: string;
   name: string;
@@ -274,6 +283,23 @@ export interface SweepingRule {
   frequency: string;
   is_active: boolean;
   total_swept_eur: string;
+}
+
+export interface SweepingRuleDraft {
+  draft_id: string;
+  source_account: string;
+  currency: string;
+  reserve_floor: string;
+  trigger_threshold: string;
+  sweep_cap: string;
+  target_asset: string;
+  frequency: string;
+  created_at: number;
+  creator_persona_id: string;
+  creator_persona_name: string;
+  institution_name: string;
+  reviewed_at?: number;
+  reviewed_by?: string;
 }
 
 export interface BridgeRoute {

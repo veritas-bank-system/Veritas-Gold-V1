@@ -1,0 +1,46 @@
+{
+  "name": "query_nvidia_nim",
+  "description": "Executes direct NVIDIA Integrate API (NIM) completions with automatic fallback to OpenRouter AI Gateway. Strictly rejects any non-NVIDIA models.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "NVIDIA model identifier. Default: nvidia/nemotron-3-super-120b-a12b:free",
+        "default": "nvidia/nemotron-3-super-120b-a12b:free"
+      },
+      "messages": {
+        "type": "array",
+        "description": "Array of message objects with 'role' and 'content'",
+        "items": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "role",
+            "content"
+          ]
+        }
+      },
+      "prompt": {
+        "type": "string",
+        "description": "Single convenience prompt string (alternative to messages)"
+      },
+      "temperature": {
+        "type": "number",
+        "description": "Sampling temperature (0.0 to 1.0)",
+        "default": 0.2
+      },
+      "max_tokens": {
+        "type": "integer",
+        "description": "Maximum tokens to generate"
+      }
+    }
+  }
+}

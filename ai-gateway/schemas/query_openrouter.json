@@ -1,0 +1,46 @@
+{
+  "name": "query_openrouter",
+  "description": "Executes chat completions restricted strictly to NVIDIA Nemotron models (e.g. nvidia/nemotron-3-ultra-550b-a55b:free, nvidia/nemotron-3-super-120b-a12b:free, nvidia/nemotron-3.5-lightning:free, nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free) via OpenRouter AI Gateway. Injects mandatory telemetry status header.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "NVIDIA model identifier. Default: nvidia/nemotron-3.5-lightning:free",
+        "default": "nvidia/nemotron-3.5-lightning:free"
+      },
+      "messages": {
+        "type": "array",
+        "description": "Array of message objects with 'role' and 'content'",
+        "items": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "role",
+            "content"
+          ]
+        }
+      },
+      "prompt": {
+        "type": "string",
+        "description": "Single convenience prompt string (alternative to messages)"
+      },
+      "temperature": {
+        "type": "number",
+        "description": "Sampling temperature (0.0 to 1.0)",
+        "default": 0.2
+      },
+      "max_tokens": {
+        "type": "integer",
+        "description": "Maximum tokens to generate"
+      }
+    }
+  }
+}

@@ -444,7 +444,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let app = server::create_app(state);
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("🚀 ICP Canister Server listening on http://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await?;

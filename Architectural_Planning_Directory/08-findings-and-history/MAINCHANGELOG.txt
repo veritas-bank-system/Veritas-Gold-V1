@@ -1,0 +1,109 @@
+VERITAS GOLD — MAIN CHANGELOG
+================================
+
+Session date: 2026-09-27
+Task: Central-bank Account Overview / VPS showcase readiness
+Plan: .planning/2026-09-27-central-bank-account-overview-and-vps-re/
+
+PURPOSE
+-------
+Track decisions and user-visible changes for the Account Overview feature while preserving the current website. Prepare the showcase for a VPS deployment path and playtest the real UI. A VPS-hosted demo is not a production-authorized central-bank settlement service.
+
+DECISIONS
+---------
+1. Replace consumer/corporate-card language with settlement account and liquidity operations appropriate to a central-bank operator.
+   Reason: the prior page presented “Total Spending Power” and “Corporate Card”, obscuring the difference between settled funds and overdraft credit.
+
+2. Show settled balance and approved overdraft/credit facility as separate amounts. Show a combined indicative ceiling only as settled balance plus approved credit, and explicitly state it is not spendable cash and excludes unavailable reservations/holds.
+   Reason: current demo accounts have €0 settled balance and €1,000/€500 overdrafts; reserved/blocked/pending amounts are not part of the account API.
+
+3. Display only account API facts: account ID, currency, settled balance, daily transfer limit, accumulated debit, remaining limit, status, owner/custodian reference and update timestamp. Treat demo genesis timestamp as “Demo seed record.”
+   Reason: do not fabricate account type, legal entity names, RTGS positions, pending settlement or bank-wide liquidity.
+
+4. Replace hardcoded quick-pay recipient buttons with a sandbox transfer form restricted to active account IDs returned by the API. Validate source/destination differ, positive amount, indicative account headroom and remaining daily limit. State that the demo action writes to in-memory ledger, without approval or real rail.
+   Reason: Swiss Vault quick-pay used an account ID absent from the API; tests should not mislead or send a fake external payment.
+
+5. Preserve the dark/red design, account route, and existing sandbox transfer API. Keep the work scoped to the overview screen and existing VPS launcher rather than changing unrelated modules.
+   Reason: user requested new features while maintaining current functionality and look.
+
+6. Treat VPS readiness as a reproducible demo build/run path. No external deployment is performed and no claim of live central-bank / RTGS/SWIFT production readiness is made.
+   Reason: current service has seeded in-memory records, no production authentication, persistence, partner integration, external approval, or VPS credentials.
+
+CHANGES
+-------
+- `frontend/src/components/smart/BankCardSurface.tsx`
+  - Reworked “Portfolio & Tokenized Deposits” into “Settlement Accounts & Liquidity.”
+  - Added per-currency settled/credit/headroom summaries with clear caveats and a sandbox warning.
+  - Added account search and status filter, status-derived badges, participant refs, demo-seed timestamp handling, daily transfer used/remaining visual meter and empty results state.
+  - Replaced fake Bob/Vault quick-pay controls with an active-account-only sandbox transfer dialog and amount guardrails.
+  - Added session / selected institution / environment context, explicitly disclosing that the shared demo account API is not institution-scoped.
+  - Added distinct loading, unavailable, stale, and successful-empty states; last successful response time, retry control, and transfer gating unless at least two active demo accounts are available.
+- `frontend/src/App.tsx` and `frontend/src/components/Navbar.tsx`
+  - Removed the cosmetic Mainnet/Sandbox toggle that incorrectly suggested a production connection; the header now labels the local sandbox ledger.
+  - Exposed requested login mode separately from the actual local sandbox data source.
+  - Align the institution profile with selected personas when their BIC matches a configured institution profile; this is presentation only and does not scope account records.
+  - Fetch account records independently from other dashboard API requests so unrelated service failures do not erase a valid account response.
+
+VPS SHOWCASE LAUNCHER
+---------------------
+- `deploy_web_showcase.sh` previously searched for prebuilt binaries, including developer-local absolute paths, and could fail on a clean VPS. It now always builds the release executable into the selected Cargo target directory and verifies the output.
+- Use `npm ci` against the checked-in lockfile for a repeatable frontend install; launcher exports PORT to the backend process and verifies `/health` (up to 30 seconds) before printing the live message.
+- Launcher still runs a foreground demo process and exposes all interfaces. It is a development/showcase runner, not a hardened service manager, TLS reverse proxy, or production operations stack.
+
+PLAYTEST RESULTS
+----------------
+- Desktop Account Overview loaded from the real Vite preview and showed the seeded account data and sandbox limits.
+- Invalid 1,200 EURD amount against 1,000 EURD indicative account headroom displayed an error and disabled submission.
+- Valid 500 EURD amount cleared the validation error and enabled the submit control; cancelled without submitting so seeded data remained unchanged.
+- Search matched an account ID; an unmatched search displayed a clear empty state. Status “Active” selection retained both active accounts.
+- At 390x844, the register's wide table is inside a horizontal overflow scroller. The overall workstation shell overflows/clips at mobile widths (document width 1015px); “Mobile (iPhone)” switches to a different wealth dashboard. This is a pre-existing shell/navigation issue outside the account feature and remains for follow-up.
+- Preview console showed only Vite connection and React DevTools informational messages; no account-page exceptions.
+- Follow-up UI check confirmed the Central Bank persona is paired with the matching SNB presentation profile. No backend was listening during this check; the page now reports account data unavailable rather than asserting zero linked accounts.
+
+VALIDATION
+----------
+Initial baseline checked 2026-09-27:
+- Frontend at http://localhost:5173/ returned HTTP 200.
+- Rust gateway at http://localhost:8080/health returned healthy.
+- Account API returned two EURD demo accounts, both with zero settled balance; overdrafts of €1,000/€500; daily transfer limits €5,000/€2,000.
+
+Implementation check 2026-09-27:
+- `cd frontend && npm run build`: PASS. Existing Vite chunk-size advisory for a 774 kB minified JS bundle.
+- `cd frontend && npm run lint`: PASS (0 errors); 13 warnings remain, none for the account component.
+- `bash -n deploy_web_showcase.sh`: PASS.
+- `git diff --check`: PASS.
+- `cargo check --release --bin icp-canister-suite`: PASS.
+- `cargo build --release --bin icp-canister-suite`: PASS; release artifact built locally.
+- Existing API health endpoint returned `{"chain":"icp-canister-suite","status":"healthy","version":"0.1.0"}`.
+- During latest account overview verification, port 8080 was not accepting connections. The UI correctly shows unavailable, not empty. Frontend build and whitespace check passed after the latest changes.
+- No VPS was accessed or deployed to. Full launcher end-to-end was not run because it binds the already-running demo service port and calls `npm ci`; checks/build were run separately to avoid restarting or disrupting the shared live service.
+
+FOLLOW-UP: PERSONA SCOPE UPDATE (2026-09-27)
+-------------------------------------------
+- Per user direction, removed “Executive Signer & Mobile Approver” from the institutional persona selector. Seven personas remain.
+- Kept Mobile (iPhone), Tablet, and login target-surface device options as presentation modes, not personas; login copy now says “Mobile Device View.” Existing design styling is unchanged.
+- Prior persona playtest documents Executive/mobile inconsistencies as historical findings only. Future role enhancements apply to seven retained roles; handset/device view may be reviewed separately.
+- Preview confirms “7 Roles Configured,” no Executive/Mobile Approver persona entry, and the “Mobile Device View” surface choice remains. `frontend/src/components/auth/InstitutionalLoginSurface.tsx` lint has no new diagnostic; full build/lint pass, with 13 warnings elsewhere.
+- No financial actions or external deployment performed.
+
+FOLLOW-UP: PERSONA PLAYTEST & ENHANCEMENT SPEC (2026-09-27)
+-----------------------------------------------------------
+- Playtested all 8 configured institutional personas against the real website. The seven workstation persona changes retain the same global Master Admin Radar/navigation; they are client-side identity switches, not access control. The app also starts already selected as Super Admin.
+- Executively configured Mobile Approver required a separate authorization/surface launch. Mobile dashboard displayed €2.45m cash despite zero settled balances from API and a pending badge of 0 while 2 pending-checker tickets were shown. Its approvals tab showed 0 pending sign-offs with those same two pending rows. No trade/approval/settlement action was invoked.
+- Login credentials, auth protocol controls, database selector and environment switch are currently UI-only. Production mode is selectable despite in-memory sandbox backend. Auditor persona still sees Admin controls. Admin KPI/list counts mismatch (8 institutions vs 7 nodes) and multiple displayed integrity/KYC/network claims have no shown API evidence.
+- Full findings, code ownership, remaining role/data defects, and a ranked seven-idea enhancement spec are in `.planning/2026-09-27-central-bank-account-overview-and-vps-re/persona-playtest-spec-brainstorm.md`.
+- Top enhancement: persona-safe, source-of-truth demo workspaces. Second: evidence-backed operational status and data provenance. The brainstorm note contains a detailed implementation brief and completion criteria for the top idea.
+- No application code changed in this follow-up; no financial action submitted. This pass was documentation/spec only.
+
+LIMITS / VPS READINESS
+----------------------
+This is a reproducible VPS-hosted demo path only. Before a production/central-bank claim, the project still needs persistent data, authenticated roles and approval workflow enforcement, participant/mandate verification, real settlement integrations, accurate reservation/pending/reconciliation records, security and secrets review, TLS/reverse proxy/service supervision, operational monitoring, legal/regulatory approval and authorized infrastructure credentials.
+
+FOLLOW-UP: ARCHITECTURAL PLANNING DIRECTORY ORGANIZATION (2026-09-28)
+--------------------------------------------------------------------
+- Copied the existing project planning/specification Markdown from `MDFILES/` and `Additional Features/`, the prior roadmap, selected root/frontend README snapshots, and dated `.planning/` artifacts into the topic-organized `Architectural_Planning_Directory/`. Original source files remain in place; no legacy Markdown was moved or rewritten.
+- Added `Architectural_Planning_Directory/README.md` as the topic index and recorded project-wide source findings/contradictions in `08-findings-and-history/project-wide-findings-and-changelog-review.md`.
+- Checked the root changelog as the only project `MAINCHANGELOG` found; its dated snapshot is archived under `08-findings-and-history/MAINCHANGELOG.txt`.
+- Added `.agents/rules/architectural_planning_directory_rule.md`: future project planning Markdown and user-supplied project Markdown belong in the matching topic folder, with provenance/evidence, originals preserved, index updated, and secrets excluded.
+- Markdown whitespace checks passed for newly authored index, rule, and findings documents. Application code, services, and deployments were not changed or run; historical test results above were not rerun for this organization task.
+- Copies are snapshots and can become stale; keep root `MAINCHANGELOG.txt` primary and update the index/archive when future documents are filed.

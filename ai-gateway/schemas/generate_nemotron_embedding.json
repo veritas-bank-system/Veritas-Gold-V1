@@ -1,0 +1,25 @@
+{
+  "name": "generate_nemotron_embedding",
+  "description": "Generates text and multimodal embeddings using nvidia/nemotron-3-embed-1b:free or nvidia/llama-nemotron-embed-vl-1b-v2:free. Strictly rejects non-NVIDIA models.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "NVIDIA embedding model identifier. Default: nvidia/nemotron-3-embed-1b:free",
+        "default": "nvidia/nemotron-3-embed-1b:free"
+      },
+      "input": {
+        "type": "string",
+        "description": "Single text string to embed"
+      },
+      "inputs": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Array of strings to embed in batch"
+      }
+    }
+  }
+}

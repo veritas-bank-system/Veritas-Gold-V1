@@ -1,32 +1,18 @@
-<!--
-  Universal AI Engine Enforcement Rule
--->
-# AI Engine Policy: Strict NVIDIA Nemotron Routing Only
+# AI Engine Rules
 
-## 🚫 BANNED ENGINES
-- All non-NVIDIA engines (e.g., Gemini, OpenAI, Claude, Anthropic, generic Antigravity fallbacks) are **STRICTLY PROHIBITED** from direct API invocations or sub-task execution.
+## Antigravity Assistant
+- In Antigravity, use **GPT-6 Luna** as the assistant model when it is available. This is a workspace instruction; select the model in Antigravity's model picker if necessary.
+- This preference applies only to Antigravity's built-in assistant. Do not claim that the assistant is running through the project's NVIDIA gateway.
 
-## ⚡ MANDATORY NVIDIA ENGINE PROTOCOL
-All external AI inference, reasoning, code generation, RAG, and embeddings across this project **MUST EXCLUSIVELY** use the NVIDIA ecosystem via the `ai-gateway` MCP server:
-- **OpenRouter AI Gateway**: `query_openrouter`
-- **NVIDIA Integrate API**: `query_nvidia_nim`
-- **NVIDIA Embeddings**: `generate_nemotron_embedding`
-
-## 🎯 DYNAMIC MODEL SELECTION BY WORKLOAD
-Always select the optimal NVIDIA Nemotron engine for the task:
-1. **Complex Architecture, Deep Planning & System Refactoring**:
-   - `nvidia/nemotron-3-ultra-550b-a55b:free` (550B MoE, 1M context)
-2. **Core Software Engineering, Logic Implementation & Code Generation**:
-   - `nvidia/nemotron-3-super-120b-a12b:free` (120B MoE, 1M context)
-3. **High-Speed Iterations, Scripts & Boilerplate**:
-   - `nvidia/nemotron-3.5-lightning:free` (30B MoE, fast response)
-4. **Multimodal, Visual UI & Rapid Extended Reasoning**:
-   - `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` (30B-A3B MoE, 256K context)
-5. **Embeddings, Semantic Search & Vector Retrieval**:
-   - `nvidia/nemotron-3-embed-1b:free` (1B embedding)
-6. **Multimodal Reranking & UI Verification**:
-   - `nvidia/llama-nemotron-rerank-vl-1b-v2:free`
-
-## 🛰️ EXECUTION STATUS BANNER
-Every AI-assisted response or generated artifact must include the status banner:
-`⚡ NVIDIA Engine Active: <Model Name> | Provider: <NVIDIA Integrate API / OpenRouter AI Gateway>`
+## Application AI Integrations
+- AI features implemented by this project must use the NVIDIA ecosystem through the `ai-gateway` MCP server. Do not add direct API calls to other providers.
+- Use the configured gateway tools: `query_openrouter`, `query_nvidia_nim`, and `generate_nemotron_embedding`.
+- Select NVIDIA Nemotron models according to the workload:
+  - Architecture and deep planning: `nvidia/nemotron-3-ultra-550b-a55b:free`
+  - Core software engineering: `nvidia/nemotron-3-super-120b-a12b:free`
+  - Fast iterations and boilerplate: `nvidia/nemotron-3.5-lightning:free`
+  - Multimodal reasoning: `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`
+  - Embeddings: `nvidia/nemotron-3-embed-1b:free`
+  - Reranking: `nvidia/llama-nemotron-rerank-vl-1b-v2:free`
+- The NVIDIA-only restriction applies to this application's integrations and their gateway calls, not the Antigravity assistant's own model selection.
+- When documenting output produced by an application AI feature, identify its actual configured model and provider. Never report Antigravity assistant output as NVIDIA-generated.

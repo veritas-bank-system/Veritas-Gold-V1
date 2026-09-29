@@ -4,6 +4,7 @@ import type {
   PrincipalProfile,
   BlindedIdentity,
   MarketRate,
+  FxReferenceRates,
   RwaOffer,
   SupervisionData,
   InstitutionalTxn,
@@ -23,6 +24,31 @@ const API_BASE = typeof window !== 'undefined' && (window.location.port === '808
   ? '/api/v1'
   : 'http://localhost:8080/api/v1';
 
+const FRANKFURTER_URL = 'https://api.frankfurter.dev/v1/latest?base=EUR';
+
+export async function fetchFxReferenceRates(signal?: AbortSignal): Promise<FxReferenceRates> {
+  const response = await fetch(FRANKFURTER_URL, { signal, headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error(`Reference-rate provider returned HTTP ${response.status}`);
+
+  const payload = await response.json() as { base?: string; date?: string; rates?: Record<string, unknown> };
+  const rates: Record<string, number> = {};
+  for (const currency of ['USD', 'CHF', 'GBP']) {
+    const rate = Number(payload.rates?.[currency]);
+    if (!Number.isFinite(rate) || rate <= 0) throw new Error(`Reference-rate response is missing a valid ${currency} rate`);
+    rates[currency] = rate;
+  }
+  if (payload.base !== 'EUR' || !payload.date) throw new Error('Reference-rate response has an unexpected base currency or no effective date');
+
+  return {
+    base: payload.base,
+    date: payload.date,
+    rates,
+    source: 'Frankfurter API · ECB reference rates',
+    sourceUrl: FRANKFURTER_URL,
+    retrievedAt: Date.now(),
+  };
+}
+
 export async function fetchMarketRates(): Promise<MarketRate[]> {
   try {
     const res = await fetch(`${API_BASE}/rates`);
@@ -31,100 +57,32 @@ export async function fetchMarketRates(): Promise<MarketRate[]> {
       return data.rates;
     }
   } catch (err) {
-    console.warn('Backend rate fetch fallback to live ECB and Frankfurter API:', err);
+    console.warn('Demo backend market-rate fetch unavailable:', err);
   }
 
-  // Live Free ECB Reference Rates via Frankfurter API (https://api.frankfurter.dev)
-  try {
-    const ecbRes = await fetch('https://api.frankfurter.dev/v1/latest?base=EUR');
-    if (ecbRes.ok) {
-      const ecbData = await ecbRes.json();
-      const usdRate = ecbData.rates?.USD || 1.0850;
-      const chfRate = ecbData.rates?.CHF || 0.9580;
-      const gbpRate = ecbData.rates?.GBP || 0.8540;
-
-      return [
-        {
-          symbol: 'XAU/EUR',
-          name: 'Swiss Allocated 999.9 Gold Bullion',
-          category: 'Physical Commodity',
-          iso24165_dti: 'DTI-GOLD-9999',
-          price_usd: '2,912.40',
-          price_eur: '84.50',
-          change_24h: '+0.85%',
-          backing: '100% 1:1 Physical Zurich Vault ZRH-01',
-          liquidity_depth: '€450,000,000.00 EUR',
-        },
-        {
-          symbol: 'sBOND/5Y',
-          name: 'Swiss 5Y Sovereign Gold-Linked Bond',
-          category: 'Sovereign Debt',
-          iso24165_dti: 'DTI-BOND-8821',
-          price_usd: (100 * usdRate).toFixed(2),
-          price_eur: '100.00',
-          change_24h: '+0.12%',
-          backing: 'Swiss National Bank Fiduciary Backing',
-          liquidity_depth: '€2,500,000,000.00 EUR',
-        },
-        {
-          symbol: 'EUR/USD',
-          name: 'Euro / US Dollar Fiduciary Corridor',
-          category: 'FX Rail',
-          price_usd: usdRate.toFixed(4),
-          price_eur: '1.0000',
-          change_24h: '+0.24%',
-          backing: 'Official European Central Bank (ECB) Reference Rate',
-          liquidity_depth: '€10,000,000,000.00 EUR',
-        },
-        {
-          symbol: 'EUR/CHF',
-          name: 'Euro / Swiss Franc Fiduciary Corridor',
-          category: 'FX Rail',
-          price_usd: (usdRate / chfRate).toFixed(4),
-          price_eur: chfRate.toFixed(4),
-          change_24h: '-0.08%',
-          backing: 'Official European Central Bank (ECB) Reference Rate',
-          liquidity_depth: '€8,000,000,000.00 EUR',
-        },
-        {
-          symbol: 'EUR/GBP',
-          name: 'Euro / British Pound Sterling',
-          category: 'FX Rail',
-          price_usd: (usdRate / gbpRate).toFixed(4),
-          price_eur: gbpRate.toFixed(4),
-          change_24h: '+0.15%',
-          backing: 'Official European Central Bank (ECB) Reference Rate',
-          liquidity_depth: '€5,000,000,000.00 EUR',
-        },
-      ];
-    }
-  } catch (e) {
-    console.error('Failed to fetch from live Frankfurter API:', e);
-  }
-
-  // Fallback defaults
+  // Keep demo market products clearly fictional when the local backend is offline.
   return [
     {
       symbol: 'XAU/EUR',
-      name: 'Swiss Allocated 999.9 Gold Bullion',
-      category: 'Physical Commodity',
+      name: 'Demo gold scenario (not a market quote)',
+      category: 'Static demo fixture',
       iso24165_dti: 'DTI-GOLD-9999',
-      price_usd: '2,912.40',
-      price_eur: '84.50',
-      change_24h: '+0.85%',
-      backing: '100% 1:1 Physical Zurich Vault ZRH-01',
-      liquidity_depth: '€450,000,000.00 EUR',
+      price_usd: '2912.40',
+      price_eur: '2542.10',
+      change_24h: '—',
+      backing: 'No live gold feed or reserve verification is connected',
+      liquidity_depth: 'Not available',
     },
     {
       symbol: 'sBOND/5Y',
-      name: 'Swiss 5Y Sovereign Gold-Linked Bond',
-      category: 'Sovereign Debt',
+      name: 'Demo bond scenario (not a market quote)',
+      category: 'Static demo fixture',
       iso24165_dti: 'DTI-BOND-8821',
       price_usd: '108.50',
       price_eur: '100.00',
-      change_24h: '+0.12%',
-      backing: 'Swiss National Bank Fiduciary Backing',
-      liquidity_depth: '€2,500,000,000.00 EUR',
+      change_24h: '—',
+      backing: 'Demo data only; not an offer or market quote',
+      liquidity_depth: 'Not available',
     },
   ];
 }

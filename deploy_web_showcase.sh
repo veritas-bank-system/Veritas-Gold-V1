@@ -11,7 +11,7 @@
 set -eo pipefail
 
 PORT="${PORT:-8080}"
-HOST="${HOST:-0.0.0.0}"
+export PORT
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
@@ -35,6 +35,7 @@ echo -e "${CYAN}🔍 [1/4] Checking System Prerequisites...${RESET}"
 command -v node >/dev/null 2>&1 || { echo -e "${RED}❌ Error: Node.js is not installed. Please install Node.js v18+${RESET}"; exit 1; }
 command -v npm >/dev/null 2>&1 || { echo -e "${RED}❌ Error: npm is not installed.${RESET}"; exit 1; }
 command -v cargo >/dev/null 2>&1 || { echo -e "${RED}❌ Error: Rust & Cargo are not installed.${RESET}"; exit 1; }
+command -v curl >/dev/null 2>&1 || { echo -e "${RED}❌ Error: curl is required for the local health check.${RESET}"; exit 1; }
 
 NODE_VER=$(node -v)
 RUST_VER=$(rustc --version | awk '{print $1, $2}')
@@ -44,10 +45,8 @@ echo -e "   ✓ Found Rust toolchain: ${GREEN}${RUST_VER}${RESET}"
 # 2. Build Frontend (React + TypeScript + TradingView + Mobile)
 echo -e "\n${CYAN}📦 [2/4] Building Institutional Frontend (Vite + TypeScript)...${RESET}"
 cd frontend
-if [ ! -d "node_modules" ]; then
-    echo "   Installing frontend dependencies (npm install)..."
-    npm install --silent
-fi
+echo "   Installing locked frontend dependencies (npm ci)..."
+npm ci --silent
 echo "   Compiling production bundle (npm run build)..."
 npm run build
 cd ..
@@ -55,22 +54,20 @@ echo -e "   ✓ Frontend built successfully into ${GREEN}frontend/dist${RESET}"
 
 # 3. Build Backend Binary (High-Performance Release Mode)
 echo -e "\n${CYAN}🦀 [3/4] Compiling Rust Canister Suite & DvP Settlement Engine...${RESET}"
-if [ -f "target/release/icp-canister-suite" ]; then
-    echo "   Using existing release binary or re-verifying incremental build..."
-fi
-cargo build --release --bin icp-canister-suite
-BINARY_PATH="target/release/icp-canister-suite"
-
-if [ ! -f "$BINARY_PATH" ]; then
-    echo -e "${YELLOW}   Notice: Release binary missing, falling back to debug binary...${RESET}"
-    BINARY_PATH="target/debug/icp-canister-suite"
+CARGO_TARGET="${CARGO_TARGET_DIR:-target}"
+echo "   Building release binary into ${CARGO_TARGET}..."
+cargo build --release --bin icp-canister-suite --target-dir "$CARGO_TARGET"
+BINARY_PATH="${CARGO_TARGET}/release/icp-canister-suite"
+if [ ! -x "$BINARY_PATH" ]; then
+    echo -e "${RED}❌ Error: Release build did not produce ${BINARY_PATH}.${RESET}"
+    exit 1
 fi
 echo -e "   ✓ Binary ready: ${GREEN}${BINARY_PATH}${RESET}"
 
 # 4. Detect IP Addresses for LAN & Mobile Presentation
 LAN_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")
 
-echo -e "\n${CYAN}🚀 [4/4] Starting Veritas Institutional Web Server on ${HOST}:${PORT}...${RESET}"
+echo -e "\n${CYAN}🚀 [4/4] Starting Veritas Institutional Web Server on 0.0.0.0:${PORT}...${RESET}"
 
 # Graceful cleanup on Ctrl+C
 cleanup() {
@@ -86,8 +83,26 @@ trap cleanup SIGINT SIGTERM
 "$BINARY_PATH" &
 SERVER_PID=$!
 
-sleep 1
+HEALTHY=0
+for attempt in $(seq 1 30); do
+    if curl --fail --silent "http://127.0.0.1:${PORT}/health" >/dev/null; then
+        HEALTHY=1
+        break
+    fi
+    if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+        break
+    fi
+    sleep 1
+done
 
+if [ "$HEALTHY" -ne 1 ]; then
+    echo -e "${RED}❌ Error: Web server did not pass its health check at http://127.0.0.1:${PORT}/health.${RESET}"
+    kill "$SERVER_PID" 2>/dev/null || true
+    wait "$SERVER_PID" 2>/dev/null || true
+    exit 1
+fi
+
+echo -e "   ✓ Health check passed at http://127.0.0.1:${PORT}/health"
 echo -e "\n${BOLD}${GREEN}================================================================================${RESET}"
 echo -e "${BOLD}${GREEN}   ✨ VERITAS INSTITUTIONAL LEDGER IS LIVE ON THE WEB!                          ${RESET}"
 echo -e "${BOLD}${GREEN}================================================================================${RESET}"
