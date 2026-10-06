@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "description": "Veritas Gold V1 — root task runner (UI tour capture)",
   "scripts": {
-    "capture:tour": "cd veritas-captures && npm run capture:tour"
+    "capture:tour": "cd scripts && npm run capture:tour"
   }
 }

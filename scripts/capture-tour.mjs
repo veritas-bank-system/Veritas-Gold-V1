@@ -19,7 +19,7 @@
  *   - optional: canister suite on :8080 for live back-end data
  *
  * Usage:
- *   cd Veritas/veritas-captures
+ *   cd Veritas/scripts
  *   npm run capture:tour                     # defaults, CDP port 9225
  *   node capture-tour.mjs --cdp-port=9226    # parallel run / port busy
  *

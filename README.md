@@ -103,7 +103,7 @@ Veritas Gold's console is organized into **two workspace scopes** selected at lo
 
 All 83 captures below were taken from the running sandbox build (backend `http://localhost:8080` in-memory ledger, frontend `:5175`) at 1600×1000 (desktop), the iPad device frame (tablet) and a 412×915 viewport (mobile). Each row states the **menu point** (sidebar label · section id) and the **persona** logged in when the capture was taken. Aliased menu points note the canonical view they render.
 
-> 🔁 **One-command regeneration:** `npm run capture:tour` (from the repo root) re-captures every shot and rewrites `docs/screenshots/manifest.json` + `docs/index.html` — see [veritas-captures/](veritas-captures/).
+> 🔁 **One-command regeneration:** `npm run capture:tour` (from the repo root) re-captures every shot and rewrites `docs/screenshots/manifest.json` + `docs/index.html` — see [scripts/](scripts/).
 > 🌐 **Filterable tour site:** [docs/index.html](docs/index.html) renders all captures with per-persona, per-workspace, per-surface filters (GitHub Pages / any static host).
 
 #### Authentication & Workspace Gate
@@ -330,7 +330,7 @@ npm run dev -- --host 0.0.0.0 --port 5173
 npm run capture:tour
 # → re-captures all 83 shots into docs/screenshots/ (needs headless google-chrome,
 #   frontend on :5175 and backend on :8080) and rewrites docs/screenshots/manifest.json
-cd veritas-captures && node init-site.mjs   # rebuild docs/index.html (filterable site)
+cd scripts && node init-site.mjs   # rebuild docs/index.html (filterable site)
 ```
 
 ---
