@@ -34,6 +34,8 @@ import {
   PERSONA_LIST,
   type PersonaDefinition,
 } from '../auth/InstitutionalLoginSurface';
+import { WORKSPACE_PERSONA_IDS } from '../../types';
+import type { WorkspaceId } from '../../types';
 
 interface SidebarProps {
   activeSection: AppSection;
@@ -51,6 +53,8 @@ interface SidebarProps {
   currentPersona?: PersonaDefinition;
   onSelectPersona?: (p: PersonaDefinition) => void;
   onOpenPersonaModal?: () => void;
+  /** Active institutional workspace — drives navigation scope & accent. */
+  workspace?: WorkspaceId;
 }
 
 interface NavGroup {
@@ -74,11 +78,153 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentPersona = PERSONA_LIST[0],
   onSelectPersona,
   onOpenPersonaModal,
+  workspace,
 }) => {
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
 
-  // Exact Section 3.1 Specification Navigation Groups
-  const navigationGroups: NavGroup[] = [
+  // Per-workspace accent: deep-red for the Central Bank console, blue-violet
+  // for the institutional trading console. Same black/plum foundation.
+  const acc = workspace === 'institutional'
+    ? { primary: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.16)', border: 'rgba(139, 92, 246, 0.5)', glow: 'rgba(139, 92, 246, 0.25)' }
+    : { primary: 'var(--red-primary)', soft: '#2d0f16', border: 'rgba(239, 68, 68, 0.45)', glow: 'rgba(239, 68, 68, 0.2)' };
+
+  // Admitted personas for the current workspace (undefined = legacy full list).
+  const selectablePersonas = workspace ? PERSONA_LIST.filter((p) => WORKSPACE_PERSONA_IDS[workspace].includes(p.id)) : PERSONA_LIST;
+
+  // Workspace-scoped navigation. Central bank = reserve-management & monetary
+  // operations console; institutional = trading, financing & settlement desk.
+  const navigationGroups: NavGroup[] = workspace === 'central_bank' ? [
+    {
+      groupName: 'WORKSPACE',
+      items: [
+        { id: 'cb_dashboard', label: 'Executive Dashboard', icon: ShieldCheck, badge: 'Reserves' },
+        { id: 'governance', label: 'Tasks & Approvals', icon: CheckSquare, badge: `${approvalCount} Pending` },
+        { id: 'support', label: 'Notifications', icon: HelpCircle, badge: 'Portal' },
+      ],
+    },
+    {
+      groupName: 'RESERVES & TREASURY',
+      items: [
+        { id: 'portfolio', label: 'Reserve Overview', icon: Landmark, badge: `${accountCount}` },
+        { id: 'vault', label: 'Gold & Bullion', icon: Key, badge: `${holdingCount} Bars` },
+        { id: 'terminal', label: 'Government Bonds', icon: BarChart2, badge: 'Portfolio' },
+        { id: 'interoperability', label: 'FX & Money Markets', icon: ArrowLeftRight, badge: 'FX Desk' },
+        { id: 'liquidity_pools', label: 'Portfolio Management', icon: Droplets, badge: `${poolCount} Pools` },
+        { id: 'sweeper', label: 'Liquidity Management', icon: Bot, badge: 'Sweeper' },
+        { id: 'settlement_instruments', label: 'Settlement Accounts', icon: Coins, badge: 'sEURD' },
+      ],
+    },
+    {
+      groupName: 'CUSTODY & SETTLEMENT',
+      items: [
+        { id: 'vault_telemetry', label: 'Custody & Vaults', icon: Activity, badge: 'PoR Live' },
+        { id: 'notaries', label: 'Settlement Monitor', icon: ShieldCheck, badge: '4/5 BFT' },
+        { id: 'iso20022_bridge', label: 'Payments & ISO 20022', icon: ArrowLeftRight, badge: 'pacs.008' },
+        { id: 'logs', label: 'Reconciliation', icon: FileText, badge: 'camt.053' },
+        { id: 'trade', label: 'Delivery & Transfers', icon: TrendingUp, badge: `${offerCount} Legs` },
+      ],
+    },
+    {
+      groupName: 'RISK & POLICY',
+      items: [
+        { id: 'compliance', label: 'Risk Dashboard', icon: Scale, badge: 'Radar' },
+        { id: 'cb_limits', label: 'Exposure & Limits', icon: Scale, badge: 'Policy' },
+        { id: 'identity_admin', label: 'Counterparties', icon: Users, badge: 'KYC' },
+        { id: 'cb_stress', label: 'Stress Testing', icon: Zap, badge: 'Scenarios' },
+        { id: 'cb_compliance_dash', label: 'Compliance Dashboard', icon: Scale, badge: '10-Yr GDPR' },
+      ],
+    },
+    {
+      groupName: 'ACCOUNTING & REPORTING',
+      items: [
+        { id: 'statements_gl', label: 'Statements & GL', icon: FileText, badge: 'GL' },
+        { id: 'cb_valuation', label: 'Valuation & P&L', icon: TrendingUp, badge: 'MTM' },
+        { id: 'cb_reg_reports', label: 'Regulatory Reports', icon: FileCode2, badge: 'Official' },
+        { id: 'cb_audit', label: 'Audit Center', icon: ShieldCheck, badge: 'Immutable' },
+      ],
+    },
+    {
+      groupName: 'GOVERNANCE',
+      items: [
+        { id: 'enterprise_admin', label: 'Institutions', icon: Building2, badge: 'Registry' },
+        { id: 'identity_admin', label: 'Users & Roles', icon: Users, badge: 'KYC' },
+        { id: 'cb_mandates', label: 'Mandates & Policies', icon: Scale, badge: 'Board' },
+        { id: 'secure_chat', label: 'Access Logs', icon: MessageSquareLock, badge: 'Signal' },
+        { id: 'canister_mgmt', label: 'System Configuration', icon: Cpu, badge: `${canisterCount} WASMs` },
+      ],
+    },
+  ] : workspace === 'institutional' ? [
+    {
+      groupName: 'WORKSPACE',
+      items: [
+        { id: 'inst_dashboard', label: 'Bank Dashboard', icon: ShieldCheck, badge: 'Treasury' },
+        { id: 'trader_desk', label: 'Client Orders', icon: Briefcase, badge: 'Orders' },
+        { id: 'trade', label: 'RFQ Inbox', icon: TrendingUp, badge: `${offerCount} RFQs` },
+        { id: 'governance', label: 'Tasks & Approvals', icon: CheckSquare, badge: `${approvalCount} Pending` },
+        { id: 'support', label: 'Notifications', icon: HelpCircle, badge: 'Portal' },
+      ],
+    },
+    {
+      groupName: 'MARKETS',
+      items: [
+        { id: 'vault', label: 'Gold Market', icon: Key, badge: 'XAU' },
+        { id: 'terminal', label: 'Government Bonds', icon: BarChart2, badge: 'TradingView' },
+        { id: 'interoperability', label: 'FX & Money Markets', icon: ArrowLeftRight, badge: 'FX' },
+        { id: 'liquidity_pools', label: 'Market Making', icon: Droplets, badge: `${poolCount} Pools` },
+        { id: 'auctions', label: 'Auctions', icon: Gavel, badge: `${auctionCount} Live` },
+      ],
+    },
+    {
+      groupName: 'TREASURY',
+      items: [
+        { id: 'portfolio', label: 'Cash & Liquidity', icon: Landmark, badge: `${accountCount}` },
+        { id: 'inst_inventory', label: 'Inventory & Positions', icon: Layers, badge: 'Live' },
+        { id: 'settlement_instruments', label: 'Settlement Accounts', icon: Coins, badge: 'sEURD' },
+        { id: 'sweeper', label: 'Funding', icon: Bot, badge: 'Sweeper' },
+      ],
+    },
+    {
+      groupName: 'FINANCING & COLLATERAL',
+      items: [
+        { id: 'inst_repo', label: 'Repo & Reverse Repo', icon: Layers, badge: 'Term' },
+        { id: 'inst_gold_loans', label: 'Gold Loans & Leases', icon: Key, badge: 'Lease' },
+        { id: 'inst_sec_lending', label: 'Securities Lending', icon: FileCode2, badge: 'SLB' },
+        { id: 'collateral', label: 'Collateral Desk', icon: Layers, badge: `${collateralCount} Pledges` },
+      ],
+    },
+    {
+      groupName: 'OPERATIONS',
+      items: [
+        { id: 'notaries', label: 'Settlement Monitor', icon: ShieldCheck, badge: '4/5 BFT' },
+        { id: 'vault_telemetry', label: 'Custody', icon: Activity, badge: 'PoR Live' },
+        { id: 'iso20022_bridge', label: 'Payments & ISO 20022', icon: ArrowLeftRight, badge: 'pacs.008' },
+        { id: 'logs', label: 'Reconciliation', icon: FileText, badge: 'camt.053' },
+        { id: 'corporate_actions', label: 'Delivery & Transfers', icon: Coins, badge: 'Payouts' },
+      ],
+    },
+    {
+      groupName: 'RISK & COMPLIANCE',
+      items: [
+        { id: 'inst_limits', label: 'Risk & Limits', icon: Scale, badge: 'Desk' },
+        { id: 'identity_admin', label: 'Counterparties', icon: Users, badge: 'KYC' },
+        { id: 'compliance', label: 'Compliance', icon: Scale, badge: 'AML/KYC' },
+        { id: 'inst_margin', label: 'Margin & Collateral', icon: Activity, badge: '3.1×' },
+        { id: 'inst_surveillance', label: 'Surveillance', icon: ShieldCheck, badge: 'Market Abuse' },
+      ],
+    },
+    {
+      groupName: 'REPORTING & ADMIN',
+      items: [
+        { id: 'inst_pnl', label: 'P&L and Valuation', icon: TrendingUp, badge: 'MTD' },
+        { id: 'inst_client_stmts', label: 'Client Statements', icon: FileText, badge: 'Client' },
+        { id: 'cb_reg_reports', label: 'Regulatory Reports', icon: FileCode2, badge: 'Official' },
+        { id: 'cb_audit', label: 'Audit', icon: ShieldCheck, badge: 'Immutable' },
+        { id: 'enterprise_admin', label: 'Users & Roles', icon: Building2, badge: 'Accounts' },
+        { id: 'inst_apis', label: 'APIs & Integrations', icon: Cpu, badge: 'FIX/ISO' },
+      ],
+    },
+  ] : [
+    // Legacy combined navigation (no workspace selected — direct-login flow).
     {
       groupName: 'WORKSPACE',
       items: [
@@ -263,7 +409,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Switch Institutional Role
               </div>
 
-              {PERSONA_LIST.map((p) => {
+              {selectablePersonas.map((p) => {
                 const isSelected = p.id === currentPersona.id;
                 const Icon = p.icon;
                 return (
@@ -348,19 +494,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         justifyContent: 'space-between',
                         padding: '7px 10px',
                         borderRadius: '7px',
-                        backgroundColor: isActive ? '#2d0f16' : 'transparent',
-                        color: isActive ? 'var(--red-primary)' : 'var(--text-muted)',
+                        backgroundColor: isActive ? acc.soft : 'transparent',
+                        color: isActive ? acc.primary : 'var(--text-muted)',
                         fontWeight: isActive ? 700 : 500,
                         fontSize: '11.5px',
                         textAlign: 'left',
                         transition: 'all 0.15s ease',
-                        border: isActive ? '1px solid rgba(239, 68, 68, 0.45)' : '1px solid transparent',
-                        boxShadow: isActive ? '0 0 14px rgba(239, 68, 68, 0.2)' : 'none',
+                        border: isActive ? `1px solid ${acc.border}` : '1px solid transparent',
+                        boxShadow: isActive ? `0 0 14px ${acc.glow}` : 'none',
                         cursor: 'pointer',
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Icon size={14} color={isActive ? 'var(--red-primary)' : 'var(--text-dim)'} />
+                        <Icon size={14} color={isActive ? acc.primary : 'var(--text-dim)'} />
                         {item.label}
                       </div>
                       {item.badge && (
@@ -370,9 +516,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             fontWeight: 700,
                             padding: '1px 5px',
                             borderRadius: '9999px',
-                            backgroundColor: isActive ? 'rgba(239, 68, 68, 0.25)' : '#180f14',
-                            color: isActive ? 'var(--red-primary)' : 'var(--text-dim)',
-                            border: `1px solid ${isActive ? 'rgba(239, 68, 68, 0.5)' : '#33161e'}`,
+                            backgroundColor: isActive ? acc.glow : '#180f14',
+                            color: isActive ? acc.primary : 'var(--text-dim)',
+                            border: `1px solid ${isActive ? acc.border : '#33161e'}`,
                           }}
                         >
                           {item.badge}

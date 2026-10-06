@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { PulseBadge } from '../ui/motion/PulseBadge';
 import { triggerSettlementConfetti } from '../ui/motion/ConfettiTrigger';
+import type { WorkspaceId } from '../../types';
+import { WORKSPACE_PERSONA_IDS, WORKSPACE_FLAGSHIP_PERSONA } from '../../types';
 
 export type SystemEnvironment = 'SANDBOX' | 'DEMO' | 'PRODUCTION';
 
@@ -137,12 +139,19 @@ export const PERSONA_LIST: PersonaDefinition[] = [
 
 interface InstitutionalLoginSurfaceProps {
   onLoginSuccess: (persona: PersonaDefinition, env: SystemEnvironment, mode: 'desktop' | 'mobile') => void;
+  /** When set, only personas admitted to this workspace are selectable and the
+   *  surface renders a workspace banner; omit for the unrestricted legacy flow. */
+  workspace?: WorkspaceId;
 }
 
 export const InstitutionalLoginSurface: React.FC<InstitutionalLoginSurfaceProps> = ({
   onLoginSuccess,
+  workspace,
 }) => {
-  const [selectedPersona, setSelectedPersona] = useState<PersonaDefinition>(PERSONA_LIST[0]);
+  const selectablePersonas = workspace ? PERSONA_LIST.filter((p) => WORKSPACE_PERSONA_IDS[workspace].includes(p.id)) : PERSONA_LIST;
+  const [selectedPersona, setSelectedPersona] = useState<PersonaDefinition>(
+    workspace ? PERSONA_LIST.find((p) => p.id === WORKSPACE_FLAGSHIP_PERSONA[workspace]) || selectablePersonas[0] : PERSONA_LIST[0],
+  );
   const [selectedEnv, setSelectedEnv] = useState<SystemEnvironment>('SANDBOX');
   const [authMethod, setAuthMethod] = useState<'WEBAUTHN' | 'INTERNET_IDENTITY' | 'MTLS' | 'MULTISIG'>('WEBAUTHN');
   const [targetMode, setTargetMode] = useState<'desktop' | 'mobile'>('desktop');
@@ -265,12 +274,14 @@ export const InstitutionalLoginSurface: React.FC<InstitutionalLoginSurfaceProps>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', margin: 0 }}>
-                  VERITAS <span style={{ color: 'var(--red-primary)', textShadow: '0 0 12px var(--red-glow)' }}>SOVEREIGN</span>
+                  VERITAS <span style={{ color: 'var(--red-primary)', textShadow: '0 0 12px var(--red-glow)' }}>GOLD</span>
                 </h1>
                 <PulseBadge label="FIPS 140-2" variant="green" />
               </div>
               <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Institutional CBDC & Tokenized Asset Gateway • DFINITY Canister Suite
+                {workspace
+                  ? `${workspace === 'central_bank' ? 'Central Bank Workspace — Reserve, Monetary & Settlement Operations' : 'Institutional Workspace — Commercial Bank, Agency & Approved Counterparty Operations'} • DFINITY Canister Suite`
+                  : 'Institutional CBDC & Tokenized Asset Gateway • DFINITY Canister Suite'}
               </div>
             </div>
           </div>
@@ -371,11 +382,11 @@ export const InstitutionalLoginSurface: React.FC<InstitutionalLoginSurfaceProps>
               <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--red-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 1. Select Institutional Persona
               </div>
-              <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{PERSONA_LIST.length} Roles Configured</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{selectablePersonas.length} Roles Configured</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '420px', paddingRight: '4px' }}>
-              {PERSONA_LIST.map((p) => {
+              {selectablePersonas.map((p) => {
                 const isSelected = selectedPersona.id === p.id;
                 const Icon = p.icon;
                 return (

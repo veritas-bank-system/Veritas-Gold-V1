@@ -4,7 +4,33 @@ export type HoldingId = string;
 export type CurrencyCode = string;
 
 export type Perspective = 'trader' | 'issuer' | 'ops' | 'regulator' | 'admin';
+
+/** Two top-level institutional workspaces, selected at login. Both share the
+ *  same identity, compliance, custody, settlement, and audit infrastructure;
+ *  only the navigation, permissions, and workflows differ. */
+export type WorkspaceId = 'central_bank' | 'institutional';
+
+/** Persona ids allowed in each workspace. Both workspaces share the same
+ *  identity/audit infrastructure; the workspace gates which institutional
+ *  roles may operate in it and which dashboard/nav they receive. */
+export const WORKSPACE_PERSONA_IDS: Record<WorkspaceId, string[]> = {
+  central_bank: ['persona_cb_governor', 'persona_super_admin', 'persona_supervisory_auditor'],
+  institutional: ['persona_comm_treasury', 'persona_issuer_dmo', 'persona_custodian_vault', 'persona_fund_asset_mgr'],
+};
+
+/** The two top-level personas — default selection per workspace. */
+export const WORKSPACE_FLAGSHIP_PERSONA: Record<WorkspaceId, string> = {
+  central_bank: 'persona_cb_governor',
+  institutional: 'persona_comm_treasury',
+};
+
+export const WORKSPACE_NAME: Record<WorkspaceId, string> = {
+  central_bank: 'Central Bank Workspace',
+  institutional: 'Institutional Workspace',
+};
 export type AppSection =
+  | 'cb_dashboard'
+  | 'inst_dashboard'
   | 'mvp_verification'
   | 'admin_overview'
   | 'workspace_dashboard'
@@ -53,7 +79,28 @@ export type AppSection =
   | 'trader_desk'
   | 'identity_admin'
   | 'enterprise_admin'
-  | 'secure_chat';
+  | 'secure_chat'
+  // Workspace-scoped nav entries (Central Bank / Institutional). These are
+  // persona-policy labels that resolve onto the shared views via SECTION_ALIASES.
+  | 'cb_limits'
+  | 'cb_stress'
+  | 'cb_compliance_dash'
+  | 'statements_gl'
+  | 'cb_valuation'
+  | 'cb_reg_reports'
+  | 'cb_audit'
+  | 'cb_mandates'
+  | 'iso20022_bridge'
+  | 'inst_inventory'
+  | 'inst_repo'
+  | 'inst_gold_loans'
+  | 'inst_sec_lending'
+  | 'inst_limits'
+  | 'inst_margin'
+  | 'inst_surveillance'
+  | 'inst_pnl'
+  | 'inst_client_stmts'
+  | 'inst_apis';
 
 export interface Amount {
   value_str: string;

@@ -34,6 +34,8 @@ import { TraderDashboard } from './components/views/TraderDashboard';
 import { AdminDashboard } from './components/views/AdminDashboard';
 import { EnterpriseAdminDashboard } from './components/views/EnterpriseAdminDashboard';
 import { SignalEncryptedChatView } from './components/views/SignalEncryptedChatView';
+import { WorkspaceSelectSurface } from './components/auth/WorkspaceSelectSurface';
+import { CentralBankDashboard, InstitutionalBankDashboard } from './components/views/WorkspaceDashboards';
 import { InstitutionalMobileSurface } from './components/mobile/InstitutionalMobileSurface';
 import {
   fetchAccounts,
@@ -73,7 +75,9 @@ import type {
   CanisterStatusInfo,
   LiquidityPool,
   SovereignBondContract,
+  WorkspaceId,
 } from './types';
+import { WORKSPACE_PERSONA_IDS } from './types';
 import {
   AlertCircle,
   CheckCircle,
@@ -95,13 +99,21 @@ import {
   type SystemEnvironment,
 } from './components/auth/InstitutionalLoginSurface';
 
+/** Both workspaces share one identity/audit fabric; a persona's admission
+ *  determines which workspace console it operates. */
+const workspaceForPersona = (p: PersonaDefinition): WorkspaceId =>
+  WORKSPACE_PERSONA_IDS.central_bank.includes(p.id) ? 'central_bank' : 'institutional';
+
 export function App() {
   const [activeSection, setActiveSection] = useState<AppSection>('notaries');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentInstitution, setCurrentInstitution] = useState<InstitutionProfile>(INSTITUTION_PROFILES[0]);
 
-  // Multi-Persona Authentication & Runtime Mode State
-  const [authenticatedPersona, setAuthenticatedPersona] = useState<PersonaDefinition | null>(PERSONA_LIST[0]);
+  // Two-Workspace Selection & Multi-Persona Authentication State.
+  // Workspace choice gates persona list, navigation scope, and permissions;
+  // both workspaces share the same identity/audit/settlement infrastructure.
+  const [workspace, setWorkspace] = useState<WorkspaceId | null>(null);
+  const [authenticatedPersona, setAuthenticatedPersona] = useState<PersonaDefinition | null>(null);
   const [systemEnv, setSystemEnv] = useState<SystemEnvironment>('SANDBOX');
   const [runtimeMode, setRuntimeMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -315,6 +327,27 @@ export function App() {
       workspace_dashboard: 'admin_overview',
       workspace_tasks: 'governance',
       yield_analytics: 'terminal',
+      // Workspace-scoped policy navigation (Central Bank / Institutional)
+      // resolves onto the shared canonical views:
+      cb_limits: 'compliance',
+      cb_stress: 'compliance',
+      cb_compliance_dash: 'compliance',
+      statements_gl: 'logs',
+      cb_valuation: 'logs',
+      cb_reg_reports: 'logs',
+      cb_audit: 'logs',
+      cb_mandates: 'governance',
+      iso20022_bridge: 'interoperability',
+      inst_inventory: 'vault',
+      inst_repo: 'collateral',
+      inst_gold_loans: 'collateral',
+      inst_sec_lending: 'collateral',
+      inst_limits: 'compliance',
+      inst_margin: 'collateral',
+      inst_surveillance: 'compliance',
+      inst_pnl: 'logs',
+      inst_client_stmts: 'logs',
+      inst_apis: 'canister_mgmt',
     };
     const canonicalSection: AppSection = SECTION_ALIASES[activeSection] ?? activeSection;
     switch (canonicalSection) {
@@ -424,6 +457,7 @@ export function App() {
             canisters={canisters}
             onSelectPersona={(p) => {
               setAuthenticatedPersona(p);
+              setWorkspace(workspaceForPersona(p));
               const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
               if (matchingInstitution) setCurrentInstitution(matchingInstitution);
               showToast(`Switched active session to ${p.roleTitle}`);
@@ -438,6 +472,42 @@ export function App() {
             <SupervisoryRadar />
             <RegulatorDashboard accounts={accounts} holdings={holdings} onNotify={showToast} />
           </div>
+        );
+      case 'cb_dashboard':
+        return (
+          <CentralBankDashboard
+            accounts={accounts}
+            holdings={holdings}
+            rates={rates}
+            offers={offers}
+            auctions={auctions}
+            approvals={approvals}
+            collateral={collateral}
+            workspace="central_bank"
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Central Bank Operator'}
+            institutionName={authenticatedPersona?.institutionName || 'Sovereign Reserve Desk'}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'inst_dashboard':
+        return (
+          <InstitutionalBankDashboard
+            accounts={accounts}
+            holdings={holdings}
+            rates={rates}
+            offers={offers}
+            auctions={auctions}
+            approvals={approvals}
+            collateral={collateral}
+            workspace="institutional"
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Institutional Treasury Operator'}
+            institutionName={authenticatedPersona?.institutionName || 'Approved Institutional Desk'}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
         );
       case 'trader_desk':
         return <TraderDashboard accounts={accounts} holdings={holdings} onRefresh={loadData} onNotify={showToast} />;
@@ -464,9 +534,23 @@ export function App() {
     }
   };
 
+  // Step 1: workspace selection — the two top-level personas of the network.
+  if (!workspace) {
+    return (
+      <WorkspaceSelectSurface
+        onSelectWorkspace={(selected) => {
+          setWorkspace(selected);
+          setActiveSection(selected === 'central_bank' ? 'cb_dashboard' : 'inst_dashboard');
+        }}
+      />
+    );
+  }
+
+  // Step 2: workspace-scoped institutional authentication.
   if (!authenticatedPersona || showLoginModal) {
     return (
       <InstitutionalLoginSurface
+        workspace={workspace}
         onLoginSuccess={(persona, env, mode) => {
           setAuthenticatedPersona(persona);
           const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === persona.bic);
@@ -474,6 +558,7 @@ export function App() {
           setSystemEnv(env);
           setRuntimeMode(mode);
           setShowLoginModal(false);
+          setActiveSection(workspace === 'institutional' ? 'inst_dashboard' : 'cb_dashboard');
           showToast(`Authenticated as ${persona.roleTitle} (${persona.institutionName})`);
         }}
       />
@@ -498,6 +583,20 @@ export function App() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span
+            style={{
+              padding: '1px 6px',
+              borderRadius: '3px',
+              backgroundColor: workspace === 'institutional' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+              border: `1px solid ${workspace === 'institutional' ? 'rgba(139, 92, 246, 0.4)' : 'rgba(239, 68, 68, 0.35)'}`,
+              color: workspace === 'institutional' ? '#A78BFA' : 'var(--red-primary)',
+              fontSize: '9.5px',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+            }}
+          >
+            {workspace === 'central_bank' ? '🏛 CENTRAL BANK WORKSPACE' : '🏦 INSTITUTIONAL WORKSPACE'}
+          </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldCheck size={14} color="var(--red-primary)" />
             <span style={{ fontWeight: 800, color: '#FFFFFF' }}>{authenticatedPersona.roleTitle}</span>
@@ -617,7 +716,8 @@ export function App() {
           <button
             onClick={() => {
               setAuthenticatedPersona(null);
-              setShowLoginModal(true);
+              setWorkspace(null);
+              setShowLoginModal(false);
             }}
             style={{
               display: 'flex',
@@ -790,8 +890,10 @@ export function App() {
           <div className="tablet-frame">
             <InstitutionalMobileSurface
               currentPersona={authenticatedPersona || PERSONA_LIST[0]}
+              workspace={workspace || undefined}
               onSelectPersona={(p) => {
                 setAuthenticatedPersona(p);
+                setWorkspace(workspaceForPersona(p));
                 const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
                 if (matchingInstitution) setCurrentInstitution(matchingInstitution);
                 showToast(`Switched persona to ${p.roleTitle}`);
@@ -815,8 +917,10 @@ export function App() {
           <div className="smartphone-frame">
             <InstitutionalMobileSurface
               currentPersona={authenticatedPersona || PERSONA_LIST[0]}
+              workspace={workspace || undefined}
               onSelectPersona={(p) => {
                 setAuthenticatedPersona(p);
+                setWorkspace(workspaceForPersona(p));
                 const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
                 if (matchingInstitution) setCurrentInstitution(matchingInstitution);
                 showToast(`Switched persona to ${p.roleTitle}`);
@@ -840,6 +944,7 @@ export function App() {
           <Sidebar
             activeSection={activeSection}
             setActiveSection={setActiveSection}
+            workspace={workspace}
             isOpenMobile={isMobileMenuOpen}
             onCloseMobile={() => setIsMobileMenuOpen(false)}
             accountCount={accounts.length}
@@ -853,6 +958,7 @@ export function App() {
             currentPersona={authenticatedPersona || PERSONA_LIST[0]}
             onSelectPersona={(p) => {
               setAuthenticatedPersona(p);
+              setWorkspace(workspaceForPersona(p));
               const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
               if (matchingInstitution) setCurrentInstitution(matchingInstitution);
               showToast(`Switched persona to ${p.roleTitle} (${p.institutionName})`);
@@ -899,6 +1005,7 @@ export function App() {
             </div>
           )}
           <InstitutionalLoginSurface
+            workspace={workspace || undefined}
             onLoginSuccess={(persona, env, mode) => {
               setAuthenticatedPersona(persona);
               const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === persona.bic);

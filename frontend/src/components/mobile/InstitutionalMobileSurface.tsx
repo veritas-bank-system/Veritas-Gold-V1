@@ -27,11 +27,15 @@ import type {
   MarketRate,
   PendingApproval,
   AppSection,
+  WorkspaceId,
 } from '../../types';
+import { WORKSPACE_PERSONA_IDS } from '../../types';
 
 interface InstitutionalMobileSurfaceProps {
   currentPersona: PersonaDefinition;
   onSelectPersona: (p: PersonaDefinition) => void;
+  /** Active institutional workspace — scopes the drawer menu (undefined = legacy full menu). */
+  workspace?: WorkspaceId;
   accounts: DemandDepositRecord[];
   holdings: FungibleAssetHolding[];
   rates: MarketRate[];
@@ -45,6 +49,7 @@ interface InstitutionalMobileSurfaceProps {
 export const InstitutionalMobileSurface: React.FC<InstitutionalMobileSurfaceProps> = ({
   currentPersona,
   onSelectPersona,
+  workspace,
   accounts,
   holdings: _holdings,
   rates: _rates,
@@ -857,8 +862,72 @@ export const InstitutionalMobileSurface: React.FC<InstitutionalMobileSurfaceProp
               </button>
             </div>
 
+            {/* Workspace Banner + Workspace-Scoped Quick Group */}
+            {workspace && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    backgroundColor: workspace === 'institutional' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                    border: `1px solid ${workspace === 'institutional' ? 'rgba(139, 92, 246, 0.45)' : 'var(--border-red)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <span style={{ fontSize: '15px' }}>{workspace === 'central_bank' ? '🏛' : '🏦'}</span>
+                  <div>
+                    <div style={{ fontSize: '11.5px', fontWeight: 900, color: '#FFFFFF' }}>
+                      {workspace === 'central_bank' ? 'Central Bank Workspace' : 'Institutional Workspace'}
+                    </div>
+                    <div style={{ fontSize: '9px', color: workspace === 'institutional' ? '#A78BFA' : 'var(--red-primary)', fontWeight: 700 }}>
+                      {workspace === 'central_bank'
+                        ? 'Reserve, Monetary & Settlement Operations'
+                        : 'Commercial Bank, Agency & Approved Counterparty Operations'}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-dim)', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                    {workspace === 'central_bank' ? '🏛 RESERVE & POLICY DESK' : '💼 TRADING & TREASURY DESK'}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {(workspace === 'central_bank'
+                      ? [
+                          { id: 'cb_dashboard' as AppSection, label: '🏛 Executive Dashboard (Reserves)' },
+                          { id: 'portfolio' as AppSection, label: '💼 Reserve Overview' },
+                          { id: 'vault' as AppSection, label: '🥇 Gold & Bullion' },
+                          { id: 'terminal' as AppSection, label: '📜 Government Bonds' },
+                          { id: 'sweeper' as AppSection, label: '💧 Liquidity Management' },
+                        ]
+                      : [
+                          { id: 'inst_dashboard' as AppSection, label: '🏦 Bank Dashboard (Treasury)' },
+                          { id: 'trader_desk' as AppSection, label: '💼 Client Orders' },
+                          { id: 'trade' as AppSection, label: '📨 RFQ Inbox' },
+                          { id: 'vault' as AppSection, label: '🥇 Gold Market' },
+                          { id: 'collateral' as AppSection, label: '🛡 Repo & Collateral' },
+                        ]
+                    ).map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleMenuClick(item.id)}
+                        style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Categorized Menu Links — Full 8-Group Tree Matching Desktop (Instant Auto-Rollback on Click) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-dim)', letterSpacing: '0.06em' }}>
+                ALL SHARED MODULES — IDENTITY · CUSTODY · SETTLEMENT · AUDIT
+              </div>
               {/* GROUP 1: WORKSPACE */}
               <div>
                 <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--red-primary)', letterSpacing: '0.06em', marginBottom: '6px' }}>
@@ -1113,7 +1182,7 @@ export const InstitutionalMobileSurface: React.FC<InstitutionalMobileSurfaceProp
             Switch Signer Persona
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '240px', overflowY: 'auto' }}>
-            {PERSONA_LIST.map((p) => {
+            {(workspace ? PERSONA_LIST.filter((p) => WORKSPACE_PERSONA_IDS[workspace].includes(p.id)) : PERSONA_LIST).map((p) => {
               const isSelected = p.id === currentPersona.id;
               return (
                 <button
