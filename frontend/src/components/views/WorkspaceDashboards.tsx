@@ -1,4 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  InstitutionContextBar,
+  DetailDrawer,
+  ApprovalDialog,
+  type DrawerSection,
+  type StatusTone,
+} from '../contract/ContractKit';
 import {
   ShieldCheck,
   AlertTriangle,
@@ -333,8 +340,18 @@ const SEV_TONE: Record<string, { color: string; bg: string; border: string }> = 
   Info: { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.4)' },
 };
 
+interface CbDetail {
+  objectType: string;
+  objectId: string;
+  status: { label: string; tone: StatusTone };
+  sections: DrawerSection[];
+  approve?: { amount: string; asset: string; approvers: string };
+}
+
 export const CentralBankDashboard: React.FC<WorkspaceDashboardProps> = (props) => {
   const acc = WORKSPACE_ACCENT.central_bank;
+  const [detail, setDetail] = useState<CbDetail | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const now = new Date().toLocaleString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich',
   });
@@ -343,8 +360,125 @@ export const CentralBankDashboard: React.FC<WorkspaceDashboardProps> = (props) =
   const aum = 14_245_796_831 + totalCash;
   void acc; void goldBars;
 
+  /* §27 detail-drawer builders (shared drawer standard, one per record type). */
+  const openApproval = (txn: string, asset: string, amount: string, approvers: string) =>
+    setDetail({
+      objectType: 'Pending Approval',
+      objectId: txn,
+      status: { label: 'Pending review', tone: 'amber' },
+      approve: { amount, asset, approvers },
+      sections: [
+        { title: 'Summary', lines: [
+          { label: 'Requested action', value: asset },
+          { label: 'Total value', value: amount },
+          { label: 'Requester', value: 'Treasury Operations' },
+          { label: 'Mandate / policy', value: 'RES-MND-07 v4 (reserve mandate)' },
+        ] },
+        { title: 'Risk & compliance', lines: [
+          { label: 'Risk assessment', value: 'Within policy limits' },
+          { label: 'KYC / AML', value: 'Cleared' },
+          { label: 'Sanctions screening', value: 'No hits' },
+          { label: 'Source of funds', value: 'Verified' },
+        ] },
+        { title: 'Settlement & approval', lines: [
+          { label: 'Settlement plan', value: 'DvP T+2 via notary cluster' },
+          { label: 'Custody plan', value: 'ZRH-01 allocated' },
+          { label: 'Required approvals', value: approvers },
+          { label: 'Completed', value: '1 of required signers' },
+        ] },
+        { title: 'Timeline', lines: [
+          { label: 'Created', value: '06 Oct 2026 09:41 CET' },
+          { label: 'Maker signed', value: 'Alice Trading Corp · 09:42 CET' },
+          { label: 'Deadline', value: 'Today 16:00 CET' },
+          { label: 'Audit', value: 'Hash-chained immutable events' },
+        ] },
+      ],
+    });
+
+  const openException = (trade: string, issue: string, owner: string, severity: string, due: string) =>
+    setDetail({
+      objectType: 'Settlement Exception',
+      objectId: trade,
+      status: { label: severity, tone: severity === 'Critical' ? 'coral' : 'amber' },
+      sections: [
+        { title: 'Summary', lines: [
+          { label: 'Issue', value: issue },
+          { label: 'Owner', value: owner },
+          { label: 'Due', value: due },
+          { label: 'Status', value: 'Investigation' },
+        ] },
+        { title: 'Legs & custody', lines: [
+          { label: 'Cash leg', value: 'Reserved — pending confirmation' },
+          { label: 'Asset leg', value: 'XAU allocated UTXO locked' },
+          { label: 'Payment ID', value: 'PAY-2201 (pacs.008)' },
+          { label: 'Custodian', value: 'Zurich ZRH-01' },
+        ] },
+        { title: 'Investigation', lines: [
+          { label: 'Detected', value: '06 Oct 2026 09:58 CET' },
+          { label: 'Repair evidence', value: 'Attached (2 documents)' },
+          { label: 'Related trade', value: `${trade} · atomic DvP` },
+          { label: 'Finality record', value: 'Pending notary quorum' },
+        ] },
+      ],
+    });
+
+  const openCounterparty = (cp: string, jurisdiction: string, rating: string, exposure: string, limit: string) =>
+    setDetail({
+      objectType: 'Counterparty',
+      objectId: cp,
+      status: { label: 'Approved', tone: 'emerald' },
+      sections: [
+        { title: 'Identity', lines: [
+          { label: 'Legal entity', value: cp },
+          { label: 'Jurisdiction', value: jurisdiction },
+          { label: 'Credit rating', value: rating },
+          { label: 'License', value: 'Institutional participant' },
+        ] },
+        { title: 'Exposure & limits', lines: [
+          { label: 'Current exposure', value: exposure },
+          { label: 'Approved limit', value: limit },
+          { label: 'Collateral', value: 'Per master agreement' },
+          { label: 'Review history', value: 'Last review Q2 2026' },
+        ] },
+        { title: 'Compliance', lines: [
+          { label: 'KYC / KYB', value: 'Valid to 12/2027' },
+          { label: 'AML screening', value: 'Continuous — clear' },
+          { label: 'Sanctions', value: 'No hits' },
+          { label: 'Next review', value: 'Q2 2027' },
+        ] },
+        { title: 'Settlement instructions', lines: [
+          { label: 'Rail', value: 'ISO 20022 pacs.008 / DvP' },
+          { label: 'Settlement account', value: 'Standing instruction per ccy' },
+          { label: 'Approved products', value: 'Gold · Bonds · FX · Repo' },
+          { label: 'Documents', value: 'IMAA · ISDA · custody annex' },
+        ] },
+      ],
+    });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* ===== Contract §2: persistent institution context (LINE 01–04 fields) ===== */}
+      <InstitutionContextBar
+        ctx={{
+          institution_id: 'INST-SNB-001',
+          institution_name: 'Swiss National Bank',
+          legal_entity_id: 'LE-SNB-RD',
+          legal_entity_name: 'Reserve Desk (Sandbox)',
+          persona_id: 'persona_cb_governor',
+          role_id: props.personaRoleTitle,
+          environment: props.environment,
+          security_level: 'Level 5 — Sovereign Reserve Authority',
+          node_id: 'N1',
+          region: 'Zurich, CH',
+          base_currency: 'EUR',
+          last_sync_at: now,
+          data_source: 'Local Sandbox API',
+          mfa_status: 'WebAuthn verified',
+          approval_count: props.approvals.length,
+          critical_alert_count: specExceptions.filter((e) => e.severity === 'Critical').length,
+        }}
+      />
+
       {/* ===== Header block ===== */}
       <div
         style={{
@@ -528,7 +662,7 @@ export const CentralBankDashboard: React.FC<WorkspaceDashboardProps> = (props) =
             </thead>
             <tbody>
               {specApprovals.map((r) => (
-                <tr key={r.txn} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <tr key={r.txn} onClick={() => openApproval(r.txn, r.asset, r.amount, r.approvers)} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer' }}>
                   <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', color: '#FFF', fontWeight: 700 }}>{r.txn}</td>
                   <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{r.asset}</td>
                   <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', color: '#FFF', fontWeight: 700 }}>{r.amount}</td>
@@ -553,7 +687,7 @@ export const CentralBankDashboard: React.FC<WorkspaceDashboardProps> = (props) =
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {specExceptions.map((r) => (
-              <div key={r.trade} style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: '#140f1a', border: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div key={r.trade} onClick={() => openException(r.trade, r.issue, r.owner, r.severity, r.due)} style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: '#140f1a', border: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', cursor: 'pointer' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, color: '#FFF', fontSize: '11.5px' }}>{r.trade}</span>
@@ -575,7 +709,7 @@ export const CentralBankDashboard: React.FC<WorkspaceDashboardProps> = (props) =
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {specExposures.map((c) => (
-              <div key={c.cp}>
+              <div key={c.cp} onClick={() => openCounterparty(c.cp, c.jurisdiction, c.rating, c.exposure, c.limit)} style={{ cursor: 'pointer' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
                   <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>
                     {c.cp} <span style={{ color: 'var(--text-dim)' }}>· {c.jurisdiction} · {c.rating}</span>
@@ -602,6 +736,50 @@ export const CentralBankDashboard: React.FC<WorkspaceDashboardProps> = (props) =
           </div>
         </div>
       </div>
+
+      {/* ===== Contract §27: unified detail drawer (one standard for every row) ===== */}
+      <DetailDrawer
+        open={detail !== null}
+        onClose={() => setDetail(null)}
+        objectType={detail?.objectType || ''}
+        objectId={detail?.objectId || ''}
+        status={detail?.status}
+        classification="Confidential — Sovereign Reserve"
+        sections={detail?.sections || []}
+        actions={[
+          ...(detail?.approve
+            ? [{ label: 'Approve (opens high-value confirmation)', primary: true, onClick: () => setConfirmOpen(true) }]
+            : []),
+          { label: 'Export evidence', onClick: () => props.onNotify('Evidence bundle exported with period, source, version and approver.') },
+          { label: 'Escalate', onClick: () => props.onNotify('Escalated to deputy governor approval chain.') },
+        ]}
+      />
+
+      {/* ===== Contract §32: high-value action confirmation ===== */}
+      <ApprovalDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          setDetail(null);
+          props.onNotify('Approval recorded — maker-checker signature chain updated.');
+        }}
+        action={detail?.approve ? `Approve ${detail.objectType} ${detail.objectId}` : 'Approve action'}
+        requiredApprovals={detail?.approve?.approvers || '2-of-2'}
+        fields={[
+          { label: 'Institution', value: 'Swiss National Bank / Reserve Desk' },
+          { label: 'Legal entity', value: 'LE-SNB-RD (Sandbox)' },
+          { label: 'Asset', value: detail?.approve?.asset || '—' },
+          { label: 'Quantity / amount', value: detail?.approve?.amount || '—' },
+          { label: 'Currency', value: 'EUR' },
+          { label: 'Counterparty', value: 'Approved institutional participant' },
+          { label: 'Settlement date', value: 'T+2 — 08 Oct 2026' },
+          { label: 'Custody account', value: 'ZRH-01 allocated' },
+          { label: 'Payment account', value: 'SNB settlement account (sandbox)' },
+          { label: 'Risk result', value: 'Within policy limits' },
+          { label: 'Compliance result', value: 'KYC / AML / sanctions cleared' },
+        ]}
+      />
     </div>
   );
 };
