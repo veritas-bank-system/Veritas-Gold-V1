@@ -31,8 +31,11 @@ export const TouchInteractiveChart: React.FC<TouchInteractiveChartProps> = ({
   const chartRef = useRef<HTMLDivElement>(null);
 
   const rawOhlcv = generateOhlcvForTimeframe(basePrice || 84.50, timeframe);
+  // Intraday points carry unix-second keys; render them as readable clock labels.
+  const timeLabel = (t: string | number) =>
+    typeof t === 'number' ? new Date(t * 1000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : t;
   const data: PricePoint[] = rawOhlcv.map((d) => ({
-    time: d.time,
+    time: timeLabel(d.time),
     price: d.close,
     open: d.open,
     high: d.high,

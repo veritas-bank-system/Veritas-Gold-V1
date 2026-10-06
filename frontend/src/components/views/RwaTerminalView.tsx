@@ -33,49 +33,54 @@ import {
 export type TimeframeOption = 'Baseline' | '1H' | '24H' | '7D' | '1M' | '6M' | '1Y' | '5Y' | '10Y';
 
 export function generateOhlcvForTimeframe(basePrice: number, tf: TimeframeOption) {
-  const points: { time: string; open: number; high: number; low: number; close: number; volume: number }[] = [];
+  const points: { time: string | number; open: number; high: number; low: number; close: number; volume: number }[] = [];
   const now = new Date(2026, 7, 26, 17, 0, 0);
+
+  // Intraday timeframes must use unique unix-second keys. Formatting hourly or
+  // sub-hourly steps as YYYY-MM-DD date strings produces duplicate times, which
+  // lightweight-charts v5 rejects in setData (crashes the whole app).
+  const toTimeKey = (d: Date) => Math.floor(d.getTime() / 1000);
 
   if (tf === 'Baseline' || tf === '24H') {
     let current = basePrice * 0.992;
     for (let i = 24; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 3600 * 1000);
-      const timeStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const timeStr = toTimeKey(d);
       const change = (Math.sin(i) * 0.003 + 0.0005) * basePrice;
       const open = Number(current.toFixed(2));
       const close = Number((current + change).toFixed(2));
       const high = Number((Math.max(open, close) + 0.002 * basePrice).toFixed(2));
       const low = Number((Math.min(open, close) - 0.002 * basePrice).toFixed(2));
       const volume = Math.floor(15000 + Math.abs(Math.sin(i)) * 20000);
-      points.push({ time: `${timeStr}`, open, high, low, close: i === 0 ? basePrice : close, volume });
+      points.push({ time: timeStr, open, high, low, close: i === 0 ? basePrice : close, volume });
       current = close;
     }
   } else if (tf === '1H') {
     let current = basePrice * 0.998;
     for (let i = 30; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 2 * 60 * 1000);
-      const timeStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const timeStr = toTimeKey(d);
       const change = (Math.sin(i * 0.4) * 0.0008 + 0.0001) * basePrice;
       const open = Number(current.toFixed(2));
       const close = Number((current + change).toFixed(2));
       const high = Number((Math.max(open, close) + 0.0008 * basePrice).toFixed(2));
       const low = Number((Math.min(open, close) - 0.0008 * basePrice).toFixed(2));
       const volume = Math.floor(4000 + Math.abs(Math.cos(i)) * 6000);
-      points.push({ time: `${timeStr}`, open, high, low, close: i === 0 ? basePrice : close, volume });
+      points.push({ time: timeStr, open, high, low, close: i === 0 ? basePrice : close, volume });
       current = close;
     }
   } else if (tf === '7D') {
     let current = basePrice * 0.975;
     for (let i = 28; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 6 * 3600 * 1000);
-      const timeStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const timeStr = toTimeKey(d);
       const change = (Math.cos(i * 0.3) * 0.004 + 0.001) * basePrice;
       const open = Number(current.toFixed(2));
       const close = Number((current + change).toFixed(2));
       const high = Number((Math.max(open, close) + 0.004 * basePrice).toFixed(2));
       const low = Number((Math.min(open, close) - 0.004 * basePrice).toFixed(2));
       const volume = Math.floor(40000 + Math.abs(Math.sin(i)) * 50000);
-      points.push({ time: `${timeStr}`, open, high, low, close: i === 0 ? basePrice : close, volume });
+      points.push({ time: timeStr, open, high, low, close: i === 0 ? basePrice : close, volume });
       current = close;
     }
   } else if (tf === '1M') {
@@ -151,7 +156,13 @@ export function generateOhlcvForTimeframe(basePrice: number, tf: TimeframeOption
       current = close;
     }
   }
-  return points;
+
+  // Defensive guard for lightweight-charts v5: strictly ascending, no duplicate
+  // time keys. Points are generated oldest→newest; a Map keyed by the raw time
+  // collapses any accidental duplicates while preserving order.
+  const unique = new Map<string, { time: string | number; open: number; high: number; low: number; close: number; volume: number }>();
+  for (const p of points) unique.set(String(p.time), p);
+  return Array.from(unique.values());
 }
 
 export interface TerminalAsset {
