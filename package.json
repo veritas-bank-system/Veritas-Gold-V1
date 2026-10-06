@@ -1,0 +1,9 @@
+{
+  "name": "veritas-gold-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Veritas Gold V1 — root task runner (UI tour capture)",
+  "scripts": {
+    "capture:tour": "cd veritas-captures && npm run capture:tour"
+  }
+}

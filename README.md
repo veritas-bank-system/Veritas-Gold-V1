@@ -101,7 +101,10 @@ Veritas Gold's console is organized into **two workspace scopes** selected at lo
 
 ### 🖼️ Screen Captures
 
-All 79 captures below were taken from the running sandbox build (backend `http://localhost:8080` in-memory ledger, frontend `:5173`) at 1600×1000. Each row states the **menu point** (sidebar label · section id) and the **persona** logged in when the capture was taken. Aliased menu points note the canonical view they render.
+All 83 captures below were taken from the running sandbox build (backend `http://localhost:8080` in-memory ledger, frontend `:5175`) at 1600×1000 (desktop), the iPad device frame (tablet) and a 412×915 viewport (mobile). Each row states the **menu point** (sidebar label · section id) and the **persona** logged in when the capture was taken. Aliased menu points note the canonical view they render.
+
+> 🔁 **One-command regeneration:** `npm run capture:tour` (from the repo root) re-captures every shot and rewrites `docs/screenshots/manifest.json` + `docs/index.html` — see [veritas-captures/](veritas-captures/).
+> 🌐 **Filterable tour site:** [docs/index.html](docs/index.html) renders all captures with per-persona, per-workspace, per-surface filters (GitHub Pages / any static host).
 
 #### Authentication & Workspace Gate
 
@@ -267,12 +270,23 @@ The top-bar runtime switcher (`Workstation / Tablet (iPad) / Mobile (iPhone)`) r
 
 | Screenshot | Menu Point | Persona | Description |
 |---|---|---|---|
-| <img src="docs/screenshots/mobile/central-bank-home.png" width="300"/> | **Mobile Home** · CB workspace | `persona_supervisory_auditor` | VERITAS MOBILE home for the Central Bank workspace with scoped quick actions. |
-| <img src="docs/screenshots/mobile/central-bank-drawer.png" width="300"/> | **Menu Drawer** · workspace-scoped tree | `persona_supervisory_auditor` | Full categorized mobile menu (Workspace & Master Radar, Accounts & Cash, Markets & Asset Issuance, …) scoped to the CB workspace. |
-| <img src="docs/screenshots/mobile/live-mvp-verification.png" width="300"/> | **Live MVP Verification** · `mvp_verification` (mobile-only) | `persona_supervisory_auditor` | ⚡ 6/6 live invariant test suite: conservation of value, notary consensus, and settlement invariants. |
-| <img src="docs/screenshots/mobile/master-dashboard-radar.png" width="300"/> | **Master Dashboard Radar** · `admin_overview` (mobile-only) | `persona_supervisory_auditor` | 👑 Master radar dashboard — global participant and liquidity monitoring. |
+| <img src="docs/screenshots/mobile/central-bank-home.png" width="300"/> | **Mobile Home** · CB workspace | `persona_cb_governor` | VERITAS MOBILE home for the Central Bank workspace with scoped quick actions. |
+| <img src="docs/screenshots/mobile/central-bank-drawer.png" width="300"/> | **Menu Drawer** · workspace-scoped tree | `persona_cb_governor` | Full categorized mobile menu (Workspace & Master Radar, Accounts & Cash, Markets & Asset Issuance, …) scoped to the CB workspace. |
+| <img src="docs/screenshots/mobile/live-mvp-verification.png" width="300"/> | **Live MVP Verification** · `mvp_verification` (mobile-only) | `persona_cb_governor` | ⚡ 6/6 live invariant test suite: conservation of value, notary consensus, and settlement invariants. |
+| <img src="docs/screenshots/mobile/master-dashboard-radar.png" width="300"/> | **Master Dashboard Radar** · `admin_overview` (mobile-only) | `persona_cb_governor` | 👑 Master radar dashboard — global participant and liquidity monitoring. |
 | <img src="docs/screenshots/mobile/institutional-home.png" width="300"/> | **Mobile Home** · Institutional workspace | `persona_comm_treasury` | VERITAS MOBILE home for the Commercial Bank/Agency workspace (Treasury quick group). |
 | <img src="docs/screenshots/mobile/institutional-drawer.png" width="300"/> | **Menu Drawer** · workspace-scoped tree | `persona_comm_treasury` | Institutional mobile drawer with Bank Dashboard / Client Orders / RFQ / Gold Market / Repo & Collateral quick links. |
+
+#### 🖥️ Tablet (iPad) Runtime
+
+The `Tablet (iPad)` top-bar switcher mounts the same **VERITAS MOBILE** surface inside a dedicated iPad device frame (`.tablet-frame`, centered on the desktop canvas) — the run-time surface between Workstation and Phone. The frame keeps the mobile persona mandate card, quick actions, colleague approval chain and bottom navigation at tablet scale; the desktop top bar (workspace, environment, runtime switcher, Switch Persona / Logout) stays visible above it.
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/tablet/central-bank-home.png" width="380"/> | **Home Dashboard** · `cb_dashboard` | `persona_cb_governor` | VERITAS MOBILE in the iPad frame: Central Bank workspace home — active signer mandate (FIPS 140-2 Level 5), €2.45B total cash available, Buy Gold / Bonds and Sign Chain actions. |
+| <img src="docs/screenshots/tablet/central-bank-drawer.png" width="380"/> | **Menu Drawer** · workspace-scoped tree | `persona_cb_governor` | VERITAS NAVIGATION drawer on the iPad surface: Reserve & Policy Desk quick group plus the full shared-module tree (Master Radar, MVP Verification, Accounts & Cash, Markets & Asset Issuance, …). |
+| <img src="docs/screenshots/tablet/institutional-home.png" width="380"/> | **Home Dashboard** · `inst_dashboard` | `persona_comm_treasury` | iPad frame for the Commercial Bank/Agency workspace: Treasury & Primary Dealer mandate card with the same Buy/Sign action pair. |
+| <img src="docs/screenshots/tablet/institutional-drawer.png" width="380"/> | **Menu Drawer** · workspace-scoped tree | `persona_comm_treasury` | Institutional navigation drawer on the iPad surface: Trading & Treasury Desk quick group (Bank Dashboard, Client Orders, RFQ Inbox, Gold Market, Repo & Collateral) plus shared modules. |
 
 ---
 
@@ -308,6 +322,15 @@ cd frontend
 npm install
 npm run dev -- --host 0.0.0.0 --port 5173
 # Frontend running at: http://localhost:5173
+```
+
+### 5. Regenerate the Screen Tour (optional)
+```bash
+# from the repo root (Veritas/)
+npm run capture:tour
+# → re-captures all 83 shots into docs/screenshots/ (needs headless google-chrome,
+#   frontend on :5175 and backend on :8080) and rewrites docs/screenshots/manifest.json
+cd veritas-captures && node init-site.mjs   # rebuild docs/index.html (filterable site)
 ```
 
 ---

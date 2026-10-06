@@ -1,0 +1,10 @@
+{
+  "name": "veritas-captures",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "One-command regeneration of the two-workspace UI tour: 79+ screenshots + manifest",
+  "scripts": {
+    "capture:tour": "node capture-tour.mjs"
+  }
+}
