@@ -30,6 +30,10 @@ import { SupportDocsPortalView } from './components/docs/SupportDocsPortalView';
 import { MasterAdminOverview } from './components/admin/MasterAdminOverview';
 import { SettlementInstrumentRegistryView } from './components/views/SettlementInstrumentRegistryView';
 import { MvpVerificationSuiteView } from './components/views/MvpVerificationSuiteView';
+import { TraderDashboard } from './components/views/TraderDashboard';
+import { AdminDashboard } from './components/views/AdminDashboard';
+import { EnterpriseAdminDashboard } from './components/views/EnterpriseAdminDashboard';
+import { SignalEncryptedChatView } from './components/views/SignalEncryptedChatView';
 import { InstitutionalMobileSurface } from './components/mobile/InstitutionalMobileSurface';
 import {
   fetchAccounts,
@@ -284,7 +288,36 @@ export function App() {
   };
 
   const renderContent = () => {
-    switch (activeSection) {
+    // Canonical section resolver: legacy/alias AppSection values (kept for the
+    // mobile prototype contract and future deep links) map onto the canonical
+    // desktop sections rendered below — every AppSection value is renderable.
+    const SECTION_ALIASES: Partial<Record<AppSection, AppSection>> = {
+      accounts_overview: 'portfolio',
+      approved_rail_connectors: 'bridge',
+      asset_catalogue: 'vault',
+      bond_auctions: 'auctions',
+      bond_draft_instruments: 'contract_maker',
+      canister_operations: 'canister_mgmt',
+      collateral_desk: 'collateral',
+      compliance_dashboard: 'compliance',
+      custody_positions: 'vault',
+      help_docs: 'support',
+      iso20022_messages: 'interoperability',
+      liquidity_management: 'sweeper',
+      por_attestations: 'vault_telemetry',
+      rwa_terminal: 'terminal',
+      settlement_monitor: 'notaries',
+      statements_reconciliation: 'logs',
+      trading_blotter_dvp: 'trade',
+      trading_rfq: 'trade',
+      transfers_payments: 'portfolio',
+      wholesale_liquidity: 'liquidity_pools',
+      workspace_dashboard: 'admin_overview',
+      workspace_tasks: 'governance',
+      yield_analytics: 'terminal',
+    };
+    const canonicalSection: AppSection = SECTION_ALIASES[activeSection] ?? activeSection;
+    switch (canonicalSection) {
       case 'notaries':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
@@ -406,6 +439,22 @@ export function App() {
             <RegulatorDashboard accounts={accounts} holdings={holdings} onNotify={showToast} />
           </div>
         );
+      case 'trader_desk':
+        return <TraderDashboard accounts={accounts} holdings={holdings} onRefresh={loadData} onNotify={showToast} />;
+      case 'identity_admin':
+        return <AdminDashboard identities={identities} onRefresh={loadData} onNotify={showToast} />;
+      case 'enterprise_admin':
+        return (
+          <EnterpriseAdminDashboard
+            identities={identities}
+            accounts={accounts}
+            holdings={holdings}
+            onRefresh={loadData}
+            onNotify={showToast}
+          />
+        );
+      case 'secure_chat':
+        return <SignalEncryptedChatView onNotify={showToast} onRefresh={loadData} />;
       case 'logs':
         return <TreasuryAccountingView transactions={transactions} onRefresh={loadData} />;
       case 'support':

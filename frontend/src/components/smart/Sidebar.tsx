@@ -25,6 +25,10 @@ import {
   ChevronDown,
   ChevronUp,
   CheckSquare,
+  Briefcase,
+  Users,
+  Building2,
+  MessageSquareLock,
 } from 'lucide-react';
 import {
   PERSONA_LIST,
@@ -101,6 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'corporate_actions', label: 'Corporate Actions / Coupons', icon: Coins, badge: 'Payouts' },
         { id: 'trade', label: 'Trade Blotter & DvP', icon: TrendingUp, badge: `${offerCount} Offers` },
         { id: 'liquidity_pools', label: 'Wholesale AMM Pools', icon: Droplets, badge: `${poolCount} Pools` },
+        { id: 'trader_desk', label: 'Trader Desk', icon: Briefcase, badge: 'RFQ & Offers' },
       ],
     },
     {
@@ -123,12 +128,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       groupName: 'RISK & COMPLIANCE',
       items: [
         { id: 'compliance', label: 'Compliance Dashboard', icon: Scale, badge: '10-Yr GDPR' },
+        { id: 'identity_admin', label: 'Identity Administration', icon: Users, badge: 'KYC Registry' },
+        { id: 'enterprise_admin', label: 'Enterprise Admin', icon: Building2, badge: 'Accounts & Holdings' },
       ],
     },
     {
       groupName: 'PLATFORM OPERATIONS',
       items: [
         { id: 'canister_mgmt', label: 'Canister Operations', icon: Cpu, badge: `${canisterCount} WASMs` },
+        { id: 'secure_chat', label: 'Encrypted Chat', icon: MessageSquareLock, badge: 'Signal-Grade' },
       ],
     },
     {

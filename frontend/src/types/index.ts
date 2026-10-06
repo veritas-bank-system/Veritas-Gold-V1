@@ -49,7 +49,11 @@ export type AppSection =
   | 'sweeper'
   | 'logs'
   | 'support'
-  | 'help_docs';
+  | 'help_docs'
+  | 'trader_desk'
+  | 'identity_admin'
+  | 'enterprise_admin'
+  | 'secure_chat';
 
 export interface Amount {
   value_str: string;

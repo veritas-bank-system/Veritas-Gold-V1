@@ -957,6 +957,12 @@ export const InstitutionalMobileSurface: React.FC<InstitutionalMobileSurfaceProp
                     ⚡ Trade Blotter & Atomic DvP
                   </button>
                   <button
+                    onClick={() => handleMenuClick('trader_desk')}
+                    style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    💼 Trader Desk (RFQ & Offers)
+                  </button>
+                  <button
                     onClick={() => handleMenuClick('liquidity_pools')}
                     style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', cursor: 'pointer' }}
                   >
@@ -1031,6 +1037,18 @@ export const InstitutionalMobileSurface: React.FC<InstitutionalMobileSurfaceProp
                   >
                     ⚖️ Compliance & 10-Yr GDPR Audit
                   </button>
+                  <button
+                    onClick={() => handleMenuClick('identity_admin')}
+                    style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    👥 Identity Administration (KYC)
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick('enterprise_admin')}
+                    style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    🏢 Enterprise Admin
+                  </button>
                 </div>
               </div>
 
@@ -1045,6 +1063,12 @@ export const InstitutionalMobileSurface: React.FC<InstitutionalMobileSurfaceProp
                     style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', cursor: 'pointer' }}
                   >
                     ⚙️ Canister Operations (WASMs & Cycles)
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick('secure_chat')}
+                    style={{ padding: '8px 10px', borderRadius: '6px', background: 'none', border: 'none', color: '#FFFFFF', textAlign: 'left', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    🔐 Encrypted Chat (Signal-Grade)
                   </button>
                 </div>
               </div>
