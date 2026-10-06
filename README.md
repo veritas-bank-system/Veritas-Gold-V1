@@ -101,7 +101,7 @@ Veritas Gold's console is organized into **two workspace scopes** selected at lo
 
 ### 🖼️ Screen Captures
 
-All 66 captures below were taken from the running sandbox build (backend `http://localhost:8080` in-memory ledger, frontend `:5173`) at 1600×1000. Each row states the **menu point** (sidebar label · section id) and the **persona** logged in when the capture was taken. Aliased menu points note the canonical view they render.
+All 79 captures below were taken from the running sandbox build (backend `http://localhost:8080` in-memory ledger, frontend `:5173`) at 1600×1000. Each row states the **menu point** (sidebar label · section id) and the **persona** logged in when the capture was taken. Aliased menu points note the canonical view they render.
 
 #### Authentication & Workspace Gate
 
@@ -110,6 +110,8 @@ All 66 captures below were taken from the running sandbox build (backend `http:/
 | <img src="docs/screenshots/auth/00-workspace-chooser.png" width="380"/> | **Workspace Chooser** · entry gate | — (pre-login) | Sovereign vs Wholesale tier cards; selection decides nav, permissions, limits, data scope, and approval rules. |
 | <img src="docs/screenshots/auth/01-central-bank-login-governor.png" width="380"/> | **Central Bank Login** · workspace-scoped auth | `persona_cb_governor` | GOLD-branded login: flagship Governor preselected, 3 admitted roles, env pills (SANDBOX/DEMO/PRODUCTION), database engine, runtime surface, and auth-protocol selectors. |
 | <img src="docs/screenshots/auth/02-institutional-login-treasury.png" width="380"/> | **Institutional Login** · workspace-scoped auth | `persona_comm_treasury` | Same contract for the Commercial Bank/Agency workspace with its 4 admitted roles and Primary Dealer flagship. |
+| <img src="docs/screenshots/auth/03-central-bank-persona-switcher.png" width="380"/> | **Switch Persona** · `Switch Persona` (top bar) | any CB role | Full-screen re-authentication overlay listing the 3 admitted Central Bank roles (Super Admin, Governor, Supervisory Auditor) with clearance levels and credentials. |
+| <img src="docs/screenshots/auth/04-institutional-persona-switcher.png" width="380"/> | **Switch Persona** · `Switch Persona` (top bar) | any institutional role | Same overlay for the institutional workspace listing its 4 admitted roles (Treasury, Custodian, DMO, Asset Manager). |
 
 #### 🏛️ Central Bank Workspace — captured as `persona_cb_governor` (Central Bank Operator & Governor, Swiss National Bank / CBRT Sovereign Desk)
 
@@ -242,6 +244,35 @@ All 66 captures below were taken from the running sandbox build (backend `http:/
 | <img src="docs/screenshots/institutional/32-audit.png" width="380"/> | **Audit** · `cb_audit` (renders `logs`) | Commercial Bank Treasury & Primary Dealer | Immutable audit trail. |
 | <img src="docs/screenshots/institutional/33-users-and-roles.png" width="380"/> | **Users & Roles** · `enterprise_admin` | Commercial Bank Treasury & Primary Dealer | Account and holdings administration. |
 | <img src="docs/screenshots/institutional/34-apis-and-integrations.png" width="380"/> | **APIs & Integrations** · `inst_apis` (renders `canister_mgmt`) | Commercial Bank Treasury & Primary Dealer | FIX/ISO API and integration configuration over the canister fleet. |
+
+---
+
+#### 👤 Persona Roster — every console identity (7 roles)
+
+The workspace dashboards are shared per workspace; the logged-in **persona** drives the institution context bar, the INSTITUTIONAL ACTION DESK ribbon, the ACTIVE PERSONA card, permissions, and data scope. Each capture below shows a different persona authenticated into its workspace (visible in the context bar and the "Authenticated as …" toast).
+
+| Persona (id · role · institution) | Workspace | Screenshot | Description |
+|---|---|---|---|
+| `persona_cb_governor` · Central Bank Operator & Governor · Swiss National Bank / CBRT Sovereign Desk | Central Bank | [central-bank/01-executive-dashboard.png](docs/screenshots/central-bank/01-executive-dashboard.png) | Flagship sovereign session (Level 5 Sovereign Root Key) over the Executive Dashboard. |
+| `persona_super_admin` · Platform Super Admin & Operator · Sovereign Network Operations Center (NOC) | Central Bank | <img src="docs/screenshots/central-bank/30-persona-super-admin.png" width="380"/> | Platform-root master session: NOC identity in the context bar, master-operator clearance ribbon, full console reach. |
+| `persona_supervisory_auditor` · Supervisory & Compliance Auditor · Bank for International Settlements (BIS) / ECB Radar | Central Bank | <img src="docs/screenshots/central-bank/31-persona-supervisory-auditor.png" width="380"/> | Read-only supervisory session (Level 5 Zero-Knowledge Audit) over the reserve console. |
+| `persona_comm_treasury` · Commercial Bank Treasury & Primary Dealer · JPMorgan Chase Bank, N.A. (Kinexys Desk) | Institutional | [institutional/01-bank-dashboard.png](docs/screenshots/institutional/01-bank-dashboard.png) | Flagship primary-dealer session (Level 4) over the Treasury & Trading Console. |
+| `persona_custodian_vault` · Qualified Custodian & Vault Notary · Zurich Swiss Bullion Custody AG | Institutional | <img src="docs/screenshots/institutional/36-persona-custodian-vault.png" width="380"/> | Physical-title custody session (Level 4): vault notary identity with PoR attestation duties. |
+| `persona_issuer_dmo` · Sovereign Debt Issuer / DMO Lead · Republic Debt Management Office (DMO) | Institutional | <img src="docs/screenshots/institutional/35-persona-issuer-dmo.png" width="380"/> | Debt-placement session: bond prospectus drafting, Dutch auction scheduling, coupon authorization. |
+| `persona_fund_asset_mgr` · Institutional Asset Manager / PE Fund · BlackRock / Veritas Institutional Alpha Fund | Institutional | <img src="docs/screenshots/institutional/37-persona-fund-asset-mgr.png" width="380"/> | Accredited institutional session (Level 3): bond trading, FX corridors, collateral margin desk. |
+
+#### 📱 Mobile Surface (iPhone runtime)
+
+The top-bar runtime switcher (`Workstation / Tablet (iPad) / Mobile (iPhone)`) renders the dedicated **VERITAS MOBILE** surface with its own workspace-scoped drawer. Two menu points exist only here — `⚡ Live MVP Verification` and `👑 Master Dashboard Radar`.
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/mobile/central-bank-home.png" width="300"/> | **Mobile Home** · CB workspace | `persona_supervisory_auditor` | VERITAS MOBILE home for the Central Bank workspace with scoped quick actions. |
+| <img src="docs/screenshots/mobile/central-bank-drawer.png" width="300"/> | **Menu Drawer** · workspace-scoped tree | `persona_supervisory_auditor` | Full categorized mobile menu (Workspace & Master Radar, Accounts & Cash, Markets & Asset Issuance, …) scoped to the CB workspace. |
+| <img src="docs/screenshots/mobile/live-mvp-verification.png" width="300"/> | **Live MVP Verification** · `mvp_verification` (mobile-only) | `persona_supervisory_auditor` | ⚡ 6/6 live invariant test suite: conservation of value, notary consensus, and settlement invariants. |
+| <img src="docs/screenshots/mobile/master-dashboard-radar.png" width="300"/> | **Master Dashboard Radar** · `admin_overview` (mobile-only) | `persona_supervisory_auditor` | 👑 Master radar dashboard — global participant and liquidity monitoring. |
+| <img src="docs/screenshots/mobile/institutional-home.png" width="300"/> | **Mobile Home** · Institutional workspace | `persona_comm_treasury` | VERITAS MOBILE home for the Commercial Bank/Agency workspace (Treasury quick group). |
+| <img src="docs/screenshots/mobile/institutional-drawer.png" width="300"/> | **Menu Drawer** · workspace-scoped tree | `persona_comm_treasury` | Institutional mobile drawer with Bank Dashboard / Client Orders / RFQ / Gold Market / Repo & Collateral quick links. |
 
 ---
 

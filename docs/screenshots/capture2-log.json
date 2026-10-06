@@ -1,0 +1,116 @@
+[
+  {
+    "step": "cb-switcher",
+    "click": {
+      "ok": true,
+      "matched": "Switch Persona"
+    },
+    "shot": "auth/03-central-bank-persona-switcher.png",
+    "size": "209KB"
+  },
+  {
+    "step": "cb-super-admin",
+    "persona": {
+      "ok": true,
+      "matched": "Authorize & Launch Workstation"
+    },
+    "shot": "central-bank/30-persona-super-admin.png",
+    "size": "377KB"
+  },
+  {
+    "step": "cb-supervisory-auditor",
+    "persona": {
+      "ok": true,
+      "matched": "Authorize & Launch Workstation"
+    },
+    "shot": "central-bank/31-persona-supervisory-auditor.png",
+    "size": "376KB"
+  },
+  {
+    "step": "cb-mobile-home",
+    "click": {
+      "ok": true,
+      "matched": "Mobile (iPhone)"
+    },
+    "shot": "mobile/central-bank-home.png",
+    "size": "47KB"
+  },
+  {
+    "step": "cb-mobile-drawer",
+    "click": {
+      "ok": true
+    },
+    "shot": "mobile/central-bank-drawer.png",
+    "size": "46KB"
+  },
+  {
+    "step": "cb-mobile-mvp",
+    "click": {
+      "ok": true,
+      "matched": "⚡ Live MVP Verification6/6 Tests"
+    },
+    "shot": "mobile/live-mvp-verification.png",
+    "size": "96KB"
+  },
+  {
+    "step": "cb-mobile-master",
+    "click": {
+      "ok": false
+    },
+    "shot": "mobile/master-dashboard-radar.png",
+    "size": "96KB"
+  },
+  {
+    "step": "inst-switcher",
+    "click": {
+      "ok": true,
+      "matched": "Switch Persona"
+    },
+    "shot": "auth/04-institutional-persona-switcher.png",
+    "size": "214KB"
+  },
+  {
+    "step": "inst-issuer-dmo",
+    "persona": {
+      "ok": true,
+      "matched": "Authorize & Launch Workstation"
+    },
+    "shot": "institutional/35-persona-issuer-dmo.png",
+    "size": "344KB"
+  },
+  {
+    "step": "inst-custodian",
+    "persona": {
+      "ok": true,
+      "matched": "Authorize & Launch Workstation"
+    },
+    "shot": "institutional/36-persona-custodian-vault.png",
+    "size": "344KB"
+  },
+  {
+    "step": "inst-fund-mgr",
+    "persona": {
+      "ok": true,
+      "matched": "Authorize & Launch Workstation"
+    },
+    "shot": "institutional/37-persona-fund-asset-mgr.png",
+    "size": "343KB"
+  },
+  {
+    "step": "inst-mobile-home",
+    "click": {
+      "ok": true,
+      "matched": "Mobile (iPhone)"
+    },
+    "shot": "mobile/institutional-home.png",
+    "size": "49KB"
+  },
+  {
+    "step": "inst-mobile-drawer",
+    "click": {
+      "ok": true
+    },
+    "shot": "mobile/institutional-drawer.png",
+    "size": "45KB"
+  }
+]
