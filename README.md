@@ -81,6 +81,170 @@ Directly issue, evaluate, and trade tokenized real-world assets:
 
 ---
 
+## 🏛️ Two Institutional Workspaces — Complete Screen Tour
+
+Veritas Gold's console is organized into **two workspace scopes** selected at login. Both share the same identity, compliance, custody, settlement, and audit infrastructure — the selection determines navigation, permissions, data scope, and approval rules:
+
+- **🏛️ Central Bank Workspace** (red accent) — reserve management & monetary operations. Personas: `persona_cb_governor` (Central Bank Operator & Governor), `persona_super_admin` (Platform Super Admin & Operator), `persona_supervisory_auditor` (Supervisory & Compliance Auditor).
+- **🏦 Commercial Bank / Agency Workspace** (violet accent) — institutional trading & settlement. Personas: `persona_comm_treasury` (Commercial Bank Treasury & Primary Dealer), `persona_issuer_dmo` (Sovereign Debt Issuer / DMO Lead), `persona_custodian_vault` (Qualified Custodian & Vault Notary), `persona_fund_asset_mgr` (Institutional Asset Manager / PE Fund).
+
+### ✨ Workspace & Console Features (detail list)
+
+- **Workspace gate** — MFA-enforced chooser with Sovereign/Wholesale tiers; each workspace scopes its own login surface, persona roster, banner text, and flagship default persona.
+- **Workspace-scoped navigation** — 6 nav groups / 29 menu points for the Central Bank console, 7 nav groups / 34 menu points for the institutional console; every one of the **49 `AppSection` values is renderable** via a canonical alias resolver (legacy ids + 19 workspace policy ids map onto shared views).
+- **Central Bank Executive Dashboard** — rebuilt to the institutional screen contract: institution context bar, 8 policy-bounded KPI cards (value · unit · change · policy target · status · updated · source), reserve-allocation donut, 12-week liquidity forecast chart, gold price history chart, calendar-year sovereign bond ladder 2026–2030+, risk-limit usage strip, and approvals/exceptions/exposures tables.
+- **ContractKit component library** — reusable screen-contract primitives: `InstitutionContextBar`, `StatusBadge` (6 tones), `EnvironmentBadge`, `SecurityLevelBadge`, `ApprovalCounter`, `CriticalAlertCounter`, `FilterBar`, `MetricCard`, `DetailDrawer` (§27 standard sections), §28 loading/error/empty/stale states, `ApprovalDialog` (§32: 17 fields, irreversibility warning, type-EXECUTE gating), `ExportMenu`.
+- **Maker-checker approval workflow** — clickable table rows open §27 detail drawers; Approve raises the §32 execution dialog with quorum, dual-control sign-off, and toast confirmation.
+- **Institutional Bank Dashboard** — treasury & trading console with position cards, order-flow bars, settlement queue, and MTD P&L under the violet workspace theme.
+- **Sandbox safety** — every screen runs against the `SANDBOX (sEURD)` simulated ledger; workspace policy scoping is enforced in the frontend gate (backend authorization is a separate layer).
+- **Mobile surface** — the mobile prototype honors the same workspace scoping (scoped drawer banner, quick group, persona filter).
+
+### 🖼️ Screen Captures
+
+All 66 captures below were taken from the running sandbox build (backend `http://localhost:8080` in-memory ledger, frontend `:5173`) at 1600×1000. Each row states the **menu point** (sidebar label · section id) and the **persona** logged in when the capture was taken. Aliased menu points note the canonical view they render.
+
+#### Authentication & Workspace Gate
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/auth/00-workspace-chooser.png" width="380"/> | **Workspace Chooser** · entry gate | — (pre-login) | Sovereign vs Wholesale tier cards; selection decides nav, permissions, limits, data scope, and approval rules. |
+| <img src="docs/screenshots/auth/01-central-bank-login-governor.png" width="380"/> | **Central Bank Login** · workspace-scoped auth | `persona_cb_governor` | GOLD-branded login: flagship Governor preselected, 3 admitted roles, env pills (SANDBOX/DEMO/PRODUCTION), database engine, runtime surface, and auth-protocol selectors. |
+| <img src="docs/screenshots/auth/02-institutional-login-treasury.png" width="380"/> | **Institutional Login** · workspace-scoped auth | `persona_comm_treasury` | Same contract for the Commercial Bank/Agency workspace with its 4 admitted roles and Primary Dealer flagship. |
+
+#### 🏛️ Central Bank Workspace — captured as `persona_cb_governor` (Central Bank Operator & Governor, Swiss National Bank / CBRT Sovereign Desk)
+
+**Group: WORKSPACE**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/central-bank/01-executive-dashboard.png" width="380"/> | **Executive Dashboard** · `cb_dashboard` | Central Bank Operator & Governor | Reserve command center: €14.2B official reserves, allocated gold, sovereign bonds, FX & cash, intraday liquidity, risk-limit usage, 4/5 BFT settlement health, compliance alerts — with policy targets and sources. |
+| <img src="docs/screenshots/central-bank/02-tasks-and-approvals.png" width="380"/> | **Tasks & Approvals** · `governance` | Central Bank Operator & Governor | Maker-checker approval queue: high-value wires, LBMA gold minting tokenization, 1/2 quorum signatures, Sign & Authorize dual control. |
+| <img src="docs/screenshots/central-bank/03-notifications.png" width="380"/> | **Notifications** · `support` | Central Bank Operator & Governor | Support & documentation portal with system notifications. |
+
+**Group: RESERVES & TREASURY**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/central-bank/04-reserve-overview.png" width="380"/> | **Reserve Overview** · `portfolio` | Central Bank Operator & Governor | Official reserve accounts, virtual corporate card with spending power, instant wires, and quick-pay counterparties. |
+| <img src="docs/screenshots/central-bank/05-gold-and-bullion.png" width="380"/> | **Gold & Bullion** · `vault` | Central Bank Operator & Governor | Allocated LBMA physical gold bar custody positions and holdings. |
+| <img src="docs/screenshots/central-bank/06-government-bonds.png" width="380"/> | **Government Bonds** · `terminal` | Central Bank Operator & Governor | RWA Capital Markets & Trading Terminal — TradingView-style multi-chart engine for sovereign bonds, gold, FX, and RWA instruments. |
+| <img src="docs/screenshots/central-bank/07-fx-and-money-markets.png" width="380"/> | **FX & Money Markets** · `interoperability` | Central Bank Operator & Governor | FX corridors and money-market operations over ISO 20022 messaging. |
+| <img src="docs/screenshots/central-bank/08-portfolio-management.png" width="380"/> | **Portfolio Management** · `liquidity_pools` | Central Bank Operator & Governor | Wholesale AMM liquidity pools for reserve portfolio deployment. |
+| <img src="docs/screenshots/central-bank/09-liquidity-management.png" width="380"/> | **Liquidity Management** · `sweeper` | Central Bank Operator & Governor | Automated liquidity sweeping engine across settlement accounts. |
+| <img src="docs/screenshots/central-bank/10-settlement-accounts.png" width="380"/> | **Settlement Accounts** · `settlement_instruments` | Central Bank Operator & Governor | sEURD settlement token registry and account instruments. |
+
+**Group: CUSTODY & SETTLEMENT**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/central-bank/11-custody-and-vaults.png" width="380"/> | **Custody & Vaults** · `vault_telemetry` | Central Bank Operator & Governor | Proof-of-Reserve IoT vault telemetry with live attestation stream. |
+| <img src="docs/screenshots/central-bank/12-settlement-monitor.png" width="380"/> | **Settlement Monitor** · `notaries` | Central Bank Operator & Governor | BFT notary consensus health and executive settlement dashboard. |
+| <img src="docs/screenshots/central-bank/13-payments-and-iso-20022.png" width="380"/> | **Payments & ISO 20022** · `iso20022_bridge` (renders `interoperability`) | Central Bank Operator & Governor | pacs.008 cross-network payment bridge. |
+| <img src="docs/screenshots/central-bank/14-reconciliation.png" width="380"/> | **Reconciliation** · `logs` | Central Bank Operator & Governor | camt.053 statements, general ledger, and reconciliation records. |
+| <img src="docs/screenshots/central-bank/15-delivery-and-transfers.png" width="380"/> | **Delivery & Transfers** · `trade` | Central Bank Operator & Governor | Trade blotter with atomic DvP settlement legs and offer book. |
+
+**Group: RISK & POLICY**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/central-bank/16-risk-dashboard.png" width="380"/> | **Risk Dashboard** · `compliance` | Central Bank Operator & Governor | Supervisory risk radar across participants and exposures. |
+| <img src="docs/screenshots/central-bank/17-exposure-and-limits.png" width="380"/> | **Exposure & Limits** · `cb_limits` (renders `compliance`) | Central Bank Operator & Governor | Policy exposure limits and utilization monitoring. |
+| <img src="docs/screenshots/central-bank/18-counterparties.png" width="380"/> | **Counterparties** · `identity_admin` | Central Bank Operator & Governor | KYC registry with blinded identities and admitted legal entities. |
+| <img src="docs/screenshots/central-bank/19-stress-testing.png" width="380"/> | **Stress Testing** · `cb_stress` (renders `compliance`) | Central Bank Operator & Governor | Scenario-based stress testing of reserve and settlement resilience. |
+| <img src="docs/screenshots/central-bank/20-compliance-dashboard.png" width="380"/> | **Compliance Dashboard** · `cb_compliance_dash` (renders `compliance`) | Central Bank Operator & Governor | 10-yr GDPR-grade compliance dashboard. |
+
+**Group: ACCOUNTING & REPORTING**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/central-bank/21-statements-and-gl.png" width="380"/> | **Statements & GL** · `statements_gl` (renders `logs`) | Central Bank Operator & Governor | Official statements and general ledger extraction. |
+| <img src="docs/screenshots/central-bank/22-valuation-and-pandl.png" width="380"/> | **Valuation & P&L** · `cb_valuation` (renders `logs`) | Central Bank Operator & Governor | Mark-to-market valuation and P&L reporting. |
+| <img src="docs/screenshots/central-bank/23-regulatory-reports.png" width="380"/> | **Regulatory Reports** · `cb_reg_reports` (renders `logs`) | Central Bank Operator & Governor | Official regulatory report generation. |
+| <img src="docs/screenshots/central-bank/24-audit-center.png" width="380"/> | **Audit Center** · `cb_audit` (renders `logs`) | Central Bank Operator & Governor | Immutable audit trail center. |
+
+**Group: GOVERNANCE**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/central-bank/25-institutions.png" width="380"/> | **Institutions** · `enterprise_admin` | Central Bank Operator & Governor | Institution registry with accounts and holdings. |
+| <img src="docs/screenshots/central-bank/26-users-and-roles.png" width="380"/> | **Users & Roles** · `identity_admin` | Central Bank Operator & Governor | Same KYC registry view as Counterparties, opened from the governance group. |
+| <img src="docs/screenshots/central-bank/27-mandates-and-policies.png" width="380"/> | **Mandates & Policies** · `cb_mandates` (renders `governance`) | Central Bank Operator & Governor | Board mandates and policy approval workflow. |
+| <img src="docs/screenshots/central-bank/28-access-logs.png" width="380"/> | **Access Logs** · `secure_chat` | Central Bank Operator & Governor | Signal-grade encrypted comms and access logging. |
+| <img src="docs/screenshots/central-bank/29-system-configuration.png" width="380"/> | **System Configuration** · `canister_mgmt` | Central Bank Operator & Governor | WASM canister fleet operations and upgrades. |
+
+#### 🏦 Institutional Workspace — captured as `persona_comm_treasury` (Commercial Bank Treasury & Primary Dealer, JPMorgan Chase Bank N.A. Kinexys Desk)
+
+**Group: WORKSPACE**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/01-bank-dashboard.png" width="380"/> | **Bank Dashboard** · `inst_dashboard` | Commercial Bank Treasury & Primary Dealer | Treasury & trading console: welcome brief, position cards, order flow, settlement queue, and MTD P&L under the violet theme. |
+| <img src="docs/screenshots/institutional/02-client-orders.png" width="380"/> | **Client Orders** · `trader_desk` | Commercial Bank Treasury & Primary Dealer | Client order book with RFQ and offer handling. |
+| <img src="docs/screenshots/institutional/03-rfq-inbox.png" width="380"/> | **RFQ Inbox** · `trade` | Commercial Bank Treasury & Primary Dealer | Incoming RFQs and the trade blotter with atomic DvP offers. |
+| <img src="docs/screenshots/institutional/04-tasks-and-approvals.png" width="380"/> | **Tasks & Approvals** · `governance` | Commercial Bank Treasury & Primary Dealer | Maker-checker approval queue for institutional operations. |
+| <img src="docs/screenshots/institutional/05-notifications.png" width="380"/> | **Notifications** · `support` | Commercial Bank Treasury & Primary Dealer | Support & documentation portal. |
+
+**Group: MARKETS**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/06-gold-market.png" width="380"/> | **Gold Market** · `vault` | Commercial Bank Treasury & Primary Dealer | Gold (XAU) market positions and custody inventory. |
+| <img src="docs/screenshots/institutional/07-government-bonds.png" width="380"/> | **Government Bonds** · `terminal` | Commercial Bank Treasury & Primary Dealer | RWA trading terminal for sovereign bond trading. |
+| <img src="docs/screenshots/institutional/08-fx-and-money-markets.png" width="380"/> | **FX & Money Markets** · `interoperability` | Commercial Bank Treasury & Primary Dealer | FX corridors and money-market rails. |
+| <img src="docs/screenshots/institutional/09-market-making.png" width="380"/> | **Market Making** · `liquidity_pools` | Commercial Bank Treasury & Primary Dealer | Wholesale AMM pool market-making positions. |
+| <img src="docs/screenshots/institutional/10-auctions.png" width="380"/> | **Auctions** · `auctions` | Commercial Bank Treasury & Primary Dealer | Primary Dutch auction participation for sovereign debt issuance. |
+
+**Group: TREASURY**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/11-cash-and-liquidity.png" width="380"/> | **Cash & Liquidity** · `portfolio` | Commercial Bank Treasury & Primary Dealer | Cash accounts, cards, and payment surfaces. |
+| <img src="docs/screenshots/institutional/12-inventory-and-positions.png" width="380"/> | **Inventory & Positions** · `inst_inventory` (renders `vault`) | Commercial Bank Treasury & Primary Dealer | Live asset inventory and position keeping. |
+| <img src="docs/screenshots/institutional/13-settlement-accounts.png" width="380"/> | **Settlement Accounts** · `settlement_instruments` | Commercial Bank Treasury & Primary Dealer | sEURD settlement instruments. |
+| <img src="docs/screenshots/institutional/14-funding.png" width="380"/> | **Funding** · `sweeper` | Commercial Bank Treasury & Primary Dealer | Funding sweeps across settlement accounts. |
+
+**Group: FINANCING & COLLATERAL**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/15-repo-and-reverse-repo.png" width="380"/> | **Repo & Reverse Repo** · `inst_repo` (renders `collateral`) | Commercial Bank Treasury & Primary Dealer | Term repo/reverse-repo financing desk. |
+| <img src="docs/screenshots/institutional/16-gold-loans-and-leases.png" width="380"/> | **Gold Loans & Leases** · `inst_gold_loans` (renders `collateral`) | Commercial Bank Treasury & Primary Dealer | Gold lease and loan book. |
+| <img src="docs/screenshots/institutional/17-securities-lending.png" width="380"/> | **Securities Lending** · `inst_sec_lending` (renders `collateral`) | Commercial Bank Treasury & Primary Dealer | Securities lending & borrowing (SLB) desk. |
+| <img src="docs/screenshots/institutional/18-collateral-desk.png" width="380"/> | **Collateral Desk** · `collateral` | Commercial Bank Treasury & Primary Dealer | Collateral pledges and encumbrance management. |
+
+**Group: OPERATIONS**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/19-settlement-monitor.png" width="380"/> | **Settlement Monitor** · `notaries` | Commercial Bank Treasury & Primary Dealer | BFT notary consensus and settlement health. |
+| <img src="docs/screenshots/institutional/20-custody.png" width="380"/> | **Custody** · `vault_telemetry` | Commercial Bank Treasury & Primary Dealer | Proof-of-Reserve vault telemetry. |
+| <img src="docs/screenshots/institutional/21-payments-and-iso-20022.png" width="380"/> | **Payments & ISO 20022** · `iso20022_bridge` (renders `interoperability`) | Commercial Bank Treasury & Primary Dealer | pacs.008 payment bridge. |
+| <img src="docs/screenshots/institutional/22-reconciliation.png" width="380"/> | **Reconciliation** · `logs` | Commercial Bank Treasury & Primary Dealer | camt.053 reconciliation stream. |
+| <img src="docs/screenshots/institutional/23-delivery-and-transfers.png" width="380"/> | **Delivery & Transfers** · `corporate_actions` | Commercial Bank Treasury & Primary Dealer | Corporate actions and coupon payout processing. |
+
+**Group: RISK & COMPLIANCE**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/24-risk-and-limits.png" width="380"/> | **Risk & Limits** · `inst_limits` (renders `compliance`) | Commercial Bank Treasury & Primary Dealer | Desk-level risk limits monitoring. |
+| <img src="docs/screenshots/institutional/25-counterparties.png" width="380"/> | **Counterparties** · `identity_admin` | Commercial Bank Treasury & Primary Dealer | KYC counterparties registry. |
+| <img src="docs/screenshots/institutional/26-compliance.png" width="380"/> | **Compliance** · `compliance` | Commercial Bank Treasury & Primary Dealer | AML/KYC compliance radar. |
+| <img src="docs/screenshots/institutional/27-margin-and-collateral.png" width="380"/> | **Margin & Collateral** · `inst_margin` (renders `collateral`) | Commercial Bank Treasury & Primary Dealer | Margin requirements and collateral provisioning. |
+| <img src="docs/screenshots/institutional/28-surveillance.png" width="380"/> | **Surveillance** · `inst_surveillance` (renders `compliance`) | Commercial Bank Treasury & Primary Dealer | Market-abuse surveillance. |
+
+**Group: REPORTING & ADMIN**
+
+| Screenshot | Menu Point | Persona | Description |
+|---|---|---|---|
+| <img src="docs/screenshots/institutional/29-pandl-and-valuation.png" width="380"/> | **P&L and Valuation** · `inst_pnl` (renders `logs`) | Commercial Bank Treasury & Primary Dealer | Month-to-date P&L and mark-to-market valuation. |
+| <img src="docs/screenshots/institutional/30-client-statements.png" width="380"/> | **Client Statements** · `inst_client_stmts` (renders `logs`) | Commercial Bank Treasury & Primary Dealer | Client statement generation. |
+| <img src="docs/screenshots/institutional/31-regulatory-reports.png" width="380"/> | **Regulatory Reports** · `cb_reg_reports` (renders `logs`) | Commercial Bank Treasury & Primary Dealer | Official regulatory reporting. |
+| <img src="docs/screenshots/institutional/32-audit.png" width="380"/> | **Audit** · `cb_audit` (renders `logs`) | Commercial Bank Treasury & Primary Dealer | Immutable audit trail. |
+| <img src="docs/screenshots/institutional/33-users-and-roles.png" width="380"/> | **Users & Roles** · `enterprise_admin` | Commercial Bank Treasury & Primary Dealer | Account and holdings administration. |
+| <img src="docs/screenshots/institutional/34-apis-and-integrations.png" width="380"/> | **APIs & Integrations** · `inst_apis` (renders `canister_mgmt`) | Commercial Bank Treasury & Primary Dealer | FIX/ISO API and integration configuration over the canister fleet. |
+
+---
+
 ## 🚀 Quickstart & Local Deployment
 
 ### 1. Prerequisites

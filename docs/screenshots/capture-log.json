@@ -1,0 +1,658 @@
+[
+  {
+    "shot": "auth/00-workspace-chooser.png",
+    "size": "218KB"
+  },
+  {
+    "step": "cb-enter",
+    "cbEnter": {
+      "ok": true,
+      "matched": "SovereignCentral BankReserve Management & Monetary Operation"
+    },
+    "shot": "auth/01-central-bank-login-governor.png",
+    "size": "196KB"
+  },
+  {
+    "step": "cb/1",
+    "label": "Executive Dashboard",
+    "click": {
+      "ok": true,
+      "matched": "Executive DashboardReserves"
+    },
+    "file": "central-bank/01-executive-dashboard.png",
+    "size": "368KB"
+  },
+  {
+    "step": "cb/2",
+    "label": "Tasks & Approvals",
+    "click": {
+      "ok": true,
+      "matched": "Tasks & Approvals2 Pending"
+    },
+    "file": "central-bank/02-tasks-and-approvals.png",
+    "size": "232KB"
+  },
+  {
+    "step": "cb/3",
+    "label": "Notifications",
+    "click": {
+      "ok": true,
+      "matched": "NotificationsPortal"
+    },
+    "file": "central-bank/03-notifications.png",
+    "size": "333KB"
+  },
+  {
+    "step": "cb/4",
+    "label": "Reserve Overview",
+    "click": {
+      "ok": true,
+      "matched": "Reserve Overview2"
+    },
+    "file": "central-bank/04-reserve-overview.png",
+    "size": "271KB"
+  },
+  {
+    "step": "cb/5",
+    "label": "Gold & Bullion",
+    "click": {
+      "ok": true,
+      "matched": "Gold & Bullion2 Bars"
+    },
+    "file": "central-bank/05-gold-and-bullion.png",
+    "size": "287KB"
+  },
+  {
+    "step": "cb/6",
+    "label": "Government Bonds",
+    "click": {
+      "ok": true,
+      "matched": "Government BondsPortfolio"
+    },
+    "file": "central-bank/06-government-bonds.png",
+    "size": "249KB"
+  },
+  {
+    "step": "cb/7",
+    "label": "FX & Money Markets",
+    "click": {
+      "ok": true,
+      "matched": "FX & Money MarketsFX Desk"
+    },
+    "file": "central-bank/07-fx-and-money-markets.png",
+    "size": "222KB"
+  },
+  {
+    "step": "cb/8",
+    "label": "Portfolio Management",
+    "click": {
+      "ok": true,
+      "matched": "Portfolio Management2 Pools"
+    },
+    "file": "central-bank/08-portfolio-management.png",
+    "size": "193KB"
+  },
+  {
+    "step": "cb/9",
+    "label": "Liquidity Management",
+    "click": {
+      "ok": true,
+      "matched": "Liquidity ManagementSweeper"
+    },
+    "file": "central-bank/09-liquidity-management.png",
+    "size": "234KB"
+  },
+  {
+    "step": "cb/10",
+    "label": "Settlement Accounts",
+    "click": {
+      "ok": true,
+      "matched": "Settlement AccountssEURD"
+    },
+    "file": "central-bank/10-settlement-accounts.png",
+    "size": "247KB"
+  },
+  {
+    "step": "cb/11",
+    "label": "Custody & Vaults",
+    "click": {
+      "ok": true,
+      "matched": "Custody & VaultsPoR Live"
+    },
+    "file": "central-bank/11-custody-and-vaults.png",
+    "size": "201KB"
+  },
+  {
+    "step": "cb/12",
+    "label": "Settlement Monitor",
+    "click": {
+      "ok": true,
+      "matched": "Settlement Monitor4/5 BFT"
+    },
+    "file": "central-bank/12-settlement-monitor.png",
+    "size": "249KB"
+  },
+  {
+    "step": "cb/13",
+    "label": "Payments & ISO 20022",
+    "click": {
+      "ok": true,
+      "matched": "Payments & ISO 20022pacs.008"
+    },
+    "file": "central-bank/13-payments-and-iso-20022.png",
+    "size": "222KB"
+  },
+  {
+    "step": "cb/14",
+    "label": "Reconciliation",
+    "click": {
+      "ok": true,
+      "matched": "Reconciliationcamt.053"
+    },
+    "file": "central-bank/14-reconciliation.png",
+    "size": "212KB"
+  },
+  {
+    "step": "cb/15",
+    "label": "Delivery & Transfers",
+    "click": {
+      "ok": true,
+      "matched": "Delivery & Transfers4 Legs"
+    },
+    "file": "central-bank/15-delivery-and-transfers.png",
+    "size": "279KB"
+  },
+  {
+    "step": "cb/16",
+    "label": "Risk Dashboard",
+    "click": {
+      "ok": true,
+      "matched": "Risk DashboardRadar"
+    },
+    "file": "central-bank/16-risk-dashboard.png",
+    "size": "237KB"
+  },
+  {
+    "step": "cb/17",
+    "label": "Exposure & Limits",
+    "click": {
+      "ok": true,
+      "matched": "Exposure & LimitsPolicy"
+    },
+    "file": "central-bank/17-exposure-and-limits.png",
+    "size": "237KB"
+  },
+  {
+    "step": "cb/18",
+    "label": "Counterparties",
+    "click": {
+      "ok": true,
+      "matched": "CounterpartiesKYC"
+    },
+    "file": "central-bank/18-counterparties.png",
+    "size": "189KB"
+  },
+  {
+    "step": "cb/19",
+    "label": "Stress Testing",
+    "click": {
+      "ok": true,
+      "matched": "Stress TestingScenarios"
+    },
+    "file": "central-bank/19-stress-testing.png",
+    "size": "237KB"
+  },
+  {
+    "step": "cb/20",
+    "label": "Compliance Dashboard",
+    "click": {
+      "ok": true,
+      "matched": "Compliance Dashboard10-Yr GDPR"
+    },
+    "file": "central-bank/20-compliance-dashboard.png",
+    "size": "235KB"
+  },
+  {
+    "step": "cb/21",
+    "label": "Statements & GL",
+    "click": {
+      "ok": true,
+      "matched": "Statements & GLGL"
+    },
+    "file": "central-bank/21-statements-and-gl.png",
+    "size": "210KB"
+  },
+  {
+    "step": "cb/22",
+    "label": "Valuation & P&L",
+    "click": {
+      "ok": true,
+      "matched": "Valuation & P&LMTM"
+    },
+    "file": "central-bank/22-valuation-and-pandl.png",
+    "size": "210KB"
+  },
+  {
+    "step": "cb/23",
+    "label": "Regulatory Reports",
+    "click": {
+      "ok": true,
+      "matched": "Regulatory ReportsOfficial"
+    },
+    "file": "central-bank/23-regulatory-reports.png",
+    "size": "210KB"
+  },
+  {
+    "step": "cb/24",
+    "label": "Audit Center",
+    "click": {
+      "ok": true,
+      "matched": "Audit CenterImmutable"
+    },
+    "file": "central-bank/24-audit-center.png",
+    "size": "210KB"
+  },
+  {
+    "step": "cb/25",
+    "label": "Institutions",
+    "click": {
+      "ok": true,
+      "matched": "InstitutionsRegistry"
+    },
+    "file": "central-bank/25-institutions.png",
+    "size": "219KB"
+  },
+  {
+    "step": "cb/26",
+    "label": "Users & Roles",
+    "click": {
+      "ok": true,
+      "matched": "Users & RolesKYC"
+    },
+    "file": "central-bank/26-users-and-roles.png",
+    "size": "189KB"
+  },
+  {
+    "step": "cb/27",
+    "label": "Mandates & Policies",
+    "click": {
+      "ok": true,
+      "matched": "Mandates & PoliciesBoard"
+    },
+    "file": "central-bank/27-mandates-and-policies.png",
+    "size": "218KB"
+  },
+  {
+    "step": "cb/28",
+    "label": "Access Logs",
+    "click": {
+      "ok": true,
+      "matched": "Access LogsSignal"
+    },
+    "file": "central-bank/28-access-logs.png",
+    "size": "221KB"
+  },
+  {
+    "step": "cb/29",
+    "label": "System Configuration",
+    "click": {
+      "ok": true,
+      "matched": "System Configuration3 WASMs"
+    },
+    "file": "central-bank/29-system-configuration.png",
+    "size": "299KB"
+  },
+  {
+    "step": "logout+inst-enter",
+    "out1": {
+      "ok": true,
+      "matched": "Logout"
+    },
+    "instEnter": {
+      "ok": true,
+      "matched": "WholesaleCommercial Bank / AgencyInstitutional Trading & Set"
+    },
+    "shot": "auth/02-institutional-login-treasury.png",
+    "size": "203KB"
+  },
+  {
+    "step": "inst/1",
+    "label": "Bank Dashboard",
+    "click": {
+      "ok": true,
+      "matched": "Bank DashboardTreasury"
+    },
+    "file": "institutional/01-bank-dashboard.png",
+    "size": "339KB"
+  },
+  {
+    "step": "inst/2",
+    "label": "Client Orders",
+    "click": {
+      "ok": true,
+      "matched": "Client OrdersOrders"
+    },
+    "file": "institutional/02-client-orders.png",
+    "size": "219KB"
+  },
+  {
+    "step": "inst/3",
+    "label": "RFQ Inbox",
+    "click": {
+      "ok": true,
+      "matched": "RFQ Inbox4 RFQs"
+    },
+    "file": "institutional/03-rfq-inbox.png",
+    "size": "274KB"
+  },
+  {
+    "step": "inst/4",
+    "label": "Tasks & Approvals",
+    "click": {
+      "ok": true,
+      "matched": "Tasks & Approvals2 Pending"
+    },
+    "file": "institutional/04-tasks-and-approvals.png",
+    "size": "215KB"
+  },
+  {
+    "step": "inst/5",
+    "label": "Notifications",
+    "click": {
+      "ok": true,
+      "matched": "NotificationsPortal"
+    },
+    "file": "institutional/05-notifications.png",
+    "size": "327KB"
+  },
+  {
+    "step": "inst/6",
+    "label": "Gold Market",
+    "click": {
+      "ok": true,
+      "matched": "Gold MarketXAU"
+    },
+    "file": "institutional/06-gold-market.png",
+    "size": "280KB"
+  },
+  {
+    "step": "inst/7",
+    "label": "Government Bonds",
+    "click": {
+      "ok": true,
+      "matched": "Government BondsTradingView"
+    },
+    "file": "institutional/07-government-bonds.png",
+    "size": "244KB"
+  },
+  {
+    "step": "inst/8",
+    "label": "FX & Money Markets",
+    "click": {
+      "ok": true,
+      "matched": "FX & Money MarketsFX"
+    },
+    "file": "institutional/08-fx-and-money-markets.png",
+    "size": "217KB"
+  },
+  {
+    "step": "inst/9",
+    "label": "Market Making",
+    "click": {
+      "ok": true,
+      "matched": "Market Making2 Pools"
+    },
+    "file": "institutional/09-market-making.png",
+    "size": "188KB"
+  },
+  {
+    "step": "inst/10",
+    "label": "Auctions",
+    "click": {
+      "ok": true,
+      "matched": "Auctions2 Live"
+    },
+    "file": "institutional/10-auctions.png",
+    "size": "256KB"
+  },
+  {
+    "step": "inst/11",
+    "label": "Cash & Liquidity",
+    "click": {
+      "ok": true,
+      "matched": "Cash & Liquidity2"
+    },
+    "file": "institutional/11-cash-and-liquidity.png",
+    "size": "265KB"
+  },
+  {
+    "step": "inst/12",
+    "label": "Inventory & Positions",
+    "click": {
+      "ok": true,
+      "matched": "Inventory & PositionsLive"
+    },
+    "file": "institutional/12-inventory-and-positions.png",
+    "size": "281KB"
+  },
+  {
+    "step": "inst/13",
+    "label": "Settlement Accounts",
+    "click": {
+      "ok": true,
+      "matched": "Settlement AccountssEURD"
+    },
+    "file": "institutional/13-settlement-accounts.png",
+    "size": "242KB"
+  },
+  {
+    "step": "inst/14",
+    "label": "Funding",
+    "click": {
+      "ok": true,
+      "matched": "FundingSweeper"
+    },
+    "file": "institutional/14-funding.png",
+    "size": "218KB"
+  },
+  {
+    "step": "inst/15",
+    "label": "Repo & Reverse Repo",
+    "click": {
+      "ok": true,
+      "matched": "Repo & Reverse RepoTerm"
+    },
+    "file": "institutional/15-repo-and-reverse-repo.png",
+    "size": "212KB"
+  },
+  {
+    "step": "inst/16",
+    "label": "Gold Loans & Leases",
+    "click": {
+      "ok": true,
+      "matched": "Gold Loans & LeasesLease"
+    },
+    "file": "institutional/16-gold-loans-and-leases.png",
+    "size": "212KB"
+  },
+  {
+    "step": "inst/17",
+    "label": "Securities Lending",
+    "click": {
+      "ok": true,
+      "matched": "Securities LendingSLB"
+    },
+    "file": "institutional/17-securities-lending.png",
+    "size": "212KB"
+  },
+  {
+    "step": "inst/18",
+    "label": "Collateral Desk",
+    "click": {
+      "ok": true,
+      "matched": "Collateral Desk2 Pledges"
+    },
+    "file": "institutional/18-collateral-desk.png",
+    "size": "212KB"
+  },
+  {
+    "step": "inst/19",
+    "label": "Settlement Monitor",
+    "click": {
+      "ok": true,
+      "matched": "Settlement Monitor4/5 BFT"
+    },
+    "file": "institutional/19-settlement-monitor.png",
+    "size": "243KB"
+  },
+  {
+    "step": "inst/20",
+    "label": "Custody",
+    "click": {
+      "ok": true,
+      "matched": "CustodyPoR Live"
+    },
+    "file": "institutional/20-custody.png",
+    "size": "193KB"
+  },
+  {
+    "step": "inst/21",
+    "label": "Payments & ISO 20022",
+    "click": {
+      "ok": true,
+      "matched": "Payments & ISO 20022pacs.008"
+    },
+    "file": "institutional/21-payments-and-iso-20022.png",
+    "size": "215KB"
+  },
+  {
+    "step": "inst/22",
+    "label": "Reconciliation",
+    "click": {
+      "ok": true,
+      "matched": "Reconciliationcamt.053"
+    },
+    "file": "institutional/22-reconciliation.png",
+    "size": "205KB"
+  },
+  {
+    "step": "inst/23",
+    "label": "Delivery & Transfers",
+    "click": {
+      "ok": true,
+      "matched": "Delivery & TransfersPayouts"
+    },
+    "file": "institutional/23-delivery-and-transfers.png",
+    "size": "206KB"
+  },
+  {
+    "step": "inst/24",
+    "label": "Risk & Limits",
+    "click": {
+      "ok": true,
+      "matched": "Risk & LimitsDesk"
+    },
+    "file": "institutional/24-risk-and-limits.png",
+    "size": "230KB"
+  },
+  {
+    "step": "inst/25",
+    "label": "Counterparties",
+    "click": {
+      "ok": true,
+      "matched": "CounterpartiesKYC"
+    },
+    "file": "institutional/25-counterparties.png",
+    "size": "181KB"
+  },
+  {
+    "step": "inst/26",
+    "label": "Compliance",
+    "click": {
+      "ok": true,
+      "matched": "ComplianceAML/KYC"
+    },
+    "file": "institutional/26-compliance.png",
+    "size": "230KB"
+  },
+  {
+    "step": "inst/27",
+    "label": "Margin & Collateral",
+    "click": {
+      "ok": true,
+      "matched": "Margin & Collateral3.1×"
+    },
+    "file": "institutional/27-margin-and-collateral.png",
+    "size": "210KB"
+  },
+  {
+    "step": "inst/28",
+    "label": "Surveillance",
+    "click": {
+      "ok": true,
+      "matched": "SurveillanceMarket Abuse"
+    },
+    "file": "institutional/28-surveillance.png",
+    "size": "230KB"
+  },
+  {
+    "step": "inst/29",
+    "label": "P&L and Valuation",
+    "click": {
+      "ok": true,
+      "matched": "P&L and ValuationMTD"
+    },
+    "file": "institutional/29-pandl-and-valuation.png",
+    "size": "205KB"
+  },
+  {
+    "step": "inst/30",
+    "label": "Client Statements",
+    "click": {
+      "ok": true,
+      "matched": "Client StatementsClient"
+    },
+    "file": "institutional/30-client-statements.png",
+    "size": "205KB"
+  },
+  {
+    "step": "inst/31",
+    "label": "Regulatory Reports",
+    "click": {
+      "ok": true,
+      "matched": "Regulatory ReportsOfficial"
+    },
+    "file": "institutional/31-regulatory-reports.png",
+    "size": "205KB"
+  },
+  {
+    "step": "inst/32",
+    "label": "Audit",
+    "click": {
+      "ok": true,
+      "matched": "AuditImmutable"
+    },
+    "file": "institutional/32-audit.png",
+    "size": "205KB"
+  },
+  {
+    "step": "inst/33",
+    "label": "Users & Roles",
+    "click": {
+      "ok": true,
+      "matched": "Users & RolesAccounts"
+    },
+    "file": "institutional/33-users-and-roles.png",
+    "size": "213KB"
+  },
+  {
+    "step": "inst/34",
+    "label": "APIs & Integrations",
+    "click": {
+      "ok": true,
+      "matched": "APIs & IntegrationsFIX/ISO"
+    },
+    "file": "institutional/34-apis-and-integrations.png",
+    "size": "293KB"
+  }
+]
