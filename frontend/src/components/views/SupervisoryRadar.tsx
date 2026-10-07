@@ -1,41 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import type { SupervisionData } from '../../types';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { SupervisionData, UnmaskedFlow } from '../../types';
 import { fetchSupervisionData } from '../../services/api';
 import { Eye, Lock, RefreshCw, ShieldCheck } from 'lucide-react';
+
+/** Fixture flows used only when the backend supervision endpoint is unreachable. */
+const DEMO_FLOWS: UnmaskedFlow[] = [
+  {
+    anonymous_id: 'ryjl3-hexae-mc6xm-gopwt-x5jg7-2a',
+    unmasked_legal_owner: 'Alice Trading Corp (Zurich)',
+    net_exposure_eur: '€24,500.00',
+    rwa_gold_holdings_oz: '5.50 oz',
+    risk_tier: 'Low_Compliant',
+  },
+  {
+    anonymous_id: 'h64fh-eybaq-aaaaa-aaaaa-cai',
+    unmasked_legal_owner: 'Bob Commodities LLC (Frankfurt)',
+    net_exposure_eur: '€18,200.00',
+    rwa_bond_holdings_usd: '$50,000 USTB',
+    risk_tier: 'Low_Compliant',
+  },
+];
 
 export const SupervisoryRadar: React.FC = () => {
   const [data, setData] = useState<SupervisionData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const loadRadar = async () => {
-    setLoading(true);
+  // Silent poll every 2s; on failure the last good snapshot is kept and the
+  // view falls back to the demo fixtures below, so the tour capture pipeline
+  // and offline demo keep working unchanged.
+  const pollRadar = useCallback(async (): Promise<void> => {
     try {
       const res = await fetchSupervisionData();
       setData(res);
     } catch {
-      // Fallback
-    } finally {
-      setLoading(false);
+      /* keep last good snapshot; UI falls back to demo fixtures */
     }
+  }, []);
+
+  const handleManualRefresh = async (): Promise<void> => {
+    setLoading(true);
+    await pollRadar();
+    setLoading(false);
   };
 
   useEffect(() => {
-    loadRadar();
-  }, []);
+    void pollRadar();
+    const id = window.setInterval(() => { void pollRadar(); }, 2000);
+    return () => window.clearInterval(id);
+  }, [pollRadar]);
+
+  const live = data !== null;
+  const flows: UnmaskedFlow[] = data?.unmasked_active_flows ?? DEMO_FLOWS;
+  const intercepted = data?.double_spend_attempts_intercepted ?? 0;
+  const partitions = data?.total_active_canister_partitions ?? 10;
+  const authority = data?.regulatory_unmasking_authority ?? 'CENTRAL_BANK_SUPERUSER';
 
   return (
     <div className="fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span className="badge badge-red">Central Bank & Supervisory Radar</span>
+            <span
+              className={live ? 'pill-valid' : 'pill-reject'}
+              style={{ fontSize: '10px' }}
+              title={live
+                ? `Sandbox ledger · ${intercepted} interceptions · ${partitions} partitions${data?.supervision_timestamp ? ` · scan ${new Date(data.supervision_timestamp).toLocaleTimeString('en-GB', { hour12: false })}` : ''}`
+                : 'Backend supervision endpoint unreachable — showing demo fixtures'}
+            >
+              ● {live ? 'LIVE' : 'DEMO DATA'}
+            </span>
             <span style={{ fontSize: '11px', color: '#606060' }}>Complete Unmasked Institutional Supervision</span>
           </div>
           <h2 style={{ fontSize: 'clamp(20px, 4vw, 24px)', fontWeight: 700, marginTop: '4px' }}>Global Institutional Oversight & Anonymous Key Unmasking</h2>
         </div>
 
-        <button className="btn-secondary" onClick={loadRadar} disabled={loading}>
-          <RefreshCw size={14} /> Refresh Radar
+        <button className="btn-secondary" onClick={() => { void handleManualRefresh(); }} disabled={loading}>
+          <RefreshCw size={14} className={loading ? 'pulse-glow' : undefined} /> Refresh Radar
         </button>
       </div>
 
@@ -43,7 +84,7 @@ export const SupervisoryRadar: React.FC = () => {
         <div className="card" style={{ padding: '14px' }}>
           <div style={{ fontSize: '11px', color: '#606060' }}>Supervisory Authority</div>
           <div style={{ fontSize: '14px', fontWeight: 700, color: '#FF0000', marginTop: '4px' }}>
-            CENTRAL_BANK_SUPERUSER
+            {authority}
           </div>
           <div style={{ fontSize: '10px', color: '#2BA640', marginTop: '2px' }}>Full Regulatory Access</div>
         </div>
@@ -51,7 +92,7 @@ export const SupervisoryRadar: React.FC = () => {
         <div className="card" style={{ padding: '14px' }}>
           <div style={{ fontSize: '11px', color: '#606060' }}>Double-Spend Interceptions</div>
           <div style={{ fontSize: '20px', fontWeight: 800, color: '#2BA640', marginTop: '2px' }}>
-            0 Double-Spends
+            {intercepted} Double-Spend{intercepted === 1 ? '' : 's'}
           </div>
           <div style={{ fontSize: '10px', color: '#606060', marginTop: '2px' }}>100% Blocked by Notary</div>
         </div>
@@ -59,7 +100,7 @@ export const SupervisoryRadar: React.FC = () => {
         <div className="card" style={{ padding: '14px' }}>
           <div style={{ fontSize: '11px', color: '#606060' }}>Active Canister Partitions</div>
           <div style={{ fontSize: '20px', fontWeight: 800, color: '#065FD4', marginTop: '2px' }}>
-            10 Canisters
+            {partitions} Canister{partitions === 1 ? '' : 's'}
           </div>
           <div style={{ fontSize: '10px', color: '#606060', marginTop: '2px' }}>Wasm Orthogonal Heap</div>
         </div>
@@ -95,7 +136,7 @@ export const SupervisoryRadar: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data?.unmasked_active_flows.map((flow) => (
+              {flows.map((flow) => (
                 <tr key={flow.anonymous_id} style={{ borderBottom: '1px solid #EAEAEA' }}>
                   <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -117,6 +158,13 @@ export const SupervisoryRadar: React.FC = () => {
                   </td>
                 </tr>
               ))}
+              {flows.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ padding: '18px 16px', textAlign: 'center', color: '#606060' }}>
+                    No active anonymous flows on the ledger.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

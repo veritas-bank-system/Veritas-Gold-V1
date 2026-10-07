@@ -150,6 +150,12 @@ pub struct VaultSensorTelemetry {
     pub purity_grade: String,
     pub merkle_root_hash: String,
     pub oracle_attestation_status: String,
+    /// Notary sequence the attestation root was computed over.
+    pub attestation_seq: u64,
+    /// Server timestamp (ms) of this sensor scan.
+    pub last_scan_ms: u64,
+    /// Total tokenized gold reserve in troy oz (1 token = 1 allocated oz).
+    pub reserve_gold_oz: String,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -264,6 +270,34 @@ pub const SUBNET_QUORUM: u32 = 4;
 pub fn short_stateref(seed: &str) -> String {
     let hex = format!("{:X}", md5::compute(seed));
     format!("{}...{}:0", &hex[..6], &hex[30..])
+}
+
+/// Group thousands separator: 15551.75 -> "15,551.75".
+fn with_commas(value: f64, decimals: usize) -> String {
+    let fixed = format!("{:.*}", decimals, value);
+    let (int_part, frac) = match fixed.split_once('.') {
+        Some((i, f)) => (i, Some(f)),
+        None => (fixed.as_str(), None),
+    };
+    let negative = int_part.starts_with('-');
+    let digits = int_part.trim_start_matches('-');
+    let mut grouped = String::new();
+    for (idx, ch) in digits.chars().enumerate() {
+        if idx > 0 && (digits.len() - idx) % 3 == 0 {
+            grouped.push(',');
+        }
+        grouped.push(ch);
+    }
+    let mut out = String::new();
+    if negative {
+        out.push('-');
+    }
+    out.push_str(&grouped);
+    if let Some(f) = frac {
+        out.push('.');
+        out.push_str(f);
+    }
+    out
 }
 
 /// Append a settlement event (newest first) to the live notary log, capped at 200 entries.
@@ -1030,31 +1064,83 @@ async fn accept_rwa_offer(
     })))
 }
 
-async fn get_admin_supervision(State(_state): State<ServerState>) -> impl IntoResponse {
+async fn get_admin_supervision(State(state): State<ServerState>) -> impl IntoResponse {
     let now = chrono::Utc::now().timestamp_millis() as u64;
+
+    // Interceptions are real: every REJECTED notary event was a blocked ledger op.
+    let intercepted = state
+        .settlement_events
+        .read()
+        .unwrap()
+        .iter()
+        .filter(|e| e.status == "REJECTED")
+        .count() as u64;
+    let partitions = state.canisters.read().unwrap().len() as u64;
+
+    // Unmasked flows are derived from the live ledger: registered legal identities,
+    // real cash exposure across demand deposit accounts and real RWA holdings.
+    let bank = PrincipalId::new_user(2);
+    let alice = PrincipalId::new_user(3);
+    let bob = PrincipalId::new_user(4);
+    let zero = rust_decimal::Decimal::ZERO;
+    let mut flows = Vec::new();
+    for principal in [bank, alice, bob] {
+        let legal_name = state
+            .env
+            .identity_registry
+            .get_profile(&principal)
+            .map(|p| p.legal_name)
+            .unwrap_or_else(|| format!("Unregistered Principal {}", principal));
+
+        let mut accounts = state.env.settlement_engine.get_participant_accounts(&principal);
+        accounts.sort_by(|a, b| a.account_id.to_string().cmp(&b.account_id.to_string()));
+        let mut holdings = state.env.settlement_engine.get_participant_holdings(&principal);
+        holdings.sort_by(|a, b| a.holding_id.to_string().cmp(&b.holding_id.to_string()));
+
+        // Net cash exposure across active demand deposit accounts (overdrawn balances count).
+        let mut eur_exposure = zero;
+        let mut overdrawn = false;
+        for acct in &accounts {
+            if acct.ensure_active().is_err() {
+                continue;
+            }
+            let balance = acct.balance.decimal();
+            if balance < zero {
+                overdrawn = true;
+            }
+            if acct.currency.as_str() == "EURD" {
+                eur_exposure += balance;
+            }
+        }
+
+        let mut gold_oz = zero;
+        let mut ustb_units = zero;
+        for h in &holdings {
+            match h.asset_symbol.as_str() {
+                "GOLD" => gold_oz += h.amount.decimal(),
+                "USTB" => ustb_units += h.amount.decimal(),
+                _ => {}
+            }
+        }
+
+        flows.push(json!({
+            "anonymous_id": principal.to_string(),
+            "unmasked_legal_owner": legal_name,
+            "net_exposure_eur": format!("€{:.2}", eur_exposure),
+            "rwa_gold_holdings_oz": if gold_oz > zero { Some(format!("{:.2} oz", gold_oz)) } else { None },
+            "rwa_bond_holdings_usd": if ustb_units > zero { Some(format!("${:.2} USTB", ustb_units)) } else { None },
+            "risk_tier": if overdrawn { "Elevated_Review" } else { "Low_Compliant" },
+        }));
+    }
+
     (StatusCode::OK, Json(json!({
         "supervision_timestamp": now,
         "radar_status": "Active_Consensus_Audit",
-        "double_spend_attempts_intercepted": 0,
-        "total_active_canister_partitions": 10,
+        "double_spend_attempts_intercepted": intercepted,
+        "total_active_canister_partitions": partitions,
         "regulatory_unmasking_authority": "CENTRAL_BANK_AUDIT_SUPERUSER",
         "iso20022_compliance_mode": "STRICT_CAMT_PACS_ENFORCED",
-        "unmasked_active_flows": [
-            {
-                "anonymous_id": "ryjl3-hexae-mc6xm-gopwt-x5jg7-2a",
-                "unmasked_legal_owner": "Alice Trading Corp (Zurich)",
-                "net_exposure_eur": "€24,500.00",
-                "rwa_gold_holdings_oz": "5.50 oz",
-                "risk_tier": "Low_Compliant"
-            },
-            {
-                "anonymous_id": "h64fh-eybaq-aaaaa-aaaaa-cai",
-                "unmasked_legal_owner": "Bob Commodities LLC (Frankfurt)",
-                "net_exposure_eur": "€18,200.00",
-                "rwa_bond_holdings_usd": "$50,000 USTB",
-                "risk_tier": "Low_Compliant"
-            }
-        ]
+        "unmasked_active_flows": flows,
     })))
 }
 
@@ -1321,17 +1407,78 @@ async fn get_settlement_telemetry(State(state): State<ServerState>) -> impl Into
     })))
 }
 
-async fn get_vault_telemetry() -> impl IntoResponse {
+async fn get_vault_telemetry(State(state): State<ServerState>) -> impl IntoResponse {
+    use rust_decimal::prelude::ToPrimitive;
+    let now_ms = chrono::Utc::now().timestamp_millis() as u64;
+
+    // Reserve backing is derived from the live ledger: every GOLD token is
+    // backed 1:1 by one allocated 1 oz bar in the configured vault profile.
+    let bank = PrincipalId::new_user(2);
+    let alice = PrincipalId::new_user(3);
+    let bob = PrincipalId::new_user(4);
+    let zero = rust_decimal::Decimal::ZERO;
+    let mut gold_oz = zero;
+    let mut holdings_digest = String::new();
+    let mut accounts_digest = String::new();
+    let mut account_count = 0u32;
+    for principal in [bank, alice, bob] {
+        let mut holdings = state.env.settlement_engine.get_participant_holdings(&principal);
+        holdings.sort_by(|a, b| a.holding_id.to_string().cmp(&b.holding_id.to_string()));
+        for h in holdings {
+            if h.asset_symbol.as_str() == "GOLD" {
+                gold_oz += h.amount.decimal();
+            }
+            holdings_digest.push_str(&format!("{}={};", h.holding_id, h.amount));
+        }
+        let mut accounts = state.env.settlement_engine.get_participant_accounts(&principal);
+        accounts.sort_by(|a, b| a.account_id.to_string().cmp(&b.account_id.to_string()));
+        for a in accounts {
+            if a.ensure_active().is_ok() {
+                account_count += 1;
+            }
+            accounts_digest.push_str(&format!("{}={};", a.account_id, a.balance));
+        }
+    }
+
+    let attestation_seq = state.event_seq.load(Ordering::SeqCst);
+    // Attestation root binds the vault reserve to the exact ledger state it backs;
+    // it changes only when holdings, accounts or the notary sequence change.
+    let merkle_hex = format!(
+        "{:X}",
+        md5::compute(format!("{}|{}|{}|{}", holdings_digest, accounts_digest, account_count, attestation_seq))
+    );
+    let merkle_root = format!("0x{}{}", merkle_hex, &merkle_hex[..8]);
+
+    // Hardware sensors are a configured simulation: deterministic slow drift around
+    // the calibrated nominal band, streamed per scan (no random per-request noise).
+    let t = now_ms as f64 / 1000.0;
+    let temperature = 18.4 + 0.25 * (t / 105.0).sin();
+    let humidity = 42.1 + 0.35 * (t / 83.0 + 1.3).sin();
+    let density = 99.991 + 0.002 * (t / 97.0 + 0.6).sin();
+
+    let status = if density >= 99.98 && (17.0..20.0).contains(&temperature) && (35.0..50.0).contains(&humidity) {
+        "Verified_Nominal"
+    } else {
+        "Reconciliation_Warning"
+    };
+
+    // LBMA good-delivery bar: 400 oz = 12.4414 kg.
+    let oz = gold_oz.to_f64().unwrap_or(0.0);
+    let weight_kg = oz * 0.031_103_476_8;
+
     (StatusCode::OK, Json(VaultSensorTelemetry {
         vault_location: "Zurich Freezone High-Security Vault #4".to_string(),
-        total_bars_verified: 1250,
-        total_weight_kg: "15,551.75 kg".to_string(),
-        ultrasonic_density_pct: "99.992%".to_string(),
-        vault_temperature_c: "18.4 °C".to_string(),
-        humidity_pct: "42.1%".to_string(),
+        total_bars_verified: gold_oz.round().to_u32().unwrap_or(0),
+        total_weight_kg: format!("{} kg", with_commas(weight_kg, 2)),
+        ultrasonic_density_pct: format!("{:.3}%", density),
+        vault_temperature_c: format!("{:.1} °C", temperature),
+        humidity_pct: format!("{:.1}%", humidity),
         purity_grade: "LBMA 999.9 Fine Gold".to_string(),
-        merkle_root_hash: "0x98f4e21a8b417c8d9e2231ff01c78491ae6b490f".to_string(),
-        oracle_attestation_status: "Verified_Nominal".to_string(),
+        merkle_root_hash: merkle_root,
+        oracle_attestation_status: status.to_string(),
+        attestation_seq,
+        last_scan_ms: now_ms,
+        reserve_gold_oz: format!("{:.2} oz", gold_oz),
     }))
 }
 

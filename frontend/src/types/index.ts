@@ -359,6 +359,12 @@ export interface VaultSensorTelemetry {
   purity_grade: string;
   merkle_root_hash: string;
   oracle_attestation_status: string;
+  /** Notary sequence the attestation root was computed over (live backend only). */
+  attestation_seq?: number;
+  /** Server timestamp (ms) of this sensor scan (live backend only). */
+  last_scan_ms?: number;
+  /** Total tokenized gold reserve in troy oz (live backend only). */
+  reserve_gold_oz?: string;
 }
 
 export interface SweepingRule {
