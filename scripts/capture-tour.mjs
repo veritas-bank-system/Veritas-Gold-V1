@@ -345,7 +345,9 @@ async function tourSidebar(cdp, rows, area, pm, surface) {
 /* --------------------------------------------------------------- tour */
 async function runTour(cdp) {
   /* 0. chooser */
-  await cdp.send('Page.navigate', { url: FRONT_URL + '/' });
+  // The veritasbank.org landing gate sits at bare `/`; the tour captures the
+  // Gold platform, so it deep-links past the gate via ?entry=gold.
+  await cdp.send('Page.navigate', { url: FRONT_URL + '/?entry=gold' });
   await sleep(1600);
   await setViewport(cdp, DESKTOP);
   await shot(cdp, meta('auth/00-workspace-chooser.png', 'Desktop Workstation', null, null, 'Workspace Chooser', null,
@@ -388,7 +390,7 @@ async function runTour(cdp) {
   await shot(cdp, meta('mobile/live-mvp-verification.png', 'Mobile (iPhone)', P_CB, FLAG_CB, 'Live MVP Verification', 'mvp_verification',
     '⚡ 6/6 live invariant test suite: conservation of value, notary consensus and settlement invariants.'), 500);
   // The MVP view has no hamburger; reset through a fresh page load.
-  await cdp.send('Page.navigate', { url: FRONT_URL + '/' });
+  await cdp.send('Page.navigate', { url: FRONT_URL + '/?entry=gold' });
   await sleep(1600);
   await clickButton(cdp, 'Enter Central Bank Workspace');
   await sleep(700);

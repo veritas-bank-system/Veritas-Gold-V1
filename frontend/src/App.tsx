@@ -35,6 +35,7 @@ import { AdminDashboard } from './components/views/AdminDashboard';
 import { EnterpriseAdminDashboard } from './components/views/EnterpriseAdminDashboard';
 import { SignalEncryptedChatView } from './components/views/SignalEncryptedChatView';
 import { WorkspaceSelectSurface } from './components/auth/WorkspaceSelectSurface';
+import { LandingSurface } from './components/auth/LandingSurface';
 import { CentralBankDashboard, InstitutionalBankDashboard } from './components/views/WorkspaceDashboards';
 import { InstitutionalMobileSurface } from './components/mobile/InstitutionalMobileSurface';
 import {
@@ -117,6 +118,27 @@ export function App() {
   const [systemEnv, setSystemEnv] = useState<SystemEnvironment>('SANDBOX');
   const [runtimeMode, setRuntimeMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [showLoginModal, setShowLoginModal] = useState(false);
+  // Landing gate (veritasbank.org entry). Bare `/` shows the landing desk chooser;
+  // every previously published deep link (?entry=gold, ?login=true, ?mode=…)
+  // bypasses straight into the Gold flow. Resolved once from the entry URL.
+  const [entryGate, setEntryGate] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const routeHash = window.location.hash;
+    const routePath = window.location.pathname;
+    const hasDeepLink =
+      params.get('entry') === 'gold' ||
+      params.get('login') === 'true' ||
+      params.get('auth') === 'true' ||
+      params.get('persona') === 'select' ||
+      mode === 'mobile' ||
+      mode === 'tablet' ||
+      routeHash === '#mobile' ||
+      routeHash === '#tablet' ||
+      routePath.includes('/mobile') ||
+      routePath.includes('/tablet');
+    return !hasDeepLink;
+  });
 
   // Check URL parameters for Direct Route Addresses (?mode=mobile, ?mode=tablet, ?login=true)
   useEffect(() => {
@@ -533,6 +555,19 @@ export function App() {
         return <ConsensusHealthView onNotify={showToast} />;
     }
   };
+
+  // Step 0: veritasbank.org landing gate — login hero + the two desk cards.
+  if (entryGate) {
+    return (
+      <LandingSurface
+        onSelectDesk={(desk) => {
+          if (desk === 'gold') {
+            setEntryGate(false);
+          }
+        }}
+      />
+    );
+  }
 
   // Step 1: workspace selection — the two top-level personas of the network.
   if (!workspace) {
