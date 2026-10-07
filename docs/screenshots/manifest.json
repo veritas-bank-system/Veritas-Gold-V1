@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T21:39:04.714Z",
+  "generated_at": "2026-10-07T06:48:21.476Z",
   "shot_count": 83,
   "shots": [
     {
@@ -11,7 +11,7 @@
       "menu_point": "Workspace Chooser",
       "section_id": null,
       "description": "Entry gate: Sovereign (Central Bank) vs Wholesale (Institutional) tier cards. The selection decides navigation, permissions, limits, data scope and approval rules.",
-      "bytes": 222991
+      "bytes": 222993
     },
     {
       "file": "auth/01-central-bank-login-governor.png",
@@ -22,7 +22,7 @@
       "menu_point": "Login Gate",
       "section_id": null,
       "description": "GOLD-branded login for the Central Bank workspace: flagship Governor preselected, 3 admitted roles, environment and auth-protocol selectors.",
-      "bytes": 200160
+      "bytes": 200159
     },
     {
       "file": "central-bank/01-executive-dashboard.png",
@@ -33,7 +33,7 @@
       "menu_point": "Executive Dashboard",
       "section_id": "cb_dashboard",
       "description": "Flagship sovereign session (Level 5 Sovereign Root Key) over the Executive Dashboard.",
-      "bytes": 355743
+      "bytes": 355772
     },
     {
       "file": "central-bank/02-tasks-and-approvals.png",
@@ -44,7 +44,7 @@
       "menu_point": "Tasks & Approvals",
       "section_id": "governance",
       "description": "Maker-checker approval queue: high-value wires, LBMA gold minting tokenization, 1/2 quorum signatures, Sign & Authorize dual control.",
-      "bytes": 224753
+      "bytes": 224758
     },
     {
       "file": "central-bank/03-notifications.png",
@@ -55,7 +55,7 @@
       "menu_point": "Notifications",
       "section_id": "support",
       "description": "Support & documentation portal with system notifications.",
-      "bytes": 340097
+      "bytes": 340106
     },
     {
       "file": "central-bank/04-reserve-overview.png",
@@ -66,7 +66,7 @@
       "menu_point": "Reserve Overview",
       "section_id": "portfolio",
       "description": "Official reserve accounts, virtual corporate card with spending power, instant wires, and quick-pay counterparties.",
-      "bytes": 276373
+      "bytes": 278388
     },
     {
       "file": "central-bank/05-gold-and-bullion.png",
@@ -77,7 +77,7 @@
       "menu_point": "Gold & Bullion",
       "section_id": "vault",
       "description": "Allocated LBMA physical gold bar custody positions and holdings.",
-      "bytes": 293226
+      "bytes": 293628
     },
     {
       "file": "central-bank/06-government-bonds.png",
@@ -88,7 +88,7 @@
       "menu_point": "Government Bonds",
       "section_id": "terminal",
       "description": "RWA Capital Markets & Trading Terminal — TradingView-style multi-chart engine for sovereign bonds, gold, FX, and RWA instruments.",
-      "bytes": 254821
+      "bytes": 255060
     },
     {
       "file": "central-bank/07-fx-and-money-markets.png",
@@ -99,7 +99,7 @@
       "menu_point": "FX & Money Markets",
       "section_id": "interoperability",
       "description": "FX corridors and money-market operations over ISO 20022 messaging.",
-      "bytes": 220906
+      "bytes": 221054
     },
     {
       "file": "central-bank/08-portfolio-management.png",
@@ -110,7 +110,7 @@
       "menu_point": "Portfolio Management",
       "section_id": "liquidity_pools",
       "description": "Wholesale AMM liquidity pools for reserve portfolio deployment.",
-      "bytes": 174941
+      "bytes": 174947
     },
     {
       "file": "central-bank/09-liquidity-management.png",
@@ -121,7 +121,7 @@
       "menu_point": "Liquidity Management",
       "section_id": "sweeper",
       "description": "Automated liquidity sweeping engine across settlement accounts.",
-      "bytes": 209919
+      "bytes": 210077
     },
     {
       "file": "central-bank/10-settlement-accounts.png",
@@ -132,7 +132,7 @@
       "menu_point": "Settlement Accounts",
       "section_id": "settlement_instruments",
       "description": "sEURD settlement token registry and account instruments.",
-      "bytes": 225357
+      "bytes": 225335
     },
     {
       "file": "central-bank/11-custody-and-vaults.png",
@@ -143,7 +143,7 @@
       "menu_point": "Custody & Vaults",
       "section_id": "vault_telemetry",
       "description": "Proof-of-Reserve IoT vault telemetry with live attestation stream.",
-      "bytes": 176312
+      "bytes": 178358
     },
     {
       "file": "central-bank/12-settlement-monitor.png",
@@ -154,7 +154,7 @@
       "menu_point": "Settlement Monitor",
       "section_id": "notaries",
       "description": "BFT notary consensus health and executive settlement dashboard.",
-      "bytes": 244163
+      "bytes": 244469
     },
     {
       "file": "central-bank/13-payments-and-iso-20022.png",
@@ -165,7 +165,7 @@
       "menu_point": "Payments & ISO 20022",
       "section_id": "iso20022_bridge",
       "description": "pacs.008 cross-network payment bridge.",
-      "bytes": 209043
+      "bytes": 209181
     },
     {
       "file": "central-bank/14-reconciliation.png",
@@ -176,7 +176,7 @@
       "menu_point": "Reconciliation",
       "section_id": "logs",
       "description": "camt.053 statements, general ledger, and reconciliation records.",
-      "bytes": 190307
+      "bytes": 211138
     },
     {
       "file": "central-bank/15-delivery-and-transfers.png",
@@ -187,7 +187,7 @@
       "menu_point": "Delivery & Transfers",
       "section_id": "trade",
       "description": "Trade blotter with atomic DvP settlement legs and offer book.",
-      "bytes": 260621
+      "bytes": 260818
     },
     {
       "file": "central-bank/16-risk-dashboard.png",
@@ -198,7 +198,7 @@
       "menu_point": "Risk Dashboard",
       "section_id": "compliance",
       "description": "Supervisory risk radar across participants and exposures.",
-      "bytes": 221946
+      "bytes": 213153
     },
     {
       "file": "central-bank/17-exposure-and-limits.png",
@@ -209,7 +209,7 @@
       "menu_point": "Exposure & Limits",
       "section_id": "cb_limits",
       "description": "Policy exposure limits and utilization monitoring.",
-      "bytes": 219994
+      "bytes": 217915
     },
     {
       "file": "central-bank/18-counterparties.png",
@@ -220,7 +220,7 @@
       "menu_point": "Counterparties",
       "section_id": "identity_admin",
       "description": "KYC registry with blinded identities and admitted legal entities.",
-      "bytes": 162939
+      "bytes": 162982
     },
     {
       "file": "central-bank/19-stress-testing.png",
@@ -231,7 +231,7 @@
       "menu_point": "Stress Testing",
       "section_id": "cb_stress",
       "description": "Scenario-based stress testing of reserve and settlement resilience.",
-      "bytes": 221423
+      "bytes": 216065
     },
     {
       "file": "central-bank/20-compliance-dashboard.png",
@@ -242,7 +242,7 @@
       "menu_point": "Compliance Dashboard",
       "section_id": "cb_compliance_dash",
       "description": "10-yr GDPR-grade compliance dashboard.",
-      "bytes": 222109
+      "bytes": 219220
     },
     {
       "file": "central-bank/21-statements-and-gl.png",
@@ -253,7 +253,7 @@
       "menu_point": "Statements & GL",
       "section_id": "statements_gl",
       "description": "Official statements and general ledger extraction.",
-      "bytes": 189109
+      "bytes": 209956
     },
     {
       "file": "central-bank/22-valuation-and-pandl.png",
@@ -264,7 +264,7 @@
       "menu_point": "Valuation & P&L",
       "section_id": "cb_valuation",
       "description": "Mark-to-market valuation and P&L reporting.",
-      "bytes": 188925
+      "bytes": 209718
     },
     {
       "file": "central-bank/23-regulatory-reports.png",
@@ -275,7 +275,7 @@
       "menu_point": "Regulatory Reports",
       "section_id": "cb_reg_reports",
       "description": "Official regulatory report generation.",
-      "bytes": 189019
+      "bytes": 209778
     },
     {
       "file": "central-bank/24-audit-center.png",
@@ -286,7 +286,7 @@
       "menu_point": "Audit Center",
       "section_id": "cb_audit",
       "description": "Immutable audit trail center.",
-      "bytes": 189011
+      "bytes": 209816
     },
     {
       "file": "central-bank/25-institutions.png",
@@ -297,7 +297,7 @@
       "menu_point": "Institutions",
       "section_id": "enterprise_admin",
       "description": "Institution registry with accounts and holdings.",
-      "bytes": 194023
+      "bytes": 194087
     },
     {
       "file": "central-bank/26-users-and-roles.png",
@@ -308,7 +308,7 @@
       "menu_point": "Users & Roles",
       "section_id": "identity_admin",
       "description": "Same KYC registry view as Counterparties, opened from the governance group.",
-      "bytes": 163844
+      "bytes": 163869
     },
     {
       "file": "central-bank/27-mandates-and-policies.png",
@@ -319,7 +319,7 @@
       "menu_point": "Mandates & Policies",
       "section_id": "cb_mandates",
       "description": "Board mandates and policy approval workflow.",
-      "bytes": 196512
+      "bytes": 196515
     },
     {
       "file": "central-bank/28-access-logs.png",
@@ -330,7 +330,7 @@
       "menu_point": "Access Logs",
       "section_id": "secure_chat",
       "description": "Signal-grade encrypted comms and access logging.",
-      "bytes": 199061
+      "bytes": 199037
     },
     {
       "file": "central-bank/29-system-configuration.png",
@@ -341,7 +341,7 @@
       "menu_point": "System Configuration",
       "section_id": "canister_mgmt",
       "description": "WASM canister fleet operations and upgrades.",
-      "bytes": 279161
+      "bytes": 279088
     },
     {
       "file": "tablet/central-bank-home.png",
@@ -396,7 +396,7 @@
       "menu_point": "Live MVP Verification",
       "section_id": "mvp_verification",
       "description": "⚡ 6/6 live invariant test suite: conservation of value, notary consensus and settlement invariants.",
-      "bytes": 99155
+      "bytes": 99220
     },
     {
       "file": "mobile/master-dashboard-radar.png",
@@ -407,7 +407,7 @@
       "menu_point": "Master Dashboard Radar",
       "section_id": "admin_overview",
       "description": "👑 Master radar dashboard — global participant and liquidity monitoring.",
-      "bytes": 110688
+      "bytes": 110686
     },
     {
       "file": "auth/02-institutional-login-treasury.png",
@@ -429,7 +429,7 @@
       "menu_point": "Bank Dashboard",
       "section_id": "inst_dashboard",
       "description": "Flagship primary-dealer session (Level 4) over the Treasury & Trading Console.",
-      "bytes": 330837
+      "bytes": 330800
     },
     {
       "file": "institutional/02-client-orders.png",
@@ -440,7 +440,7 @@
       "menu_point": "Client Orders",
       "section_id": "trader_desk",
       "description": "Client order book with RFQ and offer handling.",
-      "bytes": 211266
+      "bytes": 218684
     },
     {
       "file": "institutional/03-rfq-inbox.png",
@@ -451,7 +451,7 @@
       "menu_point": "RFQ Inbox",
       "section_id": "trade",
       "description": "Incoming RFQs and the trade blotter with atomic DvP offers.",
-      "bytes": 280597
+      "bytes": 280815
     },
     {
       "file": "institutional/04-tasks-and-approvals.png",
@@ -484,7 +484,7 @@
       "menu_point": "Gold Market",
       "section_id": "vault",
       "description": "Gold (XAU) market positions and custody inventory.",
-      "bytes": 286820
+      "bytes": 287556
     },
     {
       "file": "institutional/07-government-bonds.png",
@@ -495,7 +495,7 @@
       "menu_point": "Government Bonds",
       "section_id": "terminal",
       "description": "RWA trading terminal for sovereign bond trading.",
-      "bytes": 236218
+      "bytes": 236426
     },
     {
       "file": "institutional/08-fx-and-money-markets.png",
@@ -506,7 +506,7 @@
       "menu_point": "FX & Money Markets",
       "section_id": "interoperability",
       "description": "FX corridors and money-market rails.",
-      "bytes": 218257
+      "bytes": 218438
     },
     {
       "file": "institutional/09-market-making.png",
@@ -517,7 +517,7 @@
       "menu_point": "Market Making",
       "section_id": "liquidity_pools",
       "description": "Wholesale AMM pool market-making positions.",
-      "bytes": 161811
+      "bytes": 161812
     },
     {
       "file": "institutional/10-auctions.png",
@@ -528,7 +528,7 @@
       "menu_point": "Auctions",
       "section_id": "auctions",
       "description": "Primary Dutch auction participation for sovereign debt issuance.",
-      "bytes": 234401
+      "bytes": 234409
     },
     {
       "file": "institutional/11-cash-and-liquidity.png",
@@ -539,7 +539,7 @@
       "menu_point": "Cash & Liquidity",
       "section_id": "portfolio",
       "description": "Cash accounts, cards, and payment surfaces.",
-      "bytes": 245621
+      "bytes": 247592
     },
     {
       "file": "institutional/12-inventory-and-positions.png",
@@ -550,7 +550,7 @@
       "menu_point": "Inventory & Positions",
       "section_id": "inst_inventory",
       "description": "Live asset inventory and position keeping.",
-      "bytes": 272165
+      "bytes": 273378
     },
     {
       "file": "institutional/13-settlement-accounts.png",
@@ -561,7 +561,7 @@
       "menu_point": "Settlement Accounts",
       "section_id": "settlement_instruments",
       "description": "sEURD settlement instruments.",
-      "bytes": 219379
+      "bytes": 219415
     },
     {
       "file": "institutional/14-funding.png",
@@ -572,7 +572,7 @@
       "menu_point": "Funding",
       "section_id": "sweeper",
       "description": "Funding sweeps across settlement accounts.",
-      "bytes": 192983
+      "bytes": 193495
     },
     {
       "file": "institutional/15-repo-and-reverse-repo.png",
@@ -583,7 +583,7 @@
       "menu_point": "Repo & Reverse Repo",
       "section_id": "inst_repo",
       "description": "Term repo/reverse-repo financing desk.",
-      "bytes": 191234
+      "bytes": 191232
     },
     {
       "file": "institutional/16-gold-loans-and-leases.png",
@@ -594,7 +594,7 @@
       "menu_point": "Gold Loans & Leases",
       "section_id": "inst_gold_loans",
       "description": "Gold lease and loan book.",
-      "bytes": 190948
+      "bytes": 190951
     },
     {
       "file": "institutional/17-securities-lending.png",
@@ -605,7 +605,7 @@
       "menu_point": "Securities Lending",
       "section_id": "inst_sec_lending",
       "description": "Securities lending & borrowing (SLB) desk.",
-      "bytes": 190345
+      "bytes": 190352
     },
     {
       "file": "institutional/18-collateral-desk.png",
@@ -616,7 +616,7 @@
       "menu_point": "Collateral Desk",
       "section_id": "collateral",
       "description": "Collateral pledges and encumbrance management.",
-      "bytes": 190312
+      "bytes": 190299
     },
     {
       "file": "institutional/19-settlement-monitor.png",
@@ -627,7 +627,7 @@
       "menu_point": "Settlement Monitor",
       "section_id": "notaries",
       "description": "BFT notary consensus and settlement health.",
-      "bytes": 242092
+      "bytes": 242542
     },
     {
       "file": "institutional/20-custody.png",
@@ -638,7 +638,7 @@
       "menu_point": "Custody",
       "section_id": "vault_telemetry",
       "description": "Proof-of-Reserve vault telemetry.",
-      "bytes": 174647
+      "bytes": 176782
     },
     {
       "file": "institutional/21-payments-and-iso-20022.png",
@@ -649,7 +649,7 @@
       "menu_point": "Payments & ISO 20022",
       "section_id": "iso20022_bridge",
       "description": "pacs.008 payment bridge.",
-      "bytes": 211939
+      "bytes": 212121
     },
     {
       "file": "institutional/22-reconciliation.png",
@@ -660,7 +660,7 @@
       "menu_point": "Reconciliation",
       "section_id": "logs",
       "description": "camt.053 reconciliation stream.",
-      "bytes": 187434
+      "bytes": 208424
     },
     {
       "file": "institutional/23-delivery-and-transfers.png",
@@ -671,7 +671,7 @@
       "menu_point": "Delivery & Transfers",
       "section_id": "corporate_actions",
       "description": "Corporate actions and coupon payout processing.",
-      "bytes": 186947
+      "bytes": 186938
     },
     {
       "file": "institutional/24-risk-and-limits.png",
@@ -682,7 +682,7 @@
       "menu_point": "Risk & Limits",
       "section_id": "inst_limits",
       "description": "Desk-level risk limits monitoring.",
-      "bytes": 223222
+      "bytes": 217551
     },
     {
       "file": "institutional/25-counterparties.png",
@@ -693,7 +693,7 @@
       "menu_point": "Counterparties",
       "section_id": "identity_admin",
       "description": "KYC counterparties registry.",
-      "bytes": 162131
+      "bytes": 162127
     },
     {
       "file": "institutional/26-compliance.png",
@@ -704,7 +704,7 @@
       "menu_point": "Compliance",
       "section_id": "compliance",
       "description": "AML/KYC compliance radar.",
-      "bytes": 221483
+      "bytes": 220696
     },
     {
       "file": "institutional/27-margin-and-collateral.png",
@@ -715,7 +715,7 @@
       "menu_point": "Margin & Collateral",
       "section_id": "inst_margin",
       "description": "Margin requirements and collateral provisioning.",
-      "bytes": 193750
+      "bytes": 193746
     },
     {
       "file": "institutional/28-surveillance.png",
@@ -726,7 +726,7 @@
       "menu_point": "Surveillance",
       "section_id": "inst_surveillance",
       "description": "Market-abuse surveillance.",
-      "bytes": 218476
+      "bytes": 221377
     },
     {
       "file": "institutional/29-pandl-and-valuation.png",
@@ -737,7 +737,7 @@
       "menu_point": "P&L and Valuation",
       "section_id": "inst_pnl",
       "description": "Month-to-date P&L and mark-to-market valuation.",
-      "bytes": 189664
+      "bytes": 210639
     },
     {
       "file": "institutional/30-client-statements.png",
@@ -748,7 +748,7 @@
       "menu_point": "Client Statements",
       "section_id": "inst_client_stmts",
       "description": "Client statement generation.",
-      "bytes": 189585
+      "bytes": 210518
     },
     {
       "file": "institutional/31-regulatory-reports.png",
@@ -759,7 +759,7 @@
       "menu_point": "Regulatory Reports",
       "section_id": "cb_reg_reports",
       "description": "Official regulatory reporting.",
-      "bytes": 189710
+      "bytes": 210641
     },
     {
       "file": "institutional/32-audit.png",
@@ -770,7 +770,7 @@
       "menu_point": "Audit",
       "section_id": "cb_audit",
       "description": "Immutable audit trail.",
-      "bytes": 189603
+      "bytes": 210540
     },
     {
       "file": "institutional/33-users-and-roles.png",
@@ -781,7 +781,7 @@
       "menu_point": "Users & Roles",
       "section_id": "enterprise_admin",
       "description": "Account and holdings administration.",
-      "bytes": 194964
+      "bytes": 194949
     },
     {
       "file": "institutional/34-apis-and-integrations.png",
@@ -792,7 +792,7 @@
       "menu_point": "APIs & Integrations",
       "section_id": "inst_apis",
       "description": "FIX/ISO API and integration configuration over the canister fleet.",
-      "bytes": 279437
+      "bytes": 279438
     },
     {
       "file": "tablet/institutional-home.png",
@@ -858,7 +858,7 @@
       "menu_point": "Executive Dashboard",
       "section_id": "cb_dashboard",
       "description": "Platform-root master session: NOC identity in the context bar, master-operator clearance ribbon, full console reach.",
-      "bytes": 356489
+      "bytes": 356151
     },
     {
       "file": "central-bank/31-persona-supervisory-auditor.png",
@@ -869,7 +869,7 @@
       "menu_point": "Executive Dashboard",
       "section_id": "cb_dashboard",
       "description": "Read-only supervisory session (Level 5 Zero-Knowledge Audit) over the reserve console.",
-      "bytes": 357585
+      "bytes": 357248
     },
     {
       "file": "auth/04-institutional-persona-switcher.png",
@@ -880,7 +880,7 @@
       "menu_point": "Switch Persona",
       "section_id": null,
       "description": "Same overlay for the institutional workspace listing its 4 admitted roles (Treasury, Custodian, DMO, Asset Manager).",
-      "bytes": 207606
+      "bytes": 207584
     },
     {
       "file": "institutional/35-persona-issuer-dmo.png",
@@ -891,7 +891,7 @@
       "menu_point": "Bank Dashboard",
       "section_id": "inst_dashboard",
       "description": "Sovereign Debt Management Office session (Level 4 Debt Placement Lead) over the trading console.",
-      "bytes": 329444
+      "bytes": 329408
     },
     {
       "file": "institutional/36-persona-custodian-vault.png",
@@ -902,7 +902,7 @@
       "menu_point": "Bank Dashboard",
       "section_id": "inst_dashboard",
       "description": "Physical-title custody session at Zurich Swiss Bullion Custody AG over the institutional console.",
-      "bytes": 329153
+      "bytes": 329118
     },
     {
       "file": "institutional/37-persona-fund-asset-mgr.png",
@@ -913,7 +913,7 @@
       "menu_point": "Bank Dashboard",
       "section_id": "inst_dashboard",
       "description": "Accredited asset-manager session (BlackRock / Veritas Institutional Alpha Fund) over the institutional console.",
-      "bytes": 329184
+      "bytes": 329146
     }
   ]
 }
