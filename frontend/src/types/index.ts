@@ -250,6 +250,41 @@ export interface DoubleSpendLog {
   requesting_party: string;
   status: 'VALIDATED' | 'REJECTED';
   signatures: string;
+  reason?: string;
+  operation?: string;
+  detail?: string;
+}
+
+export interface SettlementEvent {
+  seq: number;
+  timestamp_ms: number;
+  operation: string;
+  stateref: string;
+  requesting_party: string;
+  status: 'VALIDATED' | 'REJECTED';
+  reason: string;
+  signatures: string;
+  duration_us: number;
+  detail: string;
+}
+
+export interface SettlementTelemetry {
+  server_time_ms: number;
+  started_at_ms: number;
+  uptime_s: number;
+  subnet: { notaries: number; quorum: number; algorithm: string; leader: string };
+  nodes: NotaryNode[];
+  metrics: {
+    ops_total: number;
+    validated: number;
+    rejected: number;
+    tps_60s: number;
+    last_finality_us: number;
+    p99_finality_us: number;
+    pending_staterefs: number;
+    avg_latency_ms: number;
+  };
+  events: SettlementEvent[];
 }
 
 export interface ProtocolLog {

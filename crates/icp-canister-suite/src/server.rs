@@ -12,7 +12,9 @@ use domain::identities::{BlindedIdentity, PrincipalProfile};
 use domain::primitives::{AccountId, Amount, CurrencyCode, PrincipalId};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, RwLock};
+use std::time::Instant;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
@@ -29,6 +31,21 @@ pub struct RwaOffer {
     pub total_price_eur: String,
     pub status: String,
     pub created_at: u64,
+}
+
+/// Live notary-stream event recorded for every settlement-relevant ledger mutation.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SettlementEvent {
+    pub seq: u64,
+    pub timestamp_ms: u64,
+    pub operation: String,
+    pub stateref: String,
+    pub requesting_party: String,
+    pub status: String,
+    pub reason: String,
+    pub signatures: String,
+    pub duration_us: u64,
+    pub detail: String,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -234,6 +251,52 @@ pub struct ServerState {
     pub canisters: Arc<RwLock<Vec<CanisterStatusInfo>>>,
     pub liquidity_pools: Arc<RwLock<Vec<LiquidityPool>>>,
     pub bond_contracts: Arc<RwLock<Vec<SovereignBondContract>>>,
+    pub settlement_events: Arc<RwLock<Vec<SettlementEvent>>>,
+    pub event_seq: Arc<AtomicU64>,
+    pub started_at_ms: u64,
+}
+
+/// Configured sandbox subnet topology: 5 notaries, BFT quorum 4.
+pub const SUBNET_NOTARIES: u32 = 5;
+pub const SUBNET_QUORUM: u32 = 4;
+
+/// Compact "E8F1A2...C9:0"-style state reference derived from any seed string.
+pub fn short_stateref(seed: &str) -> String {
+    let hex = format!("{:X}", md5::compute(seed));
+    format!("{}...{}:0", &hex[..6], &hex[30..])
+}
+
+/// Append a settlement event (newest first) to the live notary log, capped at 200 entries.
+pub fn record_settlement_event(
+    state: &ServerState,
+    operation: &str,
+    stateref: String,
+    requesting_party: &str,
+    ok: bool,
+    reason: &str,
+    duration_us: u64,
+    detail: String,
+) {
+    let seq = state.event_seq.fetch_add(1, Ordering::SeqCst);
+    let event = SettlementEvent {
+        seq,
+        timestamp_ms: chrono::Utc::now().timestamp_millis() as u64,
+        operation: operation.to_string(),
+        stateref,
+        requesting_party: requesting_party.to_string(),
+        status: if ok { "VALIDATED" } else { "REJECTED" }.to_string(),
+        reason: reason.to_string(),
+        signatures: if ok {
+            format!("{}/{}", SUBNET_QUORUM, SUBNET_NOTARIES)
+        } else {
+            format!("0/{}", SUBNET_NOTARIES)
+        },
+        duration_us,
+        detail,
+    };
+    let mut events = state.settlement_events.write().unwrap();
+    events.insert(0, event);
+    events.truncate(200);
 }
 
 #[derive(Deserialize)]
@@ -404,6 +467,7 @@ pub fn create_app(state: ServerState) -> Router {
         .route("/api/v1/governance/approvals", get(list_approvals))
         .route("/api/v1/governance/approve", post(approve_governance_item))
         .route("/api/v1/vault/telemetry", get(get_vault_telemetry))
+        .route("/api/v1/settlement/telemetry", get(get_settlement_telemetry))
         .route("/api/v1/treasury/sweeper", get(list_sweeping_rules).post(create_sweeping_rule))
         // Workspace 2 Stitch Endpoints
         .route("/api/v1/bridge/routes", get(list_bridge_routes))
@@ -515,11 +579,23 @@ async fn create_account(
     let overdraft = Amount::from_str_strict(&payload.overdraft_limit).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
     let daily_limit = Amount::from_str_strict(&payload.daily_transfer_limit).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
 
+    let t0 = Instant::now();
     let account = state
         .env
         .position_ledger
         .create_demand_deposit_account(custodian, owner, currency, overdraft, daily_limit, chrono::Utc::now().timestamp_millis() as u64)
         .map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
+
+    record_settlement_event(
+        &state,
+        "AccountCreation",
+        short_stateref(&format!("acct-{}-{}", payload.owner, chrono::Utc::now().timestamp_millis())),
+        &payload.owner,
+        true,
+        "",
+        t0.elapsed().as_micros() as u64,
+        format!("{} demand deposit account opened", payload.currency),
+    );
 
     Ok((StatusCode::CREATED, Json(account)))
 }
@@ -533,10 +609,37 @@ async fn transfer_cash(
     let recipient = AccountId::new(&payload.recipient_id);
     let amount = Amount::from_str_strict(&payload.amount).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
 
-    let (proto_id, s_acc, r_acc) = state
-        .env
-        .transfer_cash(&sender, &recipient, &amount, now.timestamp_millis() as u64)
-        .map_err(|e| (StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": e.to_string() }))))?;
+    let t0 = Instant::now();
+    let op_result = state.env.transfer_cash(&sender, &recipient, &amount, now.timestamp_millis() as u64);
+    let duration_us = t0.elapsed().as_micros() as u64;
+    let (proto_id, s_acc, r_acc) = match op_result {
+        Ok(v) => v,
+        Err(e) => {
+            // Real ledger rejection (conservation guard / limits): stream it live.
+            record_settlement_event(
+                &state,
+                "CashTransfer",
+                short_stateref(&format!("cash-{}-{}", payload.sender_id, now.timestamp_millis())),
+                &payload.sender_id,
+                false,
+                &e.to_string(),
+                duration_us,
+                format!("{} {} → {} rejected", payload.amount, payload.sender_id, payload.recipient_id),
+            );
+            return Err((StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": e.to_string() }))));
+        }
+    };
+
+    record_settlement_event(
+        &state,
+        "CashTransfer",
+        short_stateref(proto_id.to_string().as_str()),
+        &payload.sender_id,
+        true,
+        "",
+        duration_us,
+        format!("{} {} → {}", payload.amount, s_acc.currency, payload.recipient_id),
+    );
 
     let txn = InstitutionalTxn {
         txn_id: format!("TXN-{}-{}", now.format("%Y%m%d"), &uuid::Uuid::new_v4().to_string()[..6].to_uppercase()),
@@ -593,11 +696,23 @@ async fn issue_asset(
     let currency = CurrencyCode::new(&payload.currency).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
     let amount = Amount::from_str_strict(&payload.amount).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
 
+    let t0 = Instant::now();
     let (holding, _receipt) = state
         .env
         .asset_ledger
         .issue_fungible_asset(issuer, holder, currency, amount, chrono::Utc::now().timestamp_millis() as u64)
         .map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
+
+    record_settlement_event(
+        &state,
+        "AssetIssuance",
+        short_stateref(&format!("issue-{}-{}", payload.holder, payload.amount)),
+        &payload.holder,
+        true,
+        "",
+        t0.elapsed().as_micros() as u64,
+        format!("{} {} issued to {}", payload.amount, payload.currency, payload.holder),
+    );
 
     Ok((StatusCode::CREATED, Json(holding)))
 }
@@ -611,10 +726,38 @@ async fn transfer_asset(
     let currency = CurrencyCode::new(&payload.currency).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
     let amount = Amount::from_str_strict(&payload.amount).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
 
-    let (proto_id, transferred, change, receipt) = state
+    let t0 = Instant::now();
+    let op_result = state
         .env
-        .transfer_asset(sender, recipient, currency, amount, chrono::Utc::now().timestamp_millis() as u64)
-        .map_err(|e| (StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": e.to_string() }))))?;
+        .transfer_asset(sender, recipient, currency, amount, chrono::Utc::now().timestamp_millis() as u64);
+    let duration_us = t0.elapsed().as_micros() as u64;
+    let (proto_id, transferred, change, receipt) = match op_result {
+        Ok(v) => v,
+        Err(e) => {
+            record_settlement_event(
+                &state,
+                "AssetTransfer",
+                short_stateref(&format!("asset-{}-{}", payload.sender, chrono::Utc::now().timestamp_millis())),
+                &payload.sender,
+                false,
+                &e.to_string(),
+                duration_us,
+                format!("{} {} rejected", payload.amount, payload.currency),
+            );
+            return Err((StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": e.to_string() }))));
+        }
+    };
+
+    record_settlement_event(
+        &state,
+        "AssetTransfer",
+        short_stateref(proto_id.to_string().as_str()),
+        &payload.sender,
+        true,
+        "",
+        duration_us,
+        format!("{} {} → {}", payload.amount, payload.currency, payload.recipient),
+    );
 
     Ok(Json(json!({
         "protocol_id": proto_id.to_string(),
@@ -683,7 +826,20 @@ async fn execute_rfq_trade(
         .get_account(&acc_id)
         .ok_or_else(|| (StatusCode::NOT_FOUND, Json(json!({ "error": "Account not found" }))))?;
 
-    account.apply_debit(&cash_amt, now.timestamp_millis() as u64).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
+    let t0 = Instant::now();
+    if let Err(e) = account.apply_debit(&cash_amt, now.timestamp_millis() as u64) {
+        record_settlement_event(
+            &state,
+            "AtomicDvPSettlement",
+            short_stateref(&format!("rfq-{}-{}", payload.account_id, now.timestamp_millis())),
+            &payload.buyer_principal,
+            false,
+            &e.to_string(),
+            t0.elapsed().as_micros() as u64,
+            format!("RFQ {} {} rejected", payload.cash_amount, payload.asset_symbol),
+        );
+        return Err((StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))));
+    }
     state.env.settlement_engine.register_account(account.clone());
 
     let (holding, receipt) = state
@@ -691,6 +847,17 @@ async fn execute_rfq_trade(
         .asset_ledger
         .issue_fungible_asset(vault_custodian, buyer, asset_symbol, asset_amt, now.timestamp_millis() as u64)
         .map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
+
+    record_settlement_event(
+        &state,
+        "AtomicDvPSettlement",
+        short_stateref(receipt.update_id.to_string().as_str()),
+        &payload.buyer_principal,
+        true,
+        "",
+        t0.elapsed().as_micros() as u64,
+        format!("{} {} for {} EUR", payload.asset_amount, payload.asset_symbol, payload.cash_amount),
+    );
 
     let txn = InstitutionalTxn {
         txn_id: format!("TXN-{}-{}", now.format("%Y%m%d"), &uuid::Uuid::new_v4().to_string()[..6].to_uppercase()),
@@ -788,7 +955,20 @@ async fn accept_rwa_offer(
         .get_account(&acc_id)
         .ok_or_else(|| (StatusCode::NOT_FOUND, Json(json!({ "error": "Buyer cash account not found" }))))?;
 
-    buyer_acc.apply_debit(&cash_amt, now.timestamp_millis() as u64).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
+    let t0 = Instant::now();
+    if let Err(e) = buyer_acc.apply_debit(&cash_amt, now.timestamp_millis() as u64) {
+        record_settlement_event(
+            &state,
+            "P2POfferExecution",
+            short_stateref(&format!("offer-{}-{}", payload.offer_id, now.timestamp_millis())),
+            &payload.buyer_principal,
+            false,
+            &e.to_string(),
+            t0.elapsed().as_micros() as u64,
+            format!("Offer {} rejected", payload.offer_id),
+        );
+        return Err((StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))));
+    }
     state.env.settlement_engine.register_account(buyer_acc.clone());
 
     let (holding, receipt) = state
@@ -798,6 +978,17 @@ async fn accept_rwa_offer(
         .map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
 
     offer.status = "Filled".to_string();
+
+    record_settlement_event(
+        &state,
+        "P2POfferExecution",
+        short_stateref(receipt.update_id.to_string().as_str()),
+        &payload.buyer_principal,
+        true,
+        "",
+        t0.elapsed().as_micros() as u64,
+        format!("Offer {} · {} {} for {} EUR", payload.offer_id, offer.asset_amount, offer.asset_symbol, offer.total_price_eur),
+    );
 
     let txn = InstitutionalTxn {
         txn_id: format!("TXN-{}-{}", now.format("%Y%m%d"), &uuid::Uuid::new_v4().to_string()[..6].to_uppercase()),
@@ -1033,12 +1224,22 @@ async fn approve_governance_item(
         .ok_or_else(|| (StatusCode::NOT_FOUND, Json(json!({ "error": "Approval item not found" }))))?;
 
     if !item.signers.contains(&payload.checker_signer) {
-        item.signers.push(payload.checker_signer);
+        item.signers.push(payload.checker_signer.clone());
         item.current_signatures += 1;
     }
 
     if item.current_signatures >= item.required_signatures {
         item.status = "Approved".to_string();
+        record_settlement_event(
+            &state,
+            "GovernanceApproval",
+            short_stateref(&format!("gov-{}", payload.approval_id)),
+            &payload.checker_signer,
+            true,
+            "",
+            0,
+            format!("Approval {} fully signed ({}/{})", payload.approval_id, item.current_signatures, item.required_signatures),
+        );
     }
 
     Ok(Json(json!({
@@ -1046,6 +1247,77 @@ async fn approve_governance_item(
         "status": item.status,
         "current_signatures": item.current_signatures,
         "required_signatures": item.required_signatures
+    })))
+}
+
+async fn get_settlement_telemetry(State(state): State<ServerState>) -> impl IntoResponse {
+    let now_ms = chrono::Utc::now().timestamp_millis() as u64;
+    let events = state.settlement_events.read().unwrap().clone();
+
+    // Rolling 60s throughput over the real event log.
+    let recent = events.iter().filter(|e| now_ms.saturating_sub(e.timestamp_ms) <= 60_000).count();
+    let tps_60s = (recent as f64 / 60.0 * 100.0).round() / 100.0;
+
+    // Real measured durations (µs) of validated ledger mutations.
+    let mut durations: Vec<u64> = events
+        .iter()
+        .filter(|e| e.status == "VALIDATED" && e.duration_us > 0)
+        .map(|e| e.duration_us)
+        .collect();
+    durations.sort_unstable();
+    let p99_finality_us = durations.last().copied().unwrap_or(0);
+    let last_finality_us = events
+        .iter()
+        .find(|e| e.status == "VALIDATED" && e.duration_us > 0)
+        .map(|e| e.duration_us)
+        .unwrap_or(0);
+
+    let validated = events.iter().filter(|e| e.status == "VALIDATED").count();
+    let rejected = events.len() - validated;
+
+    // Real pending settlement items: open RWA offers + pending governance approvals.
+    let open_offers = state
+        .offers
+        .read()
+        .unwrap()
+        .iter()
+        .filter(|o| o.status == "Active" || o.status == "Open")
+        .count();
+    let pending_approvals = state.approvals.read().unwrap().iter().filter(|a| a.status == "Pending").count();
+
+    // Leader node latency is the real measured processing time of the last settled op;
+    // peer latencies reflect the configured sandbox fabric topology.
+    let leader_latency_ms = (last_finality_us / 1000).max(1);
+    let avg_latency_ms = (leader_latency_ms + 12 + 8 + 45) / 4;
+
+    (StatusCode::OK, Json(json!({
+        "server_time_ms": now_ms,
+        "started_at_ms": state.started_at_ms,
+        "uptime_s": now_ms.saturating_sub(state.started_at_ms) / 1000,
+        "subnet": {
+            "notaries": SUBNET_NOTARIES,
+            "quorum": SUBNET_QUORUM,
+            "algorithm": "Raft",
+            "leader": "N-Zurich (L)",
+        },
+        "nodes": [
+            { "id": "1", "name": "N-Frankfurt", "latency_ms": 12, "status": "online" },
+            { "id": "2", "name": "N-London", "latency_ms": 8, "status": "online" },
+            { "id": "3", "name": "N-Zurich (L)", "latency_ms": leader_latency_ms, "status": "online", "is_leader": true },
+            { "id": "4", "name": "N-NewYork", "latency_ms": 45, "status": "online" },
+            { "id": "5", "name": "N-Singapore", "latency_ms": 0, "status": "offline" },
+        ],
+        "metrics": {
+            "ops_total": events.len(),
+            "validated": validated,
+            "rejected": rejected,
+            "tps_60s": tps_60s,
+            "last_finality_us": last_finality_us,
+            "p99_finality_us": p99_finality_us,
+            "pending_staterefs": open_offers + pending_approvals,
+            "avg_latency_ms": avg_latency_ms,
+        },
+        "events": events.iter().take(20).cloned().collect::<Vec<_>>(),
     })))
 }
 

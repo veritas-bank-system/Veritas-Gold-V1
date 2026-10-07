@@ -6,6 +6,7 @@ import type {
   MarketRate,
   FxReferenceRates,
   RwaOffer,
+  SettlementTelemetry,
   SupervisionData,
   InstitutionalTxn,
   CollateralPosition,
@@ -20,9 +21,15 @@ import type {
   LiquidityPool,
 } from '../types';
 
-const API_BASE = typeof window !== 'undefined' && (window.location.port === '8080' || window.location.host.includes(':8080'))
-  ? '/api/v1'
-  : 'http://localhost:8080/api/v1';
+// Deployment override: build with VITE_API_BASE set — e.g. `VITE_API_BASE=/api/v1 npm run build`
+// when a reverse proxy forwards /api/v1 to the backend on the same origin, or an absolute
+// URL for a split (UI + API) deployment. Without it the default resolves to the same-origin
+// /api/v1 when the UI itself is served from the backend (:8080), otherwise the local-dev
+// http://localhost:8080/api/v1 — which only works for browsers running on the backend host.
+const API_BASE: string = import.meta.env.VITE_API_BASE
+  || (typeof window !== 'undefined' && (window.location.port === '8080' || window.location.host.includes(':8080'))
+    ? '/api/v1'
+    : 'http://localhost:8080/api/v1');
 
 const FRANKFURTER_URL = 'https://api.frankfurter.dev/v1/latest?base=EUR';
 
@@ -383,6 +390,12 @@ export async function approveGovernanceItem(approval_id: string, checker_signer:
 export async function fetchVaultTelemetry(): Promise<VaultSensorTelemetry> {
   const res = await fetch(`${API_BASE}/vault/telemetry`);
   if (!res.ok) throw new Error('Failed to fetch vault telemetry');
+  return res.json();
+}
+
+export async function fetchSettlementTelemetry(): Promise<SettlementTelemetry> {
+  const res = await fetch(`${API_BASE}/settlement/telemetry`);
+  if (!res.ok) throw new Error('Failed to fetch settlement telemetry');
   return res.json();
 }
 

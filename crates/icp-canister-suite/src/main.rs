@@ -3,12 +3,14 @@ mod server;
 use domain::primitives::{Amount, CurrencyCode, PrincipalId};
 use icp_canister_suite::CanisterEnvironment;
 use server::{
-    BondAuction, BridgeRoute, CanisterStatusInfo, CollateralPosition, CorporateAction,
-    InstitutionalTxn, LiquidityPool, PendingApproval, RwaOffer, ServerState, SovereignBondContract,
-    SweepingRule,
+    short_stateref, BondAuction, BridgeRoute, CanisterStatusInfo, CollateralPosition, CorporateAction,
+    InstitutionalTxn, LiquidityPool, PendingApproval, RwaOffer, ServerState, SettlementEvent,
+    SovereignBondContract, SweepingRule,
 };
 use std::net::SocketAddr;
+use std::sync::atomic::AtomicU64;
 use std::sync::{Arc, RwLock};
+use std::time::Instant;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -43,6 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let gold = CurrencyCode::new("GOLD")?;
     let ustb = CurrencyCode::new("USTB")?;
 
+    let t0 = Instant::now();
     let _ = env.position_ledger.create_demand_deposit_account(
         bank,
         alice,
@@ -51,7 +54,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Amount::from_str_strict("5000.00")?,
         1000,
     )?;
+    let dur_alice_account = t0.elapsed().as_micros() as u64;
 
+    let t0 = Instant::now();
     let _ = env.position_ledger.create_demand_deposit_account(
         bank,
         bob,
@@ -60,7 +65,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Amount::from_str_strict("2000.00")?,
         1000,
     )?;
+    let dur_bob_account = t0.elapsed().as_micros() as u64;
 
+    let t0 = Instant::now();
     let _ = env.asset_ledger.issue_fungible_asset(
         bank,
         alice,
@@ -68,7 +75,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Amount::from_str_strict("10.00")?,
         1000,
     )?;
+    let dur_gold_issue = t0.elapsed().as_micros() as u64;
 
+    let t0 = Instant::now();
     let _ = env.asset_ledger.issue_fungible_asset(
         bank,
         bob,
@@ -76,6 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Amount::from_str_strict("100.00")?,
         1000,
     )?;
+    let dur_ustb_issue = t0.elapsed().as_micros() as u64;
 
     let initial_offers = vec![
         RwaOffer {
@@ -427,8 +437,64 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
     ];
 
+    // Genesis settlement events: the real bootstrap ledger mutations measured above.
+    let started_at_ms = chrono::Utc::now().timestamp_millis() as u64;
+    let genesis_events = vec![
+        SettlementEvent {
+            seq: 3,
+            timestamp_ms: started_at_ms,
+            operation: "AssetIssuance".to_string(),
+            stateref: short_stateref("genesis-ustb-issue"),
+            requesting_party: "Sovereign Central Bank Custody (Zurich)".to_string(),
+            status: "VALIDATED".to_string(),
+            reason: String::new(),
+            signatures: format!("{}/{}", server::SUBNET_QUORUM, server::SUBNET_NOTARIES),
+            duration_us: dur_ustb_issue,
+            detail: "100.00 USTB issued to Bob Commodities LLC".to_string(),
+        },
+        SettlementEvent {
+            seq: 2,
+            timestamp_ms: started_at_ms,
+            operation: "AssetIssuance".to_string(),
+            stateref: short_stateref("genesis-gold-issue"),
+            requesting_party: "Sovereign Central Bank Custody (Zurich)".to_string(),
+            status: "VALIDATED".to_string(),
+            reason: String::new(),
+            signatures: format!("{}/{}", server::SUBNET_QUORUM, server::SUBNET_NOTARIES),
+            duration_us: dur_gold_issue,
+            detail: "10.00 GOLD issued to Alice Trading Corp".to_string(),
+        },
+        SettlementEvent {
+            seq: 1,
+            timestamp_ms: started_at_ms,
+            operation: "AccountCreation".to_string(),
+            stateref: short_stateref("genesis-bob-account"),
+            requesting_party: "Bob Commodities LLC".to_string(),
+            status: "VALIDATED".to_string(),
+            reason: String::new(),
+            signatures: format!("{}/{}", server::SUBNET_QUORUM, server::SUBNET_NOTARIES),
+            duration_us: dur_bob_account,
+            detail: "500.00 EURD demand deposit opened".to_string(),
+        },
+        SettlementEvent {
+            seq: 0,
+            timestamp_ms: started_at_ms,
+            operation: "AccountCreation".to_string(),
+            stateref: short_stateref("genesis-alice-account"),
+            requesting_party: "Alice Trading Corp".to_string(),
+            status: "VALIDATED".to_string(),
+            reason: String::new(),
+            signatures: format!("{}/{}", server::SUBNET_QUORUM, server::SUBNET_NOTARIES),
+            duration_us: dur_alice_account,
+            detail: "1000.00 EURD demand deposit opened".to_string(),
+        },
+    ];
+
     let state = ServerState {
         env,
+        settlement_events: Arc::new(RwLock::new(genesis_events)),
+        event_seq: Arc::new(AtomicU64::new(4)),
+        started_at_ms,
         offers: Arc::new(RwLock::new(initial_offers)),
         transactions: Arc::new(RwLock::new(initial_txns)),
         collateral: Arc::new(RwLock::new(initial_collateral)),

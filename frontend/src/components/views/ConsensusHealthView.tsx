@@ -1,22 +1,75 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Zap, Server, ShieldCheck, Filter, AlertOctagon, CheckCircle2, RefreshCw } from 'lucide-react';
-import type { NotaryNode, DoubleSpendLog } from '../../types';
+import { fetchSettlementTelemetry } from '../../services/api';
+import type { NotaryNode, DoubleSpendLog, SettlementTelemetry } from '../../types';
 
 interface ConsensusHealthViewProps {
   onNotify?: (msg: string, isError?: boolean) => void;
 }
 
+/** Demo fabric topology + fixtures used only when backend telemetry is unreachable. */
+const DEMO_NODES: NotaryNode[] = [
+  { id: '1', name: 'N-Frankfurt', latency_ms: 12, status: 'online' },
+  { id: '2', name: 'N-London', latency_ms: 8, status: 'online' },
+  { id: '3', name: 'N-Zurich (L)', latency_ms: 4, status: 'online', is_leader: true },
+  { id: '4', name: 'N-NewYork', latency_ms: 45, status: 'online' },
+  { id: '5', name: 'N-Singapore', latency_ms: 0, status: 'offline' },
+];
+
+/** Adaptive finality formatting: µs → ms → s (stays sub-second in practice). */
+function fmtFinality(us: number): { value: string; unit: string } {
+  if (us >= 1_000_000) return { value: (us / 1_000_000).toFixed(2), unit: 's' };
+  if (us >= 1_000) return { value: (us / 1_000).toFixed(2), unit: 'ms' };
+  return { value: String(us), unit: 'µs' };
+}
+
 export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNotify }) => {
   const [diagnosing, setDiagnosing] = useState(false);
   const [filterState, setFilterState] = useState<'ALL' | 'VALIDATED' | 'REJECTED'>('ALL');
+  const [telemetry, setTelemetry] = useState<SettlementTelemetry | null>(null);
+  const [liveLogs, setLiveLogs] = useState<DoubleSpendLog[]>([]);
 
-  const nodes: NotaryNode[] = [
-    { id: '1', name: 'N-Frankfurt', latency_ms: 12, status: 'online' },
-    { id: '2', name: 'N-London', latency_ms: 8, status: 'online' },
-    { id: '3', name: 'N-Zurich (L)', latency_ms: 4, status: 'online', is_leader: true },
-    { id: '4', name: 'N-NewYork', latency_ms: 45, status: 'online' },
-    { id: '5', name: 'N-Singapore', latency_ms: 0, status: 'offline' },
-  ];
+  // Live sandbox-ledger telemetry, polled every 2s. If the API is unreachable the
+  // last good snapshot is kept and the view falls back to the demo fixtures below,
+  // so the tour capture pipeline and offline demo keep working unchanged.
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async (): Promise<void> => {
+      try {
+        const t = await fetchSettlementTelemetry();
+        if (cancelled) return;
+        setTelemetry(t);
+        // Format timestamps in the event handler (render stays pure).
+        setLiveLogs(t.events.map((e) => ({
+          timestamp:
+            new Date(e.timestamp_ms).toLocaleTimeString('en-GB', { hour12: false }) +
+            '.' + String(e.timestamp_ms % 1000).padStart(3, '0'),
+          stateref: e.stateref,
+          requesting_party: e.requesting_party,
+          status: e.status,
+          signatures: e.signatures,
+          reason: e.reason,
+          operation: e.operation,
+          detail: e.detail,
+        })));
+      } catch {
+        /* keep last good snapshot; UI falls back to demo fixtures */
+      }
+    };
+    void poll();
+    const id = window.setInterval(() => { void poll(); }, 2000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
+  const live = telemetry !== null;
+  const nodes: NotaryNode[] = telemetry?.nodes ?? DEMO_NODES;
+  const metrics = telemetry?.metrics;
+  const subnet = telemetry?.subnet;
+  const finality = fmtFinality(metrics ? metrics.last_finality_us : 400_000);
+  const p99 = metrics ? fmtFinality(metrics.p99_finality_us) : { value: '0.85', unit: 's' };
 
   const initialLogs: DoubleSpendLog[] = [
     {
@@ -56,7 +109,7 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
     },
   ];
 
-  const [logs] = useState<DoubleSpendLog[]>(initialLogs);
+  const logs: DoubleSpendLog[] = telemetry ? liveLogs : initialLogs;
 
   const filteredLogs = logs.filter((l) => {
     if (filterState === 'ALL') return true;
@@ -67,7 +120,9 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
     setDiagnosing(true);
     setTimeout(() => {
       setDiagnosing(false);
-      if (onNotify) onNotify('Diagnostic Complete: Notary Cluster healthy. Raft Consensus quorum (4/5) nominal.');
+      const quorum = subnet ? `${subnet.quorum}/${subnet.notaries}` : '4/5';
+      const algo = subnet?.algorithm ?? 'Raft';
+      if (onNotify) onNotify(`Diagnostic Complete: Notary Cluster healthy. ${algo} Consensus quorum (${quorum}) nominal.`);
     }, 900);
   };
 
@@ -90,8 +145,17 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
           <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
             Consensus Health
           </h1>
-          <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Real-time notary cluster monitoring and finality metrics.
+          <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span>Real-time notary cluster monitoring and finality metrics.</span>
+            <span
+              className={live ? 'pill-valid' : 'pill-reject'}
+              style={{ fontSize: '10px' }}
+              title={live
+                ? `Sandbox ledger · uptime ${Math.floor((telemetry?.uptime_s ?? 0) / 60)}m · ${metrics?.ops_total ?? 0} ops`
+                : 'Backend telemetry unreachable — showing demo fixtures'}
+            >
+              ● {live ? 'LIVE' : 'DEMO DATA'}
+            </span>
           </p>
         </div>
 
@@ -176,7 +240,7 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
                   CONSENSUS THRESHOLD
                 </div>
                 <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-main)', marginTop: '3px' }}>
-                  4 / 5 <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Nodes</span>
+                  {subnet ? subnet.quorum : 4} / {subnet ? subnet.notaries : 5} <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Nodes</span>
                 </div>
               </div>
 
@@ -185,7 +249,7 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
                   AVG LATENCY
                 </div>
                 <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-main)', marginTop: '3px' }}>
-                  17<span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>ms</span>
+                  {metrics ? metrics.avg_latency_ms : 17}<span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>ms</span>
                 </div>
               </div>
 
@@ -194,7 +258,7 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
                   ALGORITHM
                 </div>
                 <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--green-valid)', marginTop: '3px' }}>
-                  Raft <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green-valid)' }}>(Healthy)</span>
+                  {subnet ? subnet.algorithm : 'Raft'} <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green-valid)' }}>(Healthy)</span>
                 </div>
               </div>
             </div>
@@ -227,7 +291,7 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
                 }}
               >
                 <div style={{ fontSize: '26px', fontWeight: 900, color: 'var(--cyan-primary)', letterSpacing: '-0.02em' }}>
-                  0.4<span style={{ fontSize: '16px' }}>s</span>
+                  {finality.value}<span style={{ fontSize: '16px' }}>{finality.unit}</span>
                 </div>
                 <div style={{ fontSize: '8.5px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '2px' }}>
                   SUB-SECOND FINALITY
@@ -238,16 +302,16 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
             {/* Finality Key Metrics List */}
             <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12.5px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Throughput (TPS)</span>
-                <b style={{ color: 'var(--cyan-primary)', fontFamily: 'var(--font-mono)' }}>1,245</b>
+                <span style={{ color: 'var(--text-muted)' }}>Throughput (TPS · 60s window)</span>
+                <b style={{ color: 'var(--cyan-primary)', fontFamily: 'var(--font-mono)' }}>{metrics ? metrics.tps_60s.toFixed(2) : '1,245'}</b>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Pending StateRefs</span>
-                <b style={{ color: 'var(--amber-warning)', fontFamily: 'var(--font-mono)' }}>12</b>
+                <b style={{ color: 'var(--amber-warning)', fontFamily: 'var(--font-mono)' }}>{metrics ? metrics.pending_staterefs : 12}</b>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Time to Finality (99th %ile)</span>
-                <b style={{ color: 'var(--cyan-primary)', fontFamily: 'var(--font-mono)' }}>0.85s</b>
+                <b style={{ color: 'var(--cyan-primary)', fontFamily: 'var(--font-mono)' }}>{p99.value}{p99.unit}</b>
               </div>
             </div>
           </div>
@@ -328,7 +392,10 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
                       {log.timestamp}
                     </td>
 
-                    <td style={{ padding: '14px 18px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: isRejected ? '#ef4444' : 'var(--cyan-primary)' }}>
+                    <td
+                      style={{ padding: '14px 18px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: isRejected ? '#ef4444' : 'var(--cyan-primary)' }}
+                      title={[log.operation, log.detail].filter(Boolean).join(' · ')}
+                    >
                       {log.stateref}
                     </td>
 
@@ -338,8 +405,8 @@ export const ConsensusHealthView: React.FC<ConsensusHealthViewProps> = ({ onNoti
 
                     <td style={{ padding: '14px 18px' }}>
                       {isRejected ? (
-                        <span className="pill-reject">
-                          <AlertOctagon size={12} /> REJECTED: DOUBLE SPEND
+                        <span className="pill-reject" title={log.reason || 'Double spend rejected by notary quorum'}>
+                          <AlertOctagon size={12} /> REJECTED{log.reason ? `: ${log.reason.length > 26 ? `${log.reason.slice(0, 26)}…` : log.reason}` : ': DOUBLE SPEND'}
                         </span>
                       ) : (
                         <span className="pill-valid">

@@ -13,3 +13,6 @@
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Cargo build artifacts (release/debug builds by deploy_web_showcase.sh)
+/target/
