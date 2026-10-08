@@ -20,6 +20,10 @@ import { StressTestingView } from './components/views/StressTestingView';
 import { AccessLogsView } from './components/views/AccessLogsView';
 import { Iso20022PaymentsView } from './components/views/Iso20022PaymentsView';
 import { DeliveryTransfersView } from './components/views/DeliveryTransfersView';
+import { StatementsAndGlView } from './components/views/StatementsAndGlView';
+import { ValuationPlView } from './components/views/ValuationPlView';
+import { RegulatoryReportsView } from './components/views/RegulatoryReportsView';
+import { AuditCenterView } from './components/views/AuditCenterView';
 import { recordSessionEvent } from './services/sessionAudit';
 import { OpsDashboard } from './components/views/OpsDashboard';
 import { RegulatorDashboard } from './components/views/RegulatorDashboard';
@@ -367,10 +371,10 @@ export function App() {
       // CB Payments & ISO 20022 is now its own message-explorer view; the
       // FX desk keeps 'interoperability' for institutional surfaces.
       cb_iso20022: 'cb_iso20022',
-      statements_gl: 'logs',
-      cb_valuation: 'logs',
-      cb_reg_reports: 'logs',
-      cb_audit: 'logs',
+      statements_gl: 'statements_gl',
+      cb_valuation: 'cb_valuation',
+      cb_reg_reports: 'cb_reg_reports',
+      cb_audit: 'cb_audit',
       cb_mandates: 'governance',
       iso20022_bridge: 'interoperability',
       inst_inventory: 'vault',
@@ -651,6 +655,66 @@ export function App() {
         );
       case 'secure_chat':
         return <SignalEncryptedChatView onNotify={showToast} onRefresh={loadData} />;
+      case 'statements_gl':
+        return (
+          <StatementsAndGlView
+            accounts={accounts}
+            holdings={holdings}
+            transactions={transactions}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            accountDataStatus={accountDataStatus}
+            txnDataStatus={txnDataStatus}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_valuation':
+        return (
+          <ValuationPlView
+            accounts={accounts}
+            holdings={holdings}
+            transactions={transactions}
+            rates={rates}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            accountDataStatus={accountDataStatus}
+            txnDataStatus={txnDataStatus}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_reg_reports':
+        return (
+          <RegulatoryReportsView
+            accounts={accounts}
+            holdings={holdings}
+            transactions={transactions}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            accountDataStatus={accountDataStatus}
+            txnDataStatus={txnDataStatus}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_audit':
+        return (
+          <AuditCenterView
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            pendingApprovals={approvals.length}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
       case 'logs':
         return <TreasuryAccountingView transactions={transactions} onRefresh={loadData} />;
       case 'support':

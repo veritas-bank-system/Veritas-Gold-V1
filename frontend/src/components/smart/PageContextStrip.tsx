@@ -31,6 +31,20 @@ function fmtTime(ts: number): string {
   return new Date(ts).toLocaleTimeString('en-GB', { hour12: false });
 }
 
+/**
+ * Served-bundle identity, extracted from the running script tag at module
+ * load. Vite emits `assets/index-<hash>.js`; showing the hash on every page
+ * means a stale cached bundle is always identifiable at a glance (the
+ * "features shipped but the website looks old" failure mode), and the
+ * content-hashed filename is the cache-busting mechanism itself.
+ */
+function servedBundleHash(): string {
+  if (typeof document === 'undefined') return 'unknown';
+  const script = [...document.querySelectorAll('script[src]')].find((s) => (s as HTMLScriptElement).src.includes('/assets/index-'));
+  const match = script ? /index-([A-Za-z0-9_-]+)\.js/.exec((script as HTMLScriptElement).src) : null;
+  return match ? match[1] : 'dev';
+}
+
 const STATUS_LABEL: Record<PageDataStatus, { text: string; color: string }> = {
   loading: { text: 'LOADING…', color: '#F5C842' },
   available: { text: 'LIVE DATA', color: '#2BA640' },
@@ -151,6 +165,14 @@ export const PageContextStrip: React.FC<PageContextStripProps> = ({
         )}
       </StripSegment>
       <StripSegment label="Audit ref" mono>{auditRef}</StripSegment>
+      <StripSegment label="Build" mono>
+        <span
+          title={`Served bundle hash ${servedBundleHash()} — content-hashed filename; a hard refresh (Ctrl+Shift+R) forces the latest build`}
+          style={{ color: 'var(--text-dim)', fontSize: '10.5px' }}
+        >
+          {servedBundleHash()}
+        </span>
+      </StripSegment>
       <button
         onClick={handleExportEvidence}
         className="btn-secondary"

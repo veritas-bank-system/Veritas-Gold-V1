@@ -1,158 +1,158 @@
-shot auth/00-workspace-chooser.png (222991 bytes)
+shot auth/00-workspace-chooser.png (223526 bytes)
 click "Enter Central Bank Workspace" -> SovereignCentral BankReserve Management & Monetary OperationsManage official reserves, mon
-shot auth/01-central-bank-login-governor.png (200160 bytes)
+shot auth/01-central-bank-login-governor.png (198096 bytes)
 click "Authorize & Launch" -> Authorize & Launch Workstation
 click "Executive Dashboard" -> Executive DashboardReserves
-shot central-bank/01-executive-dashboard.png (355654 bytes)
+shot central-bank/01-executive-dashboard.png (353457 bytes)
 click "Tasks & Approvals" -> Tasks & Approvals2 Pending
-shot central-bank/02-tasks-and-approvals.png (224753 bytes)
+shot central-bank/02-tasks-and-approvals.png (223661 bytes)
 click "Notifications" -> NotificationsPortal
-shot central-bank/03-notifications.png (340097 bytes)
+shot central-bank/03-notifications.png (337675 bytes)
 click "Reserve Overview" -> Reserve Overview2
-shot central-bank/04-reserve-overview.png (276874 bytes)
+shot central-bank/04-reserve-overview.png (271859 bytes)
 click "Gold & Bullion" -> Gold & Bullion2 Bars
-shot central-bank/05-gold-and-bullion.png (293411 bytes)
+shot central-bank/05-gold-and-bullion.png (292081 bytes)
 click "Government Bonds" -> Government BondsPortfolio
-shot central-bank/06-government-bonds.png (254604 bytes)
+shot central-bank/06-government-bonds.png (251893 bytes)
 click "FX & Money Markets" -> FX & Money MarketsFX Desk
-shot central-bank/07-fx-and-money-markets.png (220482 bytes)
+shot central-bank/07-fx-and-money-markets.png (219628 bytes)
 click "Portfolio Management" -> Portfolio Management2 Pools
-shot central-bank/08-portfolio-management.png (174947 bytes)
+shot central-bank/08-portfolio-management.png (173267 bytes)
 click "Liquidity Management" -> Liquidity ManagementSweeper
-shot central-bank/09-liquidity-management.png (209684 bytes)
+shot central-bank/09-liquidity-management.png (212823 bytes)
 click "Settlement Accounts" -> Settlement AccountssEURD
-shot central-bank/10-settlement-accounts.png (225403 bytes)
+shot central-bank/10-settlement-accounts.png (224276 bytes)
 click "Custody & Vaults" -> Custody & VaultsPoR Live
-shot central-bank/11-custody-and-vaults.png (177669 bytes)
+shot central-bank/11-custody-and-vaults.png (179185 bytes)
 click "Settlement Monitor" -> Settlement Monitor4/5 BFT
-shot central-bank/12-settlement-monitor.png (243915 bytes)
+shot central-bank/12-settlement-monitor.png (243695 bytes)
 click "Payments & ISO 20022" -> Payments & ISO 20022pacs.008
-shot central-bank/13-payments-and-iso-20022.png (199909 bytes)
+shot central-bank/13-payments-and-iso-20022.png (203294 bytes)
 click "Reconciliation" -> Reconciliationcamt.053
-shot central-bank/14-reconciliation.png (190339 bytes)
+shot central-bank/14-reconciliation.png (190550 bytes)
 click "Delivery & Transfers" -> Delivery & Transfers4 Legs
-shot central-bank/15-delivery-and-transfers.png (212942 bytes)
+shot central-bank/15-delivery-and-transfers.png (218886 bytes)
 click "Risk Dashboard" -> Risk DashboardRadar
-shot central-bank/16-risk-dashboard.png (208308 bytes)
+shot central-bank/16-risk-dashboard.png (209326 bytes)
 click "Exposure & Limits" -> Exposure & LimitsPolicy
-shot central-bank/17-exposure-and-limits.png (217901 bytes)
+shot central-bank/17-exposure-and-limits.png (220561 bytes)
 click "Counterparties" -> CounterpartiesKYC
-shot central-bank/18-counterparties.png (162991 bytes)
+shot central-bank/18-counterparties.png (160455 bytes)
 click "Stress Testing" -> Stress TestingScenarios
-shot central-bank/19-stress-testing.png (261382 bytes)
+shot central-bank/19-stress-testing.png (264765 bytes)
 click "Compliance Dashboard" -> Compliance Dashboard10-Yr GDPR
-shot central-bank/20-compliance-dashboard.png (221658 bytes)
+shot central-bank/20-compliance-dashboard.png (221310 bytes)
 click "Statements & GL" -> Statements & GLGL
-shot central-bank/21-statements-and-gl.png (189086 bytes)
+shot central-bank/21-statements-and-gl.png (224951 bytes)
 click "Valuation & P&L" -> Valuation & P&LMTM
-shot central-bank/22-valuation-and-pandl.png (188891 bytes)
+shot central-bank/22-valuation-and-pandl.png (217166 bytes)
 click "Regulatory Reports" -> Regulatory ReportsOfficial
-shot central-bank/23-regulatory-reports.png (188946 bytes)
+shot central-bank/23-regulatory-reports.png (181839 bytes)
 click "Audit Center" -> Audit CenterImmutable
-shot central-bank/24-audit-center.png (189015 bytes)
+shot central-bank/24-audit-center.png (171427 bytes)
 click "Institutions" -> InstitutionsRegistry
-shot central-bank/25-institutions.png (193937 bytes)
+shot central-bank/25-institutions.png (192501 bytes)
 click "Users & Roles" -> Users & RolesKYC
-shot central-bank/26-users-and-roles.png (163724 bytes)
+shot central-bank/26-users-and-roles.png (161346 bytes)
 click "Mandates & Policies" -> Mandates & PoliciesBoard
-shot central-bank/27-mandates-and-policies.png (196370 bytes)
+shot central-bank/27-mandates-and-policies.png (196033 bytes)
 click "Access Logs" -> Access LogsAudit
-shot central-bank/28-access-logs.png (196533 bytes)
+shot central-bank/28-access-logs.png (194655 bytes)
 click "System Configuration" -> System Configuration3 WASMs
-shot central-bank/29-system-configuration.png (278974 bytes)
+shot central-bank/29-system-configuration.png (279025 bytes)
 click "Tablet (iPad)" -> Tablet (iPad)
-shot tablet/central-bank-home.png (114264 bytes)
+shot tablet/central-bank-home.png (111860 bytes)
 click "Menu" -> Menu
-shot tablet/central-bank-drawer.png (121245 bytes)
+shot tablet/central-bank-drawer.png (120456 bytes)
 click "Mobile (iPhone)" -> Mobile (iPhone)
-shot mobile/central-bank-home.png (50909 bytes)
+shot mobile/central-bank-home.png (51058 bytes)
 click "Menu" -> Menu
-shot mobile/central-bank-drawer.png (50909 bytes)
+shot mobile/central-bank-drawer.png (51058 bytes)
 click "⚡ Live MVP Verification" -> ⚡ Live MVP Verification6/6 Tests
-shot mobile/live-mvp-verification.png (99155 bytes)
+shot mobile/live-mvp-verification.png (95972 bytes)
 click "Enter Central Bank Workspace" -> SovereignCentral BankReserve Management & Monetary OperationsManage official reserves, mon
 click "Authorize & Launch" -> Authorize & Launch Workstation
 click "Mobile (iPhone)" -> Mobile (iPhone)
 click "Menu" -> Menu
 click "👑 Master Dashboard Radar" -> 👑 Master Dashboard Radar
-shot mobile/master-dashboard-radar.png (110633 bytes)
+shot mobile/master-dashboard-radar.png (110844 bytes)
 click "Workstation" -> Workstation
 click "Logout" -> Logout
 click "Enter Institutional Workspace" -> WholesaleCommercial Bank / AgencyInstitutional Trading & SettlementTrade approved assets, 
-shot auth/02-institutional-login-treasury.png (207738 bytes)
+shot auth/02-institutional-login-treasury.png (207732 bytes)
 click "Authorize & Launch" -> Authorize & Launch Workstation
 click "Bank Dashboard" -> Bank DashboardTreasury
 shot institutional/01-bank-dashboard.png (330837 bytes)
 click "Client Orders" -> Client OrdersOrders
-shot institutional/02-client-orders.png (211116 bytes)
+shot institutional/02-client-orders.png (211183 bytes)
 click "RFQ Inbox" -> RFQ Inbox4 RFQs
-shot institutional/03-rfq-inbox.png (280691 bytes)
+shot institutional/03-rfq-inbox.png (280189 bytes)
 click "Tasks & Approvals" -> Tasks & Approvals2 Pending
 shot institutional/04-tasks-and-approvals.png (219845 bytes)
 click "Notifications" -> NotificationsPortal
 shot institutional/05-notifications.png (334643 bytes)
 click "Gold Market" -> Gold MarketXAU
-shot institutional/06-gold-market.png (286986 bytes)
+shot institutional/06-gold-market.png (287277 bytes)
 click "Government Bonds" -> Government BondsTradingView
-shot institutional/07-government-bonds.png (236023 bytes)
+shot institutional/07-government-bonds.png (235415 bytes)
 click "FX & Money Markets" -> FX & Money MarketsFX
-shot institutional/08-fx-and-money-markets.png (217704 bytes)
+shot institutional/08-fx-and-money-markets.png (217781 bytes)
 click "Market Making" -> Market Making2 Pools
-shot institutional/09-market-making.png (161818 bytes)
+shot institutional/09-market-making.png (161804 bytes)
 click "Auctions" -> Auctions2 Live
-shot institutional/10-auctions.png (234408 bytes)
+shot institutional/10-auctions.png (234362 bytes)
 click "Cash & Liquidity" -> Cash & Liquidity2
-shot institutional/11-cash-and-liquidity.png (246185 bytes)
+shot institutional/11-cash-and-liquidity.png (247070 bytes)
 click "Inventory & Positions" -> Inventory & PositionsLive
-shot institutional/12-inventory-and-positions.png (272347 bytes)
+shot institutional/12-inventory-and-positions.png (272653 bytes)
 click "Settlement Accounts" -> Settlement AccountssEURD
-shot institutional/13-settlement-accounts.png (219381 bytes)
+shot institutional/13-settlement-accounts.png (219384 bytes)
 click "Funding" -> FundingSweeper
-shot institutional/14-funding.png (192997 bytes)
+shot institutional/14-funding.png (193603 bytes)
 click "Repo & Reverse Repo" -> Repo & Reverse RepoTerm
-shot institutional/15-repo-and-reverse-repo.png (191234 bytes)
+shot institutional/15-repo-and-reverse-repo.png (191210 bytes)
 click "Gold Loans & Leases" -> Gold Loans & LeasesLease
-shot institutional/16-gold-loans-and-leases.png (190943 bytes)
+shot institutional/16-gold-loans-and-leases.png (190901 bytes)
 click "Securities Lending" -> Securities LendingSLB
-shot institutional/17-securities-lending.png (190348 bytes)
+shot institutional/17-securities-lending.png (190409 bytes)
 click "Collateral Desk" -> Collateral Desk2 Pledges
-shot institutional/18-collateral-desk.png (190307 bytes)
+shot institutional/18-collateral-desk.png (190324 bytes)
 click "Settlement Monitor" -> Settlement Monitor4/5 BFT
-shot institutional/19-settlement-monitor.png (242129 bytes)
+shot institutional/19-settlement-monitor.png (241988 bytes)
 click "Custody" -> CustodyPoR Live
-shot institutional/20-custody.png (176209 bytes)
+shot institutional/20-custody.png (176248 bytes)
 click "Payments & ISO 20022" -> Payments & ISO 20022pacs.008
-shot institutional/21-payments-and-iso-20022.png (211430 bytes)
+shot institutional/21-payments-and-iso-20022.png (211443 bytes)
 click "Reconciliation" -> Reconciliationcamt.053
-shot institutional/22-reconciliation.png (187481 bytes)
+shot institutional/22-reconciliation.png (187478 bytes)
 click "Delivery & Transfers" -> Delivery & TransfersPayouts
-shot institutional/23-delivery-and-transfers.png (186941 bytes)
+shot institutional/23-delivery-and-transfers.png (187009 bytes)
 click "Risk & Limits" -> Risk & LimitsDesk
-shot institutional/24-risk-and-limits.png (221925 bytes)
+shot institutional/24-risk-and-limits.png (222497 bytes)
 click "Counterparties" -> CounterpartiesKYC
-shot institutional/25-counterparties.png (162132 bytes)
+shot institutional/25-counterparties.png (162125 bytes)
 click "Compliance" -> ComplianceAML/KYC
-shot institutional/26-compliance.png (209229 bytes)
+shot institutional/26-compliance.png (210564 bytes)
 click "Margin & Collateral" -> Margin & Collateral3.1×
-shot institutional/27-margin-and-collateral.png (193750 bytes)
+shot institutional/27-margin-and-collateral.png (193719 bytes)
 click "Surveillance" -> SurveillanceMarket Abuse
-shot institutional/28-surveillance.png (222697 bytes)
+shot institutional/28-surveillance.png (223183 bytes)
 click "P&L and Valuation" -> P&L and ValuationMTD
-shot institutional/29-pandl-and-valuation.png (189683 bytes)
+shot institutional/29-pandl-and-valuation.png (189756 bytes)
 click "Client Statements" -> Client StatementsClient
-shot institutional/30-client-statements.png (189613 bytes)
+shot institutional/30-client-statements.png (189623 bytes)
 click "Regulatory Reports" -> Regulatory ReportsOfficial
-shot institutional/31-regulatory-reports.png (189731 bytes)
+shot institutional/31-regulatory-reports.png (181110 bytes)
 click "Audit" -> AuditImmutable
-shot institutional/32-audit.png (189630 bytes)
+shot institutional/32-audit.png (170617 bytes)
 click "Users & Roles" -> Users & RolesAccounts
-shot institutional/33-users-and-roles.png (194958 bytes)
+shot institutional/33-users-and-roles.png (194965 bytes)
 click "APIs & Integrations" -> APIs & IntegrationsFIX/ISO
-shot institutional/34-apis-and-integrations.png (279403 bytes)
+shot institutional/34-apis-and-integrations.png (279483 bytes)
 click "Tablet (iPad)" -> Tablet (iPad)
-shot tablet/institutional-home.png (115286 bytes)
+shot tablet/institutional-home.png (115297 bytes)
 click "Menu" -> Menu
-shot tablet/institutional-drawer.png (121564 bytes)
+shot tablet/institutional-drawer.png (121553 bytes)
 click "Workstation" -> Workstation
 click "Mobile (iPhone)" -> Mobile (iPhone)
 shot mobile/institutional-home.png (47457 bytes)
@@ -162,14 +162,14 @@ click "Logout" -> Logout
 click "Enter Central Bank Workspace" -> SovereignCentral BankReserve Management & Monetary OperationsManage official reserves, mon
 click "Authorize & Launch" -> Authorize & Launch Workstation
 click "Switch Persona" -> Switch Persona
-shot auth/03-central-bank-persona-switcher.png (199994 bytes)
+shot auth/03-central-bank-persona-switcher.png (199989 bytes)
 persona-pick "Platform Super Admin & Operator"
 click "Authorize & Launch" -> Authorize & Launch Workstation
-shot central-bank/30-persona-super-admin.png (356526 bytes)
+shot central-bank/30-persona-super-admin.png (356547 bytes)
 click "Switch Persona" -> Switch Persona
 persona-pick "Supervisory & Compliance Auditor"
 click "Authorize & Launch" -> Authorize & Launch Workstation
-shot central-bank/31-persona-supervisory-auditor.png (357637 bytes)
+shot central-bank/31-persona-supervisory-auditor.png (357652 bytes)
 click "Logout" -> Logout
 click "Enter Institutional Workspace" -> WholesaleCommercial Bank / AgencyInstitutional Trading & SettlementTrade approved assets, 
 click "Authorize & Launch" -> Authorize & Launch Workstation
