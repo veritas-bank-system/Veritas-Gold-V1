@@ -14,6 +14,11 @@ import { RfqTradeDesk } from './components/smart/RfqTradeDesk';
 import { TreasuryAccountingView } from './components/institutional/TreasuryAccountingView';
 import { CollateralManagementView } from './components/institutional/CollateralManagementView';
 import { SupervisoryRadar } from './components/views/SupervisoryRadar';
+import { RiskDashboardView } from './components/views/RiskDashboardView';
+import { ExposureLimitsView } from './components/views/ExposureLimitsView';
+import { StressTestingView } from './components/views/StressTestingView';
+import { AccessLogsView } from './components/views/AccessLogsView';
+import { recordSessionEvent } from './services/sessionAudit';
 import { OpsDashboard } from './components/views/OpsDashboard';
 import { RegulatorDashboard } from './components/views/RegulatorDashboard';
 import { INSTITUTION_PROFILES, type InstitutionProfile } from './components/institutional/InstitutionalAuthSurface';
@@ -351,9 +356,9 @@ export function App() {
       yield_analytics: 'terminal',
       // Workspace-scoped policy navigation (Central Bank / Institutional)
       // resolves onto the shared canonical views:
-      cb_limits: 'compliance',
-      cb_stress: 'compliance',
-      cb_compliance_dash: 'compliance',
+      // cb_limits / cb_stress / access_logs are now real views (Phase 2 of the
+      // menu-build programme); cb_compliance_dash keeps the supervisory radar.
+      cb_compliance_dash: 'cb_supervisory_radar',
       statements_gl: 'logs',
       cb_valuation: 'logs',
       cb_reg_reports: 'logs',
@@ -364,9 +369,9 @@ export function App() {
       inst_repo: 'collateral',
       inst_gold_loans: 'collateral',
       inst_sec_lending: 'collateral',
-      inst_limits: 'compliance',
+      inst_limits: 'cb_supervisory_radar',
       inst_margin: 'collateral',
-      inst_surveillance: 'compliance',
+      inst_surveillance: 'cb_supervisory_radar',
       inst_pnl: 'logs',
       inst_client_stmts: 'logs',
       inst_apis: 'canister_mgmt',
@@ -482,18 +487,82 @@ export function App() {
               setWorkspace(workspaceForPersona(p));
               const matchingInstitution = INSTITUTION_PROFILES.find((profile) => profile.bic === p.bic);
               if (matchingInstitution) setCurrentInstitution(matchingInstitution);
+              recordSessionEvent({
+                actor: p.roleTitle,
+                effectiveRole: p.roleTitle,
+                institution: p.institutionName,
+                action: 'PERSONA_SWITCH',
+                object: `${p.id} · effective authority now ${p.roleTitle}`,
+                environment: systemEnv,
+              });
               showToast(`Switched active session to ${p.roleTitle}`);
             }}
             onNotify={showToast}
             onRefresh={loadData}
           />
         );
+      // Risk Dashboard is now its own view (menu-build Phase 2); it no longer
+      // doubles as the supervisory radar.
       case 'compliance':
+        return (
+          <RiskDashboardView
+            accounts={accounts}
+            holdings={holdings}
+            identities={identities}
+            accountDataStatus={accountDataStatus}
+            accountsFetchedAt={accountsFetchedAt}
+            pendingApprovals={approvals.length}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_supervisory_radar':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <SupervisoryRadar />
             <RegulatorDashboard accounts={accounts} holdings={holdings} onNotify={showToast} />
           </div>
+        );
+      case 'cb_limits':
+        return (
+          <ExposureLimitsView
+            accounts={accounts}
+            holdings={holdings}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            personaId={authenticatedPersona?.id || 'unknown'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            accountDataStatus={accountDataStatus}
+            accountsFetchedAt={accountsFetchedAt}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_stress':
+        return (
+          <StressTestingView
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            pendingApprovals={approvals.length}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'access_logs':
+        return (
+          <AccessLogsView
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            pendingApprovals={approvals.length}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
         );
       case 'cb_dashboard':
         return (
@@ -594,6 +663,14 @@ export function App() {
           setRuntimeMode(mode);
           setShowLoginModal(false);
           setActiveSection(workspace === 'institutional' ? 'inst_dashboard' : 'cb_dashboard');
+          recordSessionEvent({
+            actor: persona.roleTitle,
+            effectiveRole: persona.roleTitle,
+            institution: persona.institutionName,
+            action: 'LOGIN',
+            object: `${workspace ?? 'unknown'} workspace · ${env} · ${mode}`,
+            environment: env,
+          });
           showToast(`Authenticated as ${persona.roleTitle} (${persona.institutionName})`);
         }}
       />

@@ -144,8 +144,26 @@ export const SupervisoryRadar: React.FC = () => {
                       <code style={{ fontSize: '11px' }}>{flow.anonymous_id.slice(0, 14)}...</code>
                     </div>
                   </td>
-                  <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0F0F0F' }}>
-                    {flow.unmasked_legal_owner}
+                  <td style={{ padding: '12px 16px' }}>
+                    <div
+                      title={`Unmasked legal identity under ${authority} authority — regulator-only visibility`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        backgroundColor: 'rgba(255, 82, 82, 0.10)',
+                        border: '1px solid rgba(255, 82, 82, 0.35)',
+                        borderRadius: '6px',
+                        color: '#FFB3AB',
+                        fontWeight: 700,
+                        fontSize: '12.5px',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <Eye size={11} color="#FF5252" />
+                      {flow.unmasked_legal_owner}
+                    </div>
                   </td>
                   <td style={{ padding: '12px 16px', fontWeight: 600 }}>{flow.net_exposure_eur}</td>
                   <td style={{ padding: '12px 16px' }}>

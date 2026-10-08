@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import type { DemandDepositRecord, FungibleAssetHolding } from '../../types';
+import type { DemandDepositRecord, FungibleAssetHolding, SupervisionData } from '../../types';
+import { fetchSupervisionData } from '../../services/api';
+import { recordSessionEvent } from '../../services/sessionAudit';
 import { Lock, Search, Scale } from 'lucide-react';
 
 interface RegulatorDashboardProps {
@@ -10,17 +12,61 @@ interface RegulatorDashboardProps {
 
 export const RegulatorDashboard: React.FC<RegulatorDashboardProps> = ({ accounts, holdings, onNotify }) => {
   const [blindedSearch, setBlindedSearch] = useState('');
-  const [unmaskedResult, setUnmaskedResult] = useState<string | null>(null);
+  const [unmaskState, setUnmaskState] = useState<
+    | { kind: 'idle' }
+    | { kind: 'checking' }
+    | { kind: 'hit'; owner: string; principal: string }
+    | { kind: 'miss'; scope: number }
+    | { kind: 'unavailable' }
+  >({ kind: 'idle' });
 
-  const handleUnmask = (e: React.FormEvent) => {
+  // Audit resolves ONLY against the live supervision endpoint's unmasked
+  // flows (ledger-derived identities). No client-side fixtures: an unknown
+  // key must report an honest miss, never a guessed legal owner.
+  const handleUnmask = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!blindedSearch) return;
-    if (blindedSearch.includes('ryjl3') || blindedSearch.includes('anon')) {
-      setUnmaskedResult('Alice Trading Corp (Principal: lpmt4-wqbam-aaaaa-aaaaa-cai)');
+    const query = blindedSearch.trim().toLowerCase();
+    if (!query) return;
+    setUnmaskState({ kind: 'checking' });
+    let data: SupervisionData | null = null;
+    try {
+      data = await fetchSupervisionData();
+    } catch {
+      setUnmaskState({ kind: 'unavailable' });
+      onNotify('Supervision endpoint unreachable — audit not performed', true);
+      return;
+    }
+    const flows = data.unmasked_active_flows ?? [];
+    const hit = flows.find((f) => {
+      const key = f.anonymous_id.trim().toLowerCase();
+      const keyPrefix = key.split('-').slice(0, 2).join('-');
+      return key === query || key.startsWith(query) || query.startsWith(keyPrefix);
+    });
+    if (hit) {
+      setUnmaskState({ kind: 'hit', owner: hit.unmasked_legal_owner, principal: hit.anonymous_id });
+      recordSessionEvent({
+        actor: 'CENTRAL_BANK_AUDIT_SUPERUSER',
+        effectiveRole: 'CENTRAL_BANK_AUDIT_SUPERUSER',
+        institution: 'Central Bank / Financial Market Authority',
+        action: 'UNMASK_AUDIT',
+        object: `${hit.anonymous_id} → ${hit.unmasked_legal_owner}`,
+        environment: 'sandbox',
+        reason: 'Ledger-derived blinded ownership verification',
+      });
       onNotify('Verified Blinded Ownership Proof against IdentityRegistry!');
     } else {
-      setUnmaskedResult('Unknown Anonymous Principal or Invalid Proof Signature');
-      onNotify('No verified legal entity found for this anonymous key', true);
+      setUnmaskState({ kind: 'miss', scope: flows.length });
+      recordSessionEvent({
+        actor: 'CENTRAL_BANK_AUDIT_SUPERUSER',
+        effectiveRole: 'CENTRAL_BANK_AUDIT_SUPERUSER',
+        institution: 'Central Bank / Financial Market Authority',
+        action: 'UNMASK_AUDIT',
+        object: blindedSearch,
+        environment: 'sandbox',
+        result: 'Failure',
+        reason: `No match in supervision scope (${flows.length} flows audited)`,
+      });
+      onNotify('No blinded-key match in the current supervision scope', true);
     }
   };
 
@@ -123,7 +169,7 @@ export const RegulatorDashboard: React.FC<RegulatorDashboardProps> = ({ accounts
             </div>
           </div>
 
-          <form onSubmit={handleUnmask} style={{ display: 'flex', gap: '8px' }}>
+          <form onSubmit={(e) => { void handleUnmask(e); }} style={{ display: 'flex', gap: '8px' }}>
             <input
               type="text"
               placeholder="Paste anonymous principal (e.g. ryjl3-hexae...)"
@@ -132,15 +178,30 @@ export const RegulatorDashboard: React.FC<RegulatorDashboardProps> = ({ accounts
               className="input-flat"
               style={{ flex: 1 }}
             />
-            <button type="submit" className="btn-primary" style={{ padding: '8px 16px' }}>
-              <Search size={14} /> Audit
+            <button type="submit" className="btn-primary" style={{ padding: '8px 16px' }} disabled={unmaskState.kind === 'checking'}>
+              <Search size={14} /> {unmaskState.kind === 'checking' ? 'Auditing…' : 'Audit'}
             </button>
           </form>
 
-          {unmaskedResult && (
-            <div style={{ backgroundColor: '#E8F5E9', padding: '12px', borderRadius: '8px', fontSize: '12px', border: '1px solid #C8E6C9' }}>
-              <div style={{ fontWeight: 600, color: '#2E7D32' }}>Legal Owner Verified:</div>
-              <div style={{ marginTop: '2px', fontFamily: 'var(--font-mono)' }}>{unmaskedResult}</div>
+          {unmaskState.kind === 'hit' && (
+            <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', padding: '12px', borderRadius: '8px', fontSize: '12px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+              <div style={{ fontWeight: 600, color: '#6EE7B7' }}>Legal Owner Verified (ledger-derived):</div>
+              <div style={{ marginTop: '2px', fontFamily: 'var(--font-mono)', color: '#A7F3D0' }}>
+                {unmaskState.owner} (Principal: {unmaskState.principal})
+              </div>
+            </div>
+          )}
+          {unmaskState.kind === 'miss' && (
+            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.10)', padding: '12px', borderRadius: '8px', fontSize: '12px', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+              <div style={{ fontWeight: 600, color: '#FCA5A5' }}>No Match in Supervision Scope</div>
+              <div style={{ marginTop: '2px', color: '#FECACA' }}>
+                {unmaskState.scope} unmasked flow{unmaskState.scope === 1 ? '' : 's'} audited against the live ledger — no blinded key matches this input. No legal owner is inferred.
+              </div>
+            </div>
+          )}
+          {unmaskState.kind === 'unavailable' && (
+            <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.10)', padding: '12px', borderRadius: '8px', fontSize: '12px', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#FCD34D' }}>
+              Supervision endpoint unreachable — audit aborted. No result was fabricated.
             </div>
           )}
         </div>

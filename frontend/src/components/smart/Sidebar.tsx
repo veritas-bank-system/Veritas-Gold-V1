@@ -149,7 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'enterprise_admin', label: 'Institutions', icon: Building2, badge: 'Registry' },
         { id: 'identity_admin', label: 'Users & Roles', icon: Users, badge: 'KYC' },
         { id: 'cb_mandates', label: 'Mandates & Policies', icon: Scale, badge: 'Board' },
-        { id: 'secure_chat', label: 'Access Logs', icon: MessageSquareLock, badge: 'Signal' },
+        { id: 'access_logs', label: 'Access Logs', icon: MessageSquareLock, badge: 'Audit' },
         { id: 'canister_mgmt', label: 'System Configuration', icon: Cpu, badge: `${canisterCount} WASMs` },
       ],
     },

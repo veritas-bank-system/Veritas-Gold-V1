@@ -80,6 +80,10 @@ export type AppSection =
   | 'identity_admin'
   | 'enterprise_admin'
   | 'secure_chat'
+  // Dedicated CB Access Logs view (in-session audit trail). Institutional
+  // Encrypted Chat keeps 'secure_chat'.
+  | 'access_logs'
+  | 'cb_supervisory_radar'
   // Workspace-scoped nav entries (Central Bank / Institutional). These are
   // persona-policy labels that resolve onto the shared views via SECTION_ALIASES.
   | 'cb_limits'
