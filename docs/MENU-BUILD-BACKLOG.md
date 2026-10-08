@@ -29,35 +29,32 @@ Legend: ✅ done · 🚧 in progress · ⬜ queued
 - ✅ `AccessLogsView` (new `access_logs` nav id; institutional chat keeps `secure_chat`) —
   filterable event table, in-session events only, "server audit trail not connected" state
 
-## Phase 3 — Remaining de-aliased views ✅ (first tranche delivered in commit 7d73d81)
-- ✅ **Payments & ISO 20022** (`cb_iso20022`, own view `Iso20022PaymentsView`; FX desk keeps
-  `interoperability`): live message explorer, screening/validation columns, repair queue,
-  evidence export, unmapped-type honest labels. P5 message store still queued.
-- ✅ **Delivery & Transfers** (`delivery_transfers`, institutional RFQ desk untouched):
-  custody inventory, movement register with finality receipts, instruction/confirmation split.
-- ✅ **Access Logs** upgraded to the **server audit chain**: `GET/POST /api/v1/admin/
-  audit-events` + `/verify` (hash-chained, append-only, in-memory until P5 persistence);
-  `AccessLogsView` reads the ledger first, source-labels rows Ledger vs Session.
-- ⬜ **Statements & GL** (`statements_gl`, currently shared accounting view): account
-  hierarchy, journal queue, period close, posting approvals
-- ⬜ **Valuation & P&L** (`cb_valuation`): price-source comparison, realized/unrealized P&L,
-  lock/approval workflow
-- ⬜ **Regulatory Reports** (`cb_reg_reports`): reporting calendar, validation, approval +
-  submission states, corrections, evidence archive
-- 🚧 **Audit Center** (`cb_audit`, currently shared logs view): P5 audit-event source now
-  exists — needs its own de-aliased view (search, timeline, entity history, export builder)
-- ⬜ **Institutions** (`enterprise_admin`, currently enterprise-admin overview): registry,
-  onboarding, scope assignment
-- ⬜ **Users & Roles** (`identity_admin`, shared with Counterparties): role matrix,
-  SoD conflicts, recertification, sessions
-- ⬜ **Mandates & Policies** (`cb_mandates`, currently maker-checker): policy catalogue,
-  versioning, exceptions with expiry
-- ⬜ **Counterparties** (`identity_admin` CB de-alias): registry, KYC/AML/sanctions states,
-  document expiry, eligibility workflow
-- ⬜ **Settlement Accounts** enhancement (`settlement_instruments`): verification queue,
-  signatories, rail mapping, restrictions
-- ⬜ **System Configuration — Bonds** (`canister_mgmt`): instrument master, calendars,
-  day-count, versioned config releases with approvals
+## Phase 3 — Remaining de-aliased views ✅ (complete: 7d73d81 + 744785c + third tranche)
+- ✅ **Payments & ISO 20022** (`cb_iso20022`, own view `Iso20022PaymentsView`)
+- ✅ **Delivery & Transfers** (`delivery_transfers`, institutional RFQ desk untouched)
+- ✅ **Access Logs** on the server audit chain (`access_logs`)
+- ✅ **Statements & GL** (`statements_gl`): per-currency trial balance, masked account
+  hierarchy, 1:1 GL journal from real transactions, maker-step period close
+- ✅ **Valuation & P&L** (`cb_valuation`): live-feed price-source comparison; cost basis
+  and P&L honestly withheld (Phase 5 engine); valuation snapshot lock (maker step)
+- ✅ **Regulatory Reports** (`cb_reg_reports`): calendar, drafts from ledger aggregates,
+  validation, submission recording (checker + authority Phase 5), evidence export
+- ✅ **Audit Center** (`cb_audit`): chain-verified header, global search, timeline,
+  entity before/after history, scoped export builder re-attesting to the chain
+- ✅ **Institutions** (`cb_institutions`): live identity registry, onboarding queue,
+  scope proposals (maker step)
+- ✅ **Users & Roles** (`cb_users_roles`): role matrix, 8 spec SoD pairs evaluated live
+  (violations / separate / not-present — never silently clean), recertification proposals
+- ✅ **Mandates & Policies** (`cb_mandates`): catalogue of enforced mandates, amendment
+  drafts (editor ≠ publisher), exceptions with owner + expiry + justification
+- ✅ **Counterparties** (`cb_counterparties`): registry joined with settlement accounts;
+  KYC/AML/sanctions shown as NOT SCREENED (no engine) — never falsely clear
+- ✅ **Settlement Accounts** (`settlement_accounts_config`): verification queue, rails
+  derived from observed finalized traffic, restrictions from real limits
+- ✅ **System Configuration — Bonds** (`cb_bond_config`): instrument master from live
+  contracts, configured coupon frequencies/ACTUS types, config release proposals
+- 🔒 **Build badge** on the Common Page Contract strip: served bundle hash visible on
+  every page (stale-cache failure mode made observable)
 
 ## Phase 4 — Cross-menu access model ⬜
 - ⬜ SoD conflict matrix detection (8 conflict pairs from the spec) in access-request flow

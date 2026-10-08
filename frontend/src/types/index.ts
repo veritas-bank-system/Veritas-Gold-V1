@@ -99,6 +99,12 @@ export type AppSection =
   | 'cb_reg_reports'
   | 'cb_audit'
   | 'cb_mandates'
+  // Phase 3 third tranche — de-aliased governance/registry/config views.
+  | 'cb_institutions'
+  | 'cb_users_roles'
+  | 'cb_counterparties'
+  | 'settlement_accounts_config'
+  | 'cb_bond_config'
   | 'iso20022_bridge'
   | 'inst_inventory'
   | 'inst_repo'

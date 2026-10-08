@@ -111,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'interoperability', label: 'FX & Money Markets', icon: ArrowLeftRight, badge: 'FX Desk' },
         { id: 'liquidity_pools', label: 'Portfolio Management', icon: Droplets, badge: `${poolCount} Pools` },
         { id: 'sweeper', label: 'Liquidity Management', icon: Bot, badge: 'Sweeper' },
-        { id: 'settlement_instruments', label: 'Settlement Accounts', icon: Coins, badge: 'sEURD' },
+        { id: 'settlement_accounts_config', label: 'Settlement Accounts', icon: Coins, badge: 'sEURD' },
       ],
     },
     {
@@ -129,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'compliance', label: 'Risk Dashboard', icon: Scale, badge: 'Radar' },
         { id: 'cb_limits', label: 'Exposure & Limits', icon: Scale, badge: 'Policy' },
-        { id: 'identity_admin', label: 'Counterparties', icon: Users, badge: 'KYC' },
+        { id: 'cb_counterparties', label: 'Counterparties', icon: Users, badge: 'KYC' },
         { id: 'cb_stress', label: 'Stress Testing', icon: Zap, badge: 'Scenarios' },
         { id: 'cb_compliance_dash', label: 'Compliance Dashboard', icon: Scale, badge: '10-Yr GDPR' },
       ],
@@ -146,11 +146,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       groupName: 'GOVERNANCE',
       items: [
-        { id: 'enterprise_admin', label: 'Institutions', icon: Building2, badge: 'Registry' },
-        { id: 'identity_admin', label: 'Users & Roles', icon: Users, badge: 'KYC' },
+        { id: 'cb_institutions', label: 'Institutions', icon: Building2, badge: 'Registry' },
+        { id: 'cb_users_roles', label: 'Users & Roles', icon: Users, badge: 'KYC' },
         { id: 'cb_mandates', label: 'Mandates & Policies', icon: Scale, badge: 'Board' },
         { id: 'access_logs', label: 'Access Logs', icon: MessageSquareLock, badge: 'Audit' },
-        { id: 'canister_mgmt', label: 'System Configuration', icon: Cpu, badge: `${canisterCount} WASMs` },
+        { id: 'cb_bond_config', label: 'System Configuration', icon: Cpu, badge: 'Bonds' },
       ],
     },
   ] : workspace === 'institutional' ? [
@@ -179,7 +179,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'portfolio', label: 'Cash & Liquidity', icon: Landmark, badge: `${accountCount}` },
         { id: 'inst_inventory', label: 'Inventory & Positions', icon: Layers, badge: 'Live' },
-        { id: 'settlement_instruments', label: 'Settlement Accounts', icon: Coins, badge: 'sEURD' },
+        { id: 'settlement_accounts_config', label: 'Settlement Accounts', icon: Coins, badge: 'sEURD' },
         { id: 'sweeper', label: 'Funding', icon: Bot, badge: 'Sweeper' },
       ],
     },

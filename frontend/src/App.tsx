@@ -24,6 +24,12 @@ import { StatementsAndGlView } from './components/views/StatementsAndGlView';
 import { ValuationPlView } from './components/views/ValuationPlView';
 import { RegulatoryReportsView } from './components/views/RegulatoryReportsView';
 import { AuditCenterView } from './components/views/AuditCenterView';
+import { InstitutionsView } from './components/views/InstitutionsView';
+import { UsersRolesView } from './components/views/UsersRolesView';
+import { MandatesPoliciesView } from './components/views/MandatesPoliciesView';
+import { CounterpartiesView } from './components/views/CounterpartiesView';
+import { SettlementAccountsView } from './components/views/SettlementAccountsView';
+import { SystemConfigBondsView } from './components/views/SystemConfigBondsView';
 import { recordSessionEvent } from './services/sessionAudit';
 import { OpsDashboard } from './components/views/OpsDashboard';
 import { RegulatorDashboard } from './components/views/RegulatorDashboard';
@@ -375,7 +381,7 @@ export function App() {
       cb_valuation: 'cb_valuation',
       cb_reg_reports: 'cb_reg_reports',
       cb_audit: 'cb_audit',
-      cb_mandates: 'governance',
+      cb_mandates: 'cb_mandates',
       iso20022_bridge: 'interoperability',
       inst_inventory: 'vault',
       inst_repo: 'collateral',
@@ -422,6 +428,33 @@ export function App() {
         );
       case 'settlement_instruments':
         return <SettlementInstrumentRegistryView />;
+      case 'settlement_accounts_config':
+        return (
+          <SettlementAccountsView
+            accounts={accounts}
+            transactions={transactions}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            accountDataStatus={accountDataStatus}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_bond_config':
+        return (
+          <SystemConfigBondsView
+            bondContracts={bondContracts}
+            auctions={auctions}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
       case 'terminal':
         return <RwaTerminalView accounts={accounts} rates={rates} onRefresh={loadData} onNotify={showToast} />;
       case 'contract_maker':
@@ -643,6 +676,43 @@ export function App() {
         return <TraderDashboard accounts={accounts} holdings={holdings} onRefresh={loadData} onNotify={showToast} />;
       case 'identity_admin':
         return <AdminDashboard identities={identities} onRefresh={loadData} onNotify={showToast} />;
+      case 'cb_users_roles':
+        return (
+          <UsersRolesView
+            identities={identities}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_counterparties':
+        return (
+          <CounterpartiesView
+            identities={identities}
+            accounts={accounts}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_institutions':
+        return (
+          <InstitutionsView
+            identities={identities}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
       case 'enterprise_admin':
         return (
           <EnterpriseAdminDashboard
@@ -711,6 +781,17 @@ export function App() {
             institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
             environment={systemEnv}
             pendingApprovals={approvals.length}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_mandates':
+        return (
+          <MandatesPoliciesView
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
             onNavigate={setActiveSection}
             onNotify={showToast}
           />
