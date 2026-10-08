@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Menu Build Backlog — the master to-do list, phased P0–P5 · Veritas Gold V1</title>
+<style>
+ :root{--bg:#0b0a0d;--panel:#141118;--panel2:#1a1620;--line:#2a2331;--ink:#efe6f2;--mut:#9d92a8;--red:#ef4444;--gold:#d4af37;--violet:#8b5cf6}
+ *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 -apple-system,'Segoe UI',Roboto,sans-serif}
+ a{color:var(--red);text-decoration:none} a:hover{text-decoration:underline}
+ header{padding:28px 32px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#171219,#0b0a0d)}
+ .brand{font:800 26px/1 'Segoe UI',sans-serif;letter-spacing:-.02em;margin:0 0 6px}
+ .brand b{color:var(--red)} .tag{display:inline-block;margin-left:10px;font:700 10px/1.8 sans-serif;letter-spacing:.12em;color:#ffb1b1;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);border-radius:999px;padding:2px 10px;vertical-align:2px}
+ header p{color:var(--mut);max-width:860px;margin:8px 0 0}
+ .crumbs{font-size:12px;color:var(--mut);margin-top:10px}
+ .crumbs a{color:var(--gold)}
+ main{max-width:980px;margin:0 auto;padding:28px 32px 80px}
+ h1{font:800 30px/1.2 'Segoe UI',sans-serif;letter-spacing:-.02em;margin:18px 0 14px;color:var(--ink);border-bottom:2px solid var(--line);padding-bottom:10px}
+ h2{font:800 20px/1.3 'Segoe UI',sans-serif;margin:32px 0 10px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px}
+ h3{font:700 16px/1.3 'Segoe UI',sans-serif;margin:22px 0 8px;color:var(--ink)}
+ h4{font:700 14px/1.3 'Segoe UI',sans-serif;margin:18px 0 6px;color:var(--violet)}
+ h5{font:700 13px/1.3 'Segoe UI',sans-serif;margin:14px 0 6px;color:var(--mut)}
+ p{margin:8px 0;color:#cfc4d8;max-width:820px}
+ ul{margin:6px 0 12px;padding-left:22px;color:#cfc4d8}
+ ul ul{margin-top:4px}
+ li{margin:4px 0}
+ ul.tasks{list-style:none;padding-left:0}
+ ul.tasks li{display:flex;gap:10px;align-items:flex-start;padding:5px 8px;border-radius:8px}
+ ul.tasks li:hover{background:var(--panel2)}
+ ul.tasks li.done .mark{color:#34d399;font-weight:800}
+ ul.tasks li.doing .mark{color:var(--gold);font-weight:800}
+ ul.tasks li.todo .mark{color:var(--mut)}
+ ul.tasks li.done{color:var(--mut)}
+ ul.tasks li.doing{color:var(--ink)}
+ code{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--gold)}
+ pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;margin:12px 0}
+ pre code{background:none;border:none;padding:0;color:#d9cfdf}
+ .tblwrap{overflow-x:auto;margin:12px 0}
+ table{border-collapse:collapse;width:100%;font-size:13px}
+ th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+ th{background:var(--panel2);color:var(--gold);font-weight:700;white-space:nowrap}
+ tr:nth-child(even) td{background:rgba(20,17,24,.5)}
+ hr{border:none;border-top:1px solid var(--line);margin:24px 0}
+ footer{padding:18px 32px 40px;border-top:1px solid var(--line);color:var(--mut);font-size:12px}
+ @media(max-width:640px){header,main,footer{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<header>
+ <h1 class="brand">VERITAS <b>GOLD</b> <span style="color:var(--mut);font-weight:600;font-size:15px">· Governance Docs</span><span class="tag">Phase 0 · Governance</span></h1>
+ <p>Menu Build Backlog — the master to-do list, phased P0–P5</p>
+ <div class="crumbs">
+   <a href="governance.html">← Governance landing</a> ·
+   <a href="index.html">Screen tour</a> ·
+   <a href="https://github.com/veritas-bank-system/Veritas-Gold-V1">repo</a>
+ </div>
+</header>
+<main>
+<h1>Veritas Gold — Menu Build Backlog</h1>
+<p>Master to-do list for implementing <a href="VERITAS-GOLD-MENU-SPECIFICATIONS.md">VERITAS-GOLD-MENU-SPECIFICATIONS.md</a><br/>across the Central Bank workspace. Each phase is a separately verified tranche.<br/>Rule for every item: banking-vertical-ui law (separate API client, loading/empty/error/<br/>confirmation/audit states, <strong>zero fabricated data</strong>), Common Page Contract strip on every<br/>page, and the five build gates before any commit.</p>
+<p>Legend: ✅ done · 🚧 in progress · ⬜ queued</p>
+<h2>Phase 0 — Governance ✅</h2>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span>Persist the detailed menu catalogue → <code>docs/VERITAS-GOLD-MENU-SPECIFICATIONS.md</code></span></li>
+<li class="done"><span class="mark">✓</span><span>This backlog document (single to-do list for all tranches)</span></li>
+</task>
+<h2>Phase 1 — Common Page Contract ✅</h2>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><code>PageContextStrip</code> shared component (workspace/institution, persona+role, environment,</span></li>
+</task>
+<p>  ledger status, permission scope, data freshness + stale warning, pending approvals,<br/>  active incidents, Export Evidence, audit reference)</p>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><code>sessionAudit</code> service — in-session, hash-chained client events for the audit trail</span></li>
+</task>
+<p>  (login, persona switch, evidence export, unmask audit), sessionStorage-backed</p>
+<h2>Phase 2 — De-alias the worst offenders ✅</h2>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><code>RiskDashboardView</code> (nav <code>compliance</code>) — exposure by institution/product/currency from</span></li>
+</task>
+<p>  live accounts+holdings; limits/breaches sections with honest empty states until P3</p>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><code>ExposureLimitsView</code> (<code>cb_limits</code>, alias removed) — limit registry, utilization,</span></li>
+</task>
+<p>  temporary exceptions with expiry, proposals (client-side drafts, proposer ≠ approver)</p>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><code>StressTestingView</code> (<code>cb_stress</code>, alias removed) — 8 spec scenarios, builder, honest</span></li>
+</task>
+<p>  &quot;simulation engine not connected&quot; run state</p>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><code>AccessLogsView</code> (new <code>access_logs</code> nav id; institutional chat keeps <code>secure_chat</code>) —</span></li>
+</task>
+<p>  filterable event table, in-session events only, &quot;server audit trail not connected&quot; state</p>
+<h2>Phase 3 — Remaining de-aliased views ✅ (first tranche delivered in commit 7d73d81)</h2>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><strong>Payments &amp; ISO 20022</strong> (<code>cb_iso20022</code>, own view <code>Iso20022PaymentsView</code>; FX desk keeps</span></li>
+</task>
+<p>  <code>interoperability</code>): live message explorer, screening/validation columns, repair queue,<br/>  evidence export, unmapped-type honest labels. P5 message store still queued.</p>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><strong>Delivery &amp; Transfers</strong> (<code>delivery_transfers</code>, institutional RFQ desk untouched):</span></li>
+</task>
+<p>  custody inventory, movement register with finality receipts, instruction/confirmation split.</p>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span><strong>Access Logs</strong> upgraded to the <strong>server audit chain</strong>: `GET/POST /api/v1/admin/</span></li>
+</task>
+<p>  audit-events<code> + </code>/verify` (hash-chained, append-only, in-memory until P5 persistence);<br/>  <code>AccessLogsView</code> reads the ledger first, source-labels rows Ledger vs Session.</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Statements &amp; GL</strong> (<code>statements_gl</code>, currently shared accounting view): account</span></li>
+</task>
+<p>  hierarchy, journal queue, period close, posting approvals</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Valuation &amp; P&amp;L</strong> (<code>cb_valuation</code>): price-source comparison, realized/unrealized P&amp;L,</span></li>
+</task>
+<p>  lock/approval workflow</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Regulatory Reports</strong> (<code>cb_reg_reports</code>): reporting calendar, validation, approval +</span></li>
+</task>
+<p>  submission states, corrections, evidence archive</p>
+<ul>
+<li>🚧 <strong>Audit Center</strong> (<code>cb_audit</code>, currently shared logs view): P5 audit-event source now</li>
+</ul>
+<p>  exists — needs its own de-aliased view (search, timeline, entity history, export builder)</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Institutions</strong> (<code>enterprise_admin</code>, currently enterprise-admin overview): registry,</span></li>
+</task>
+<p>  onboarding, scope assignment</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Users &amp; Roles</strong> (<code>identity_admin</code>, shared with Counterparties): role matrix,</span></li>
+</task>
+<p>  SoD conflicts, recertification, sessions</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Mandates &amp; Policies</strong> (<code>cb_mandates</code>, currently maker-checker): policy catalogue,</span></li>
+</task>
+<p>  versioning, exceptions with expiry</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Counterparties</strong> (<code>identity_admin</code> CB de-alias): registry, KYC/AML/sanctions states,</span></li>
+</task>
+<p>  document expiry, eligibility workflow</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>Settlement Accounts</strong> enhancement (<code>settlement_instruments</code>): verification queue,</span></li>
+</task>
+<p>  signatories, rail mapping, restrictions</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span><strong>System Configuration — Bonds</strong> (<code>canister_mgmt</code>): instrument master, calendars,</span></li>
+</task>
+<p>  day-count, versioned config releases with approvals</p>
+<h2>Phase 4 — Cross-menu access model ⬜</h2>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span>SoD conflict matrix detection (8 conflict pairs from the spec) in access-request flow</span></li>
+<li class="todo"><span class="mark">○</span><span>Access-request lifecycle (12 steps incl. dual approval, expiry, recertification)</span></li>
+<li class="todo"><span class="mark">○</span><span>Role-based action gating on every sensitive control (11-role matrix from the spec)</span></li>
+<li class="todo"><span class="mark">○</span><span>Emergency suspension panel (scope/reason/duration/incident ref/review deadline/audit)</span></li>
+</task>
+<h2>Phase 5 — Backend sources (Rust, banking-rules review required per item) 🚧</h2>
+<ul class="tasks">
+<li class="done"><span class="mark">✓</span><span>Audit/access-event endpoint (append-only, hash-chained) backing Access Logs + Audit</span></li>
+</task>
+<p>  Center — shipped in <code>7d73d81</code> (in-memory; see P5 persistence item below)</p>
+<ul class="tasks">
+<li class="todo"><span class="mark">○</span><span>Audit-chain persistence (currently in-memory journal, resets on restart)</span></li>
+<li class="todo"><span class="mark">○</span><span>Limits engine (proposals, dual approval, versioning, automatic expiry)</span></li>
+<li class="todo"><span class="mark">○</span><span>Stress-scenario store + deterministic simulation runner</span></li>
+<li class="todo"><span class="mark">○</span><span>ISO 20022 message store + validation/screening pipeline (banking-payment-messaging skill)</span></li>
+<li class="todo"><span class="mark">○</span><span>Auth guard for <code>/api/v1/admin/*</code> (supervision endpoint is currently unauthenticated)</span></li>
+<li class="todo"><span class="mark">○</span><span>GL/journal + valuation + regulatory-report persistence</span></li>
+</task>
+<h2>Definition of done (per tranche)</h2>
+<ul>
+<li>tsc, oxlint, production build all clean; preview walkthrough of every touched view with</li>
+</ul>
+<p>  all states exercised; no fabricated data anywhere; evidence export real; sidebar/deep<br/>  links intact; tour-script compatibility checked.</p>
+</main>
+<footer>
+ Veritas Gold V1 · generated from Markdown by scripts/build-docs-pages.mjs ·
+ <a href="https://github.com/veritas-bank-system/Veritas-Gold-V1">repo</a>
+</footer>
+</body>
+</html>

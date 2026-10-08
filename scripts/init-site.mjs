@@ -191,6 +191,23 @@ render();
 fs.writeFileSync(SITE_OUT, PAGE);
 console.log(`init-site: wrote ${SITE_OUT} (${shots.length} shots, ${PAGE.length} bytes)`);
 
+/* --------------------------------------- governance doc pages (same design) */
+// Render docs/VERITAS-GOLD-MENU-SPECIFICATIONS.md + docs/MENU-BUILD-BACKLOG.md
+// into styled HTML (docs/*.html + docs/governance.html) so the Phase 0
+// documents are browsable on the same site as the tour. Runs before --serve
+// or via `npm run build:site`.
+{
+  const { execFileSync } = await import('node:child_process');
+  const conv = path.join(REPO_ROOT, 'scripts', 'build-docs-pages.mjs');
+  if (fs.existsSync(conv)) {
+    try {
+      execFileSync(process.execPath, [conv], { stdio: 'inherit', cwd: REPO_ROOT });
+    } catch (e) {
+      console.error('init-site: doc-page generation failed:', e.message);
+    }
+  }
+}
+
 /* -------------------------------------------------- optional dev server */
 if (process.argv.includes('--serve') || argFlag('serve')) {
   const port = Number(process.env.PORT) > 0 ? Number(process.env.PORT) : 4173;

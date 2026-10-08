@@ -1,0 +1,1418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Menu Specifications — every menu point, page contract, and acceptance criteria · Veritas Gold V1</title>
+<style>
+ :root{--bg:#0b0a0d;--panel:#141118;--panel2:#1a1620;--line:#2a2331;--ink:#efe6f2;--mut:#9d92a8;--red:#ef4444;--gold:#d4af37;--violet:#8b5cf6}
+ *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 -apple-system,'Segoe UI',Roboto,sans-serif}
+ a{color:var(--red);text-decoration:none} a:hover{text-decoration:underline}
+ header{padding:28px 32px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#171219,#0b0a0d)}
+ .brand{font:800 26px/1 'Segoe UI',sans-serif;letter-spacing:-.02em;margin:0 0 6px}
+ .brand b{color:var(--red)} .tag{display:inline-block;margin-left:10px;font:700 10px/1.8 sans-serif;letter-spacing:.12em;color:#ffb1b1;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);border-radius:999px;padding:2px 10px;vertical-align:2px}
+ header p{color:var(--mut);max-width:860px;margin:8px 0 0}
+ .crumbs{font-size:12px;color:var(--mut);margin-top:10px}
+ .crumbs a{color:var(--gold)}
+ main{max-width:980px;margin:0 auto;padding:28px 32px 80px}
+ h1{font:800 30px/1.2 'Segoe UI',sans-serif;letter-spacing:-.02em;margin:18px 0 14px;color:var(--ink);border-bottom:2px solid var(--line);padding-bottom:10px}
+ h2{font:800 20px/1.3 'Segoe UI',sans-serif;margin:32px 0 10px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px}
+ h3{font:700 16px/1.3 'Segoe UI',sans-serif;margin:22px 0 8px;color:var(--ink)}
+ h4{font:700 14px/1.3 'Segoe UI',sans-serif;margin:18px 0 6px;color:var(--violet)}
+ h5{font:700 13px/1.3 'Segoe UI',sans-serif;margin:14px 0 6px;color:var(--mut)}
+ p{margin:8px 0;color:#cfc4d8;max-width:820px}
+ ul{margin:6px 0 12px;padding-left:22px;color:#cfc4d8}
+ ul ul{margin-top:4px}
+ li{margin:4px 0}
+ ul.tasks{list-style:none;padding-left:0}
+ ul.tasks li{display:flex;gap:10px;align-items:flex-start;padding:5px 8px;border-radius:8px}
+ ul.tasks li:hover{background:var(--panel2)}
+ ul.tasks li.done .mark{color:#34d399;font-weight:800}
+ ul.tasks li.doing .mark{color:var(--gold);font-weight:800}
+ ul.tasks li.todo .mark{color:var(--mut)}
+ ul.tasks li.done{color:var(--mut)}
+ ul.tasks li.doing{color:var(--ink)}
+ code{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--gold)}
+ pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;margin:12px 0}
+ pre code{background:none;border:none;padding:0;color:#d9cfdf}
+ .tblwrap{overflow-x:auto;margin:12px 0}
+ table{border-collapse:collapse;width:100%;font-size:13px}
+ th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+ th{background:var(--panel2);color:var(--gold);font-weight:700;white-space:nowrap}
+ tr:nth-child(even) td{background:rgba(20,17,24,.5)}
+ hr{border:none;border-top:1px solid var(--line);margin:24px 0}
+ footer{padding:18px 32px 40px;border-top:1px solid var(--line);color:var(--mut);font-size:12px}
+ @media(max-width:640px){header,main,footer{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<header>
+ <h1 class="brand">VERITAS <b>GOLD</b> <span style="color:var(--mut);font-weight:600;font-size:15px">· Governance Docs</span><span class="tag">Phase 0 · Governance</span></h1>
+ <p>Menu Specifications — every menu point, page contract, and acceptance criteria</p>
+ <div class="crumbs">
+   <a href="governance.html">← Governance landing</a> ·
+   <a href="index.html">Screen tour</a> ·
+   <a href="https://github.com/veritas-bank-system/Veritas-Gold-V1">repo</a>
+ </div>
+</header>
+<main>
+<h1>Veritas Gold — Detailed Menu Specifications</h1>
+<h2>Document Purpose</h2>
+<p>This document defines the purpose, users, information model, workflows, permissions, approvals, audit requirements, and central-bank supervisory value of every Veritas Gold menu point. It is intended for product design, engineering, compliance, security, QA, and operational training.</p>
+<p>The interface should retain the supplied Central Bank Workspace visual language: dark institutional panels, compact high-density tables, burgundy active navigation, visible operator persona, institution and node context, environment indicators, approval badges, and regulator-focused auditability.</p>
+<h2>Common Page Contract</h2>
+<p>Every menu page should show the following context above its main content:</p>
+<ul>
+<li>Active workspace and institution.</li>
+<li>Active persona and effective role.</li>
+<li>Environment: production, sandbox, training, or disaster recovery.</li>
+<li>Ledger and data-source status.</li>
+<li>Current permission scope.</li>
+<li>Last data refresh and data freshness warning.</li>
+<li>Pending approvals relevant to the page.</li>
+<li>Active incidents or emergency restrictions.</li>
+<li>Export evidence action.</li>
+<li>Audit reference for sensitive records.</li>
+</ul>
+<p>Every write action should record the actor, role, institution, timestamp, environment, device, session, reason, request version, approval reference, and result.</p>
+<p>Every sensitive change should support least privilege, multi-factor authentication, segregation-of-duties checks, four-eyes approval, automatic expiry where relevant, and immutable audit history.</p>
+<h1>Operations</h1>
+<h2>Settlement Monitor</h2>
+<h3>Purpose</h3>
+<p>Settlement Monitor is the operational control tower for tracking whether approved trades and transfers have completed correctly. It connects the trade instruction, cash movement, asset movement, counterparty, settlement account, custody location, and final confirmation.</p>
+<h3>Main users</h3>
+<ul>
+<li>Settlement officers.</li>
+<li>Treasury operations.</li>
+<li>Custody operations.</li>
+<li>Supervisory operators.</li>
+<li>Risk and compliance reviewers.</li>
+<li>Auditors in read-only mode.</li>
+</ul>
+<h3>Main page sections</h3>
+<p>1. Settlement health summary.<br/>2. Live settlement queue.<br/>3. Failed and delayed settlements.<br/>4. Settlement exceptions.<br/>5. Settlement-rail status.<br/>6. Counterparty settlement readiness.<br/>7. Recent confirmations.<br/>8. Audit and evidence panel.</p>
+<h3>Key data</h3>
+<ul>
+<li>Settlement ID.</li>
+<li>Trade or transfer reference.</li>
+<li>Buy or sell direction.</li>
+<li>Instrument and quantity.</li>
+<li>Cash amount and currency.</li>
+<li>Trade date and value date.</li>
+<li>Delivery-versus-payment state.</li>
+<li>Counterparty and custodian.</li>
+<li>Settlement account.</li>
+<li>Settlement rail.</li>
+<li>Current status.</li>
+<li>Failure reason.</li>
+<li>Exception owner.</li>
+<li>SLA and escalation level.</li>
+<li>Finality timestamp.</li>
+</ul>
+<h3>Status model</h3>
+<ul>
+<li>Instruction received.</li>
+<li>Validation pending.</li>
+<li>Approved.</li>
+<li>Awaiting cash.</li>
+<li>Awaiting asset.</li>
+<li>Matched.</li>
+<li>Settling.</li>
+<li>Completed.</li>
+<li>Failed.</li>
+<li>Held.</li>
+<li>Cancelled.</li>
+<li>Reversed.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Investigate a failed settlement.</li>
+<li>Repair an eligible instruction.</li>
+<li>Place a settlement on hold.</li>
+<li>Request a settlement override.</li>
+<li>Escalate a late settlement.</li>
+<li>Confirm delivery-versus-payment.</li>
+<li>Release a completed settlement.</li>
+<li>Export a complete settlement evidence pack.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Settlement creation, repair, release, and confirmation should be separated. High-value settlement overrides require a second authorized approver. A settlement officer must not approve their own repair or override.</p>
+<h3>Central-bank value</h3>
+<p>The module gives supervisors immediate visibility into market infrastructure health, systemic settlement delays, failed obligations, and potential liquidity or counterparty stress.</p>
+<h2>Payments &amp; ISO 20022</h2>
+<h3>Purpose</h3>
+<p>This menu manages structured institutional payment messages and their full lifecycle from creation through validation, screening, release, transmission, response, and reconciliation.</p>
+<h3>Main page sections</h3>
+<p>1. Payment-processing health.<br/>2. Incoming and outgoing queues.<br/>3. ISO 20022 message explorer.<br/>4. Validation and repair queue.<br/>5. Screening and sanctions status.<br/>6. Payment approvals.<br/>7. Rejected and returned messages.<br/>8. Message audit trail.</p>
+<h3>Supported message areas</h3>
+<ul>
+<li>Customer credit transfers.</li>
+<li>Financial-institution transfers.</li>
+<li>Account reports.</li>
+<li>Statement messages.</li>
+<li>Payment status messages.</li>
+<li>Investigation and exception messages.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Message ID.</li>
+<li>Transaction ID.</li>
+<li>Message type.</li>
+<li>Sender and receiver.</li>
+<li>Debtor and creditor.</li>
+<li>Amount and currency.</li>
+<li>Value date.</li>
+<li>Settlement account.</li>
+<li>Correspondent or clearing route.</li>
+<li>Screening result.</li>
+<li>Validation result.</li>
+<li>Repair history.</li>
+<li>Delivery status.</li>
+<li>Response code.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create or import a payment.</li>
+<li>Validate message structure.</li>
+<li>Review field-level errors.</li>
+<li>Repair permitted fields.</li>
+<li>Route for approval.</li>
+<li>Release payment.</li>
+<li>Investigate rejection.</li>
+<li>Resubmit a corrected message.</li>
+<li>Reconcile message status to ledger status.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Message creation, repair, and release must be permission-separated. Changes to beneficiary, amount, currency, account, or value date after approval should invalidate the approval and restart the workflow.</p>
+<h3>Central-bank value</h3>
+<p>The module supports payment-system oversight, message integrity, suspicious-payment investigation, and reliable evidence for settlement and regulatory review.</p>
+<h2>Reconciliation</h2>
+<h3>Purpose</h3>
+<p>Reconciliation identifies differences between internal records and external statements, custodians, payment networks, settlement systems, and distributed ledgers.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Reconciliation health.</li>
+<li>Match-rate trend.</li>
+<li>Unmatched items.</li>
+<li>High-value breaks.</li>
+<li>Ageing analysis.</li>
+<li>Cash reconciliation.</li>
+<li>Asset reconciliation.</li>
+<li>Ledger-to-statement comparison.</li>
+<li>Adjustments awaiting approval.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Reconciliation run ID.</li>
+<li>Source system.</li>
+<li>Internal reference.</li>
+<li>External reference.</li>
+<li>Instrument.</li>
+<li>Quantity.</li>
+<li>Amount.</li>
+<li>Currency.</li>
+<li>Expected value.</li>
+<li>Actual value.</li>
+<li>Difference.</li>
+<li>Break category.</li>
+<li>Age.</li>
+<li>Owner.</li>
+<li>Due date.</li>
+<li>Resolution state.</li>
+</ul>
+<h3>Break categories</h3>
+<ul>
+<li>Timing difference.</li>
+<li>Missing instruction.</li>
+<li>Duplicate record.</li>
+<li>Wrong amount.</li>
+<li>Wrong account.</li>
+<li>Wrong asset quantity.</li>
+<li>Price difference.</li>
+<li>Fee difference.</li>
+<li>Currency difference.</li>
+<li>Unauthorised adjustment.</li>
+<li>Unknown transaction.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Auto-match records.</li>
+<li>Manually match records.</li>
+<li>Assign a break.</li>
+<li>Request supporting evidence.</li>
+<li>Propose an adjustment.</li>
+<li>Approve an adjustment.</li>
+<li>Escalate aged breaks.</li>
+<li>Close a reconciliation period.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Users who identify a break may not approve the accounting adjustment that resolves it. Adjustments must preserve the original records and reference the reason, evidence, and approver.</p>
+<h3>Central-bank value</h3>
+<p>Reconciliation proves that institutional balances, reserve positions, transactions, and settlement records agree across systems.</p>
+<h2>Delivery &amp; Transfers</h2>
+<h3>Purpose</h3>
+<p>Delivery &amp; Transfers manages the movement of assets, cash, ownership records, custody instructions, and physical bullion between approved parties and locations.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Transfer overview.</li>
+<li>Pending instructions.</li>
+<li>Physical delivery queue.</li>
+<li>Electronic asset transfers.</li>
+<li>Chain-of-custody timeline.</li>
+<li>Exception and hold queue.</li>
+<li>Delivery confirmations.</li>
+<li>Transfer audit evidence.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Transfer ID.</li>
+<li>Asset type.</li>
+<li>Quantity and unit.</li>
+<li>Origin institution.</li>
+<li>Destination institution.</li>
+<li>Origin and destination account.</li>
+<li>Custodian and vault.</li>
+<li>Bar identifiers.</li>
+<li>Delivery date.</li>
+<li>Insurance status.</li>
+<li>Instruction owner.</li>
+<li>Approval state.</li>
+<li>Confirmation document.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create a transfer request.</li>
+<li>Validate ownership and availability.</li>
+<li>Screen destination institution.</li>
+<li>Approve transfer.</li>
+<li>Confirm physical handover.</li>
+<li>Confirm electronic receipt.</li>
+<li>Place transfer on hold.</li>
+<li>Investigate a discrepancy.</li>
+<li>Complete chain-of-custody evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Transfer initiation, custody confirmation, and final ownership update should be performed by separate authorized users. Physical gold transfers require dual confirmation and bar-level evidence.</p>
+<h3>Central-bank value</h3>
+<p>The module demonstrates control over reserve assets, ownership changes, physical custody, and cross-institution asset movement.</p>
+<h1>Markets &amp; Assets</h1>
+<h2>Gold Bullion</h2>
+<h3>Purpose</h3>
+<p>Gold Bullion is the asset-level operating screen for physical, allocated, and unallocated gold products.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Gold position overview.</li>
+<li>Buy and sell order area.</li>
+<li>Bar inventory.</li>
+<li>Allocation register.</li>
+<li>Vault distribution.</li>
+<li>Price and valuation panel.</li>
+<li>Encumbrance and lien status.</li>
+<li>Delivery queue.</li>
+<li>Reserve reconciliation.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Bar number.</li>
+<li>Refinery.</li>
+<li>Serial number.</li>
+<li>Weight.</li>
+<li>Fineness and purity.</li>
+<li>Gross and fine weight.</li>
+<li>Assay reference.</li>
+<li>Vault and compartment.</li>
+<li>Custodian.</li>
+<li>Legal owner.</li>
+<li>Allocation state.</li>
+<li>Encumbrance state.</li>
+<li>Insurance.</li>
+<li>Valuation price and timestamp.</li>
+<li>Buy/sell eligibility.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create a gold purchase request.</li>
+<li>Create a gold sale request.</li>
+<li>Allocate bars to an institution.</li>
+<li>Deallocate bars.</li>
+<li>Transfer ownership.</li>
+<li>Request physical delivery.</li>
+<li>Verify assay.</li>
+<li>Reconcile bar inventory.</li>
+<li>Freeze a bar or holding.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Orders must respect product, institution, counterparty, risk, and jurisdiction limits. A trader may initiate an order, but independent operations and compliance users must validate settlement and eligibility.</p>
+<h3>Central-bank value</h3>
+<p>Gold Bullion provides proof of reserve existence, ownership, allocation, custody, valuation, and transferability.</p>
+<h2>Government Bonds</h2>
+<h3>Purpose</h3>
+<p>Government Bonds manages sovereign and government-backed fixed-income instruments used for reserves, liquidity, collateral, and institutional investment.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Bond catalogue.</li>
+<li>Yield and price view.</li>
+<li>Holdings.</li>
+<li>Maturity ladder.</li>
+<li>Coupon calendar.</li>
+<li>Duration and sensitivity.</li>
+<li>Buy/sell workflow.</li>
+<li>Settlement status.</li>
+<li>Regulatory eligibility.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Issuer.</li>
+<li>ISIN.</li>
+<li>Country and currency.</li>
+<li>Maturity date.</li>
+<li>Coupon rate.</li>
+<li>Coupon frequency.</li>
+<li>Yield.</li>
+<li>Clean and dirty price.</li>
+<li>Duration.</li>
+<li>Credit rating.</li>
+<li>Position quantity.</li>
+<li>Market value.</li>
+<li>Custodian.</li>
+<li>Settlement convention.</li>
+<li>Eligibility status.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Review instrument.</li>
+<li>Request a buy or sell.</li>
+<li>Validate mandate and limit.</li>
+<li>Approve trade.</li>
+<li>Monitor settlement.</li>
+<li>Review maturity or coupon.</li>
+<li>Calculate valuation.</li>
+<li>Generate regulatory report.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Bond-trading permission should be separate from bond-configuration permission. Changes to pricing, settlement conventions, or eligibility require configuration approval and regression testing.</p>
+<h3>Central-bank value</h3>
+<p>The module supports reserve management, liquidity operations, collateral oversight, and sovereign-market supervision.</p>
+<h2>FX &amp; Money Markets</h2>
+<h3>Purpose</h3>
+<p>FX &amp; Money Markets manages currency trading, short-term funding, liquidity instruments, and money-market exposure.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Market overview.</li>
+<li>Currency-pair quotes.</li>
+<li>Trade blotter.</li>
+<li>Money-market instruments.</li>
+<li>Liquidity-provider panel.</li>
+<li>Exposure and limits.</li>
+<li>Settlement readiness.</li>
+<li>Counterparty status.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Currency pair.</li>
+<li>Bid and offer.</li>
+<li>Quote timestamp.</li>
+<li>Notional.</li>
+<li>Trade direction.</li>
+<li>Value date.</li>
+<li>Counterparty.</li>
+<li>Liquidity source.</li>
+<li>Limit utilization.</li>
+<li>Funding rate.</li>
+<li>Maturity.</li>
+<li>Settlement route.</li>
+<li>Approval status.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Review market data.</li>
+<li>Initiate FX or money-market transaction.</li>
+<li>Validate limit and mandate.</li>
+<li>Approve transaction.</li>
+<li>Monitor liquidity.</li>
+<li>Manage funding maturity.</li>
+<li>Suspend a liquidity provider.</li>
+<li>Investigate settlement exposure.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Market-data access, trade initiation, limit approval, and settlement confirmation should be separated. A liquidity-provider change requires counterparty and risk review.</p>
+<h3>Central-bank value</h3>
+<p>The module supports liquidity supervision, foreign-exchange operations, funding stability, and emergency market intervention.</p>
+<h2>Custody &amp; Vaults</h2>
+<h3>Purpose</h3>
+<p>Custody &amp; Vaults manages locations, custodians, physical holdings, allocated assets, vault controls, and evidence of possession.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Vault map or vault list.</li>
+<li>Inventory totals.</li>
+<li>Allocated and unallocated holdings.</li>
+<li>Bar-level inventory.</li>
+<li>Custodian dashboard.</li>
+<li>Insurance and access status.</li>
+<li>Physical audit schedule.</li>
+<li>Movement and delivery queue.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Vault ID.</li>
+<li>Location and jurisdiction.</li>
+<li>Custodian.</li>
+<li>Compartment.</li>
+<li>Bar number.</li>
+<li>Weight and purity.</li>
+<li>Owner.</li>
+<li>Allocation state.</li>
+<li>Insurance value.</li>
+<li>Access log.</li>
+<li>Last physical audit.</li>
+<li>Encumbrance.</li>
+<li>Transfer restrictions.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Add a vault.</li>
+<li>Register inventory.</li>
+<li>Allocate or deallocate gold.</li>
+<li>Approve custody movement.</li>
+<li>Confirm physical audit.</li>
+<li>Freeze a compartment.</li>
+<li>Investigate missing or mismatched assets.</li>
+<li>Export custody evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Vault administration, asset movement, and audit verification must be separate responsibilities. Any discrepancy requires incident escalation and preservation of evidence.</p>
+<h3>Central-bank value</h3>
+<p>This module supports reserve integrity and physical proof of assets backing institutional obligations.</p>
+<h2>Portfolio Management</h2>
+<h3>Purpose</h3>
+<p>Portfolio Management consolidates holdings, mandates, objectives, risk, liquidity, valuation, and compliance for an institution or supervisory scope.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Portfolio overview.</li>
+<li>Mandate and policy status.</li>
+<li>Asset allocation.</li>
+<li>Performance and P&amp;L.</li>
+<li>Risk and liquidity.</li>
+<li>Concentration.</li>
+<li>Compliance breaches.</li>
+<li>Cash and collateral.</li>
+<li>Rebalancing requests.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Portfolio ID.</li>
+<li>Institution.</li>
+<li>Mandate.</li>
+<li>Base currency.</li>
+<li>Asset allocation.</li>
+<li>Market value.</li>
+<li>Cost basis.</li>
+<li>Realized and unrealized P&amp;L.</li>
+<li>Benchmark.</li>
+<li>Liquidity bucket.</li>
+<li>Risk score.</li>
+<li>Limit utilization.</li>
+<li>Compliance state.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Review portfolio.</li>
+<li>Compare against mandate.</li>
+<li>Identify allocation breach.</li>
+<li>Request rebalance.</li>
+<li>Approve rebalance.</li>
+<li>Review performance.</li>
+<li>Export portfolio report.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Portfolio managers may propose changes, but compliance and risk controls must validate mandate adherence before execution.</p>
+<h3>Central-bank value</h3>
+<p>The module enables institution-wide oversight instead of isolated product monitoring.</p>
+<h2>Reserve Overview</h2>
+<h3>Purpose</h3>
+<p>Reserve Overview presents the composition, valuation, availability, encumbrance, and coverage of institutional reserves.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Reserve composition.</li>
+<li>Gold reserves.</li>
+<li>Cash and deposits.</li>
+<li>Government bonds.</li>
+<li>Liquidity reserves.</li>
+<li>Encumbered versus available assets.</li>
+<li>Coverage ratio.</li>
+<li>Reserve movements.</li>
+<li>Reconciliation and audit status.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Reserve category.</li>
+<li>Asset quantity.</li>
+<li>Market value.</li>
+<li>Valuation time.</li>
+<li>Currency.</li>
+<li>Custodian.</li>
+<li>Availability.</li>
+<li>Encumbrance.</li>
+<li>Coverage ratio.</li>
+<li>Required reserve level.</li>
+<li>Variance.</li>
+<li>Audit status.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Review reserve coverage.</li>
+<li>Investigate reserve variance.</li>
+<li>Reconcile reserve assets.</li>
+<li>Approve reserve report.</li>
+<li>Freeze disputed assets.</li>
+<li>Export reserve evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Reserve reports require independent review. Changes to reserve classification or availability must be versioned and approved.</p>
+<h3>Central-bank value</h3>
+<p>This is the high-level reserve and backing view for governors, supervisors, auditors, and authorized financial operators.</p>
+<h1>Risk &amp; Policy</h1>
+<h2>Risk Dashboard</h2>
+<h3>Purpose</h3>
+<p>Risk Dashboard consolidates market, credit, liquidity, operational, compliance, settlement, and concentration risk.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Risk summary.</li>
+<li>Exposure by institution.</li>
+<li>Exposure by product.</li>
+<li>Limit utilization.</li>
+<li>Breaches and near-breaches.</li>
+<li>Liquidity risk.</li>
+<li>Counterparty risk.</li>
+<li>Stress-test results.</li>
+<li>Open mitigations.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Risk type.</li>
+<li>Exposure.</li>
+<li>Limit.</li>
+<li>Utilization.</li>
+<li>Threshold.</li>
+<li>Breach time.</li>
+<li>Owner.</li>
+<li>Severity.</li>
+<li>Mitigation.</li>
+<li>Escalation state.</li>
+<li>Approval reference.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Review a risk event.</li>
+<li>Approve mitigation.</li>
+<li>Propose a limit change.</li>
+<li>Freeze a product or institution.</li>
+<li>Escalate to supervisory authority.</li>
+<li>Export risk evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Risk users may recommend restrictions but should not silently alter operational permissions without approved workflow.</p>
+<h3>Central-bank value</h3>
+<p>The dashboard provides early warning of concentration, liquidity, market, and institutional risk.</p>
+<h2>Exposure &amp; Limits</h2>
+<h3>Purpose</h3>
+<p>Exposure &amp; Limits defines the quantitative and policy boundaries within which trading, settlement, custody, and transfers may operate.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Limit hierarchy.</li>
+<li>Product limits.</li>
+<li>Institution limits.</li>
+<li>Counterparty limits.</li>
+<li>Currency limits.</li>
+<li>Settlement limits.</li>
+<li>Limit utilization.</li>
+<li>Temporary exceptions.</li>
+<li>Breach history.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Limit ID.</li>
+<li>Limit type.</li>
+<li>Owner.</li>
+<li>Scope.</li>
+<li>Currency.</li>
+<li>Threshold.</li>
+<li>Current usage.</li>
+<li>Available capacity.</li>
+<li>Start and expiry date.</li>
+<li>Approval state.</li>
+<li>Exception reason.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create limit proposal.</li>
+<li>Review utilization.</li>
+<li>Increase or reduce limit.</li>
+<li>Add temporary exception.</li>
+<li>Suspend limit.</li>
+<li>Approve limit change.</li>
+<li>Review historical versions.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>A limit proposer must not be the final approver. Expired temporary limits must stop applying automatically.</p>
+<h3>Central-bank value</h3>
+<p>The module turns policy limits into enforceable operational controls.</p>
+<h2>Counterparties</h2>
+<h3>Purpose</h3>
+<p>Counterparties stores legal, regulatory, operational, credit, sanctions, KYC, and settlement information for external institutions.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Counterparty registry.</li>
+<li>Onboarding queue.</li>
+<li>KYC and AML status.</li>
+<li>Sanctions screening.</li>
+<li>Credit and risk profile.</li>
+<li>Approved products.</li>
+<li>Settlement accounts.</li>
+<li>Document expiry.</li>
+<li>Relationship history.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Legal name.</li>
+<li>LEI.</li>
+<li>Jurisdiction.</li>
+<li>Regulator.</li>
+<li>Beneficial ownership.</li>
+<li>KYC status.</li>
+<li>AML status.</li>
+<li>Sanctions status.</li>
+<li>Credit rating.</li>
+<li>Approved limit.</li>
+<li>Settlement account.</li>
+<li>Documentation expiry.</li>
+<li>Compliance owner.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create onboarding case.</li>
+<li>Collect evidence.</li>
+<li>Screen entity and owners.</li>
+<li>Approve eligibility.</li>
+<li>Assign limits.</li>
+<li>Suspend trading.</li>
+<li>Renew documents.</li>
+<li>Review relationship history.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Counterparty approval requires independent compliance review and cannot be granted by the relationship owner alone.</p>
+<h3>Central-bank value</h3>
+<p>This module provides the institutional identity and risk foundation for every transaction.</p>
+<h2>Stress Testing</h2>
+<h3>Purpose</h3>
+<p>Stress Testing models adverse scenarios and determines whether portfolios, reserves, liquidity, limits, and settlement systems remain resilient.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Scenario library.</li>
+<li>Scenario builder.</li>
+<li>Model assumptions.</li>
+<li>Affected institutions.</li>
+<li>Projected impact.</li>
+<li>Limit breaches.</li>
+<li>Liquidity impact.</li>
+<li>Recovery actions.</li>
+<li>Approval and publication status.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Scenario ID.</li>
+<li>Scenario type.</li>
+<li>Assumptions.</li>
+<li>Market shock.</li>
+<li>Liquidity shock.</li>
+<li>Counterparty default.</li>
+<li>Loss projection.</li>
+<li>Reserve impact.</li>
+<li>Recovery time.</li>
+<li>Mitigation owner.</li>
+<li>Review state.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create scenario.</li>
+<li>Run model.</li>
+<li>Compare scenarios.</li>
+<li>Review breaches.</li>
+<li>Assign mitigation.</li>
+<li>Approve publication.</li>
+<li>Export results.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Model assumptions and final published results should have separate ownership and approval.</p>
+<h3>Central-bank value</h3>
+<p>The module supports resilience planning and supervisory scenario analysis.</p>
+<h2>Compliance Dashboard</h2>
+<h3>Purpose</h3>
+<p>Compliance Dashboard is the supervisory control center for product launch, trading permissions, institutional compliance, team access, privileged activity, approvals, exceptions, and evidence.</p>
+<h3>Main page sections</h3>
+<p>1. Workspace and operator context.<br/>2. Compliance posture KPIs.<br/>3. Market-launch initiative.<br/>4. Buy/sell product register.<br/>5. Team Access &amp; Authority Control.<br/>6. Four-eyes approval strip.<br/>7. Critical compliance alerts.<br/>8. Privileged Access Activity.<br/>9. Regulatory Oversight &amp; Audit.<br/>10. Evidence and emergency controls.</p>
+<h3>Core KPIs</h3>
+<ul>
+<li>Market Launch Readiness.</li>
+<li>Critical Compliance Controls.</li>
+<li>Approved Products.</li>
+<li>KYC/AML Coverage.</li>
+<li>Privileged Access Risk.</li>
+<li>Approval Integrity.</li>
+<li>Sanctions-screening coverage.</li>
+<li>Settlement readiness.</li>
+</ul>
+<h3>Launch gates</h3>
+<ul>
+<li>Product definition.</li>
+<li>Regulatory classification.</li>
+<li>Legal and policy review.</li>
+<li>KYC/AML validation.</li>
+<li>Sanctions validation.</li>
+<li>Risk-limit approval.</li>
+<li>Liquidity-provider approval.</li>
+<li>Counterparty approval.</li>
+<li>Custody and vault readiness.</li>
+<li>Settlement-account readiness.</li>
+<li>Accounting and valuation readiness.</li>
+<li>Operational resilience.</li>
+<li>Incident and recovery plan.</li>
+<li>Final dual approval.</li>
+</ul>
+<h3>Buy/sell register</h3>
+<p>The table should distinguish buy permission, sell permission, order creation, order amendment, order approval, settlement, limit changes, and control overrides.</p>
+<h3>Team access panel</h3>
+<p>Show active users, privileged users, overdue reviews, dormant accounts, temporary grants, SoD conflicts, external users, break-glass accounts, active privileged sessions, and pending requests.</p>
+<h3>Approval rules</h3>
+<p>The requester cannot approve their own request. High-risk approval requires re-authentication. Any material change invalidates prior approval. Approval records must include actor, role, timestamp, device, session, version, and evidence hash.</p>
+<h3>Emergency actions</h3>
+<p>Support controlled suspension of buy activity, sell activity, products, counterparties, jurisdictions, settlement rails, privileged sessions, and compromised users. Every emergency action requires scope, reason, duration, incident reference, notification list, review deadline, and audit record.</p>
+<h3>Central-bank value</h3>
+<p>This is the supervisory summary layer connecting the rest of the platform.</p>
+<h1>Accounting &amp; Reporting</h1>
+<h2>Statements &amp; GL</h2>
+<h3>Purpose</h3>
+<p>Statements &amp; GL manages institutional accounts, journal entries, postings, accounting periods, balances, and statement production.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Account hierarchy.</li>
+<li>Balance summary.</li>
+<li>Journal queue.</li>
+<li>Pending postings.</li>
+<li>Period close.</li>
+<li>Reconciliation state.</li>
+<li>Adjustment approvals.</li>
+<li>Statement exports.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Account number.</li>
+<li>Account name.</li>
+<li>Entity.</li>
+<li>Currency.</li>
+<li>Opening balance.</li>
+<li>Closing balance.</li>
+<li>Debit and credit.</li>
+<li>Journal reference.</li>
+<li>Posting date.</li>
+<li>Accounting period.</li>
+<li>Approval status.</li>
+<li>Reconciliation status.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create journal proposal.</li>
+<li>Review posting.</li>
+<li>Approve entry.</li>
+<li>Reverse eligible entry.</li>
+<li>Close accounting period.</li>
+<li>Generate statement.</li>
+<li>Export accounting evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>The journal creator, approver, and period closer should be separate roles for material entries.</p>
+<h3>Central-bank value</h3>
+<p>This module connects operational activity to official books and financial reporting.</p>
+<h2>Valuation &amp; P&amp;L</h2>
+<h3>Purpose</h3>
+<p>Valuation &amp; P&amp;L calculates market value, accounting value, realized P&amp;L, unrealized P&amp;L, and valuation confidence for products and portfolios.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Valuation summary.</li>
+<li>Price-source comparison.</li>
+<li>Instrument positions.</li>
+<li>Realized P&amp;L.</li>
+<li>Unrealized P&amp;L.</li>
+<li>Valuation adjustments.</li>
+<li>Exceptions.</li>
+<li>Approval history.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Instrument.</li>
+<li>Quantity.</li>
+<li>Price source.</li>
+<li>Price timestamp.</li>
+<li>Currency.</li>
+<li>Market value.</li>
+<li>Cost basis.</li>
+<li>Realized P&amp;L.</li>
+<li>Unrealized P&amp;L.</li>
+<li>Price confidence.</li>
+<li>Adjustment reason.</li>
+<li>Reviewer.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Run valuation.</li>
+<li>Compare price sources.</li>
+<li>Investigate outlier.</li>
+<li>Propose adjustment.</li>
+<li>Approve adjustment.</li>
+<li>Lock valuation.</li>
+<li>Generate P&amp;L report.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Price-source configuration and valuation approval should be separate. Locked valuations require a controlled correction process.</p>
+<h3>Central-bank value</h3>
+<p>The module supports accurate reserves, financial statements, capital analysis, and supervisory reporting.</p>
+<h2>Regulatory Reports</h2>
+<h3>Purpose</h3>
+<p>Regulatory Reports produces, validates, approves, submits, and preserves official regulatory filings.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Reporting calendar.</li>
+<li>Draft reports.</li>
+<li>Validation errors.</li>
+<li>Review queue.</li>
+<li>Approval queue.</li>
+<li>Submission status.</li>
+<li>Corrections.</li>
+<li>Evidence archive.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Report ID.</li>
+<li>Report type.</li>
+<li>Authority.</li>
+<li>Period.</li>
+<li>Deadline.</li>
+<li>Data cut-off.</li>
+<li>Validation state.</li>
+<li>Reviewer.</li>
+<li>Approval state.</li>
+<li>Submission reference.</li>
+<li>Correction history.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Generate report.</li>
+<li>Validate report.</li>
+<li>Resolve data error.</li>
+<li>Approve report.</li>
+<li>Submit report.</li>
+<li>Record authority response.</li>
+<li>Create correction.</li>
+<li>Export filing package.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Report preparation, validation, approval, and submission should be separated for high-impact filings.</p>
+<h3>Central-bank value</h3>
+<p>The module creates a defensible, versioned, traceable regulatory record.</p>
+<h2>Audit Center</h2>
+<h3>Purpose</h3>
+<p>Audit Center provides deep investigation and evidence management for system, user, market, compliance, settlement, and governance events.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Global event search.</li>
+<li>Timeline view.</li>
+<li>Entity history.</li>
+<li>Approval history.</li>
+<li>Privileged activity.</li>
+<li>Evidence validation.</li>
+<li>Incidents.</li>
+<li>Export builder.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>UTC and local timestamp.</li>
+<li>Actor.</li>
+<li>Effective role.</li>
+<li>Institution.</li>
+<li>Object.</li>
+<li>Action.</li>
+<li>Previous value.</li>
+<li>New value.</li>
+<li>Reason.</li>
+<li>Approval reference.</li>
+<li>Session ID.</li>
+<li>Device ID.</li>
+<li>Network zone.</li>
+<li>Result.</li>
+<li>Evidence hash.</li>
+<li>Retention class.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Search an event.</li>
+<li>Reconstruct a timeline.</li>
+<li>Compare versions.</li>
+<li>Validate evidence.</li>
+<li>Link event to incident.</li>
+<li>Produce auditor export.</li>
+<li>Place evidence under legal hold.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Audit administrators must not be able to erase the records they investigate. Exports should be controlled, watermarked, versioned, and logged.</p>
+<h3>Central-bank value</h3>
+<p>The module allows the institution to prove what happened, who acted, under what authority, and with which evidence.</p>
+<h1>Governance</h1>
+<h2>Institutions</h2>
+<h3>Purpose</h3>
+<p>Institutions manages legal entities, regulated organizations, central-bank departments, custodians, counterparties, and supervisory scopes.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Institution registry.</li>
+<li>Onboarding queue.</li>
+<li>Legal identity.</li>
+<li>Jurisdiction and regulator.</li>
+<li>Access scope.</li>
+<li>Product permissions.</li>
+<li>Risk profile.</li>
+<li>Settlement relationships.</li>
+<li>Documentation.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Legal name.</li>
+<li>Registration identifier.</li>
+<li>LEI.</li>
+<li>Institution type.</li>
+<li>Jurisdiction.</li>
+<li>Regulator.</li>
+<li>Risk tier.</li>
+<li>Parent entity.</li>
+<li>Approved products.</li>
+<li>Settlement accounts.</li>
+<li>Custody relationships.</li>
+<li>Access state.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create institution profile.</li>
+<li>Verify legal identity.</li>
+<li>Approve onboarding.</li>
+<li>Assign supervisory scope.</li>
+<li>Enable products.</li>
+<li>Suspend institution.</li>
+<li>Review institutional history.</li>
+<li>Export profile.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Institution scope must be explicit. Users should not see or act on institutions outside their assigned authority.</p>
+<h3>Central-bank value</h3>
+<p>The module is the legal and organizational foundation for all platform activity.</p>
+<h2>Users &amp; Roles</h2>
+<h3>Purpose</h3>
+<p>Users &amp; Roles controls identity, team access, role assignment, permissions, approval authority, recertification, and access suspension.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Access posture.</li>
+<li>User registry.</li>
+<li>Role matrix.</li>
+<li>Access-request queue.</li>
+<li>Privileged users.</li>
+<li>Temporary access.</li>
+<li>SoD conflicts.</li>
+<li>Recertification queue.</li>
+<li>Active sessions.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>User identity.</li>
+<li>Institution.</li>
+<li>Department.</li>
+<li>Employment state.</li>
+<li>Roles.</li>
+<li>Permissions.</li>
+<li>Jurisdiction.</li>
+<li>Device trust.</li>
+<li>MFA state.</li>
+<li>Last login.</li>
+<li>Last access review.</li>
+<li>Temporary grants.</li>
+<li>Privileged status.</li>
+<li>Conflicts.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create user.</li>
+<li>Assign role.</li>
+<li>Request access.</li>
+<li>Approve access.</li>
+<li>Revoke access.</li>
+<li>Suspend user.</li>
+<li>Grant temporary privilege.</li>
+<li>Review session.</li>
+<li>Resolve SoD conflict.</li>
+<li>Complete recertification.</li>
+</ul>
+<h3>Required roles</h3>
+<p>Central Bank Governor, Supervisory Operator, Compliance Officer, Risk Officer, Treasury Trader, Settlement Officer, Custody Officer, Auditor, Security Administrator, System Administrator, and External Reviewer.</p>
+<h3>Access and approval rules</h3>
+<p>No shared privileged credentials. The requester cannot approve their own access. Temporary access must expire automatically. High-risk role assignment requires a second approver and strong re-authentication.</p>
+<h3>Central-bank value</h3>
+<p>This module provides direct control over who may view, initiate, approve, administer, or override institutional operations.</p>
+<h2>Mandates &amp; Policies</h2>
+<h3>Purpose</h3>
+<p>Mandates &amp; Policies defines the rules that govern product activity, institution permissions, limits, settlement, compliance, emergency action, and access review.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Policy catalogue.</li>
+<li>Mandate register.</li>
+<li>Draft changes.</li>
+<li>Approval queue.</li>
+<li>Published policies.</li>
+<li>Exceptions.</li>
+<li>Expiry calendar.</li>
+<li>Version comparison.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Policy ID.</li>
+<li>Policy name.</li>
+<li>Version.</li>
+<li>Scope.</li>
+<li>Owner.</li>
+<li>Effective date.</li>
+<li>Expiry date.</li>
+<li>Affected institutions.</li>
+<li>Affected products.</li>
+<li>Required approvals.</li>
+<li>Exceptions.</li>
+<li>Change history.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Create policy.</li>
+<li>Draft amendment.</li>
+<li>Review impact.</li>
+<li>Approve policy.</li>
+<li>Publish policy.</li>
+<li>Create exception.</li>
+<li>Review exception.</li>
+<li>Retire policy.</li>
+<li>Compare versions.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Policy editors should not independently approve publication. Exceptions must have expiry, owner, justification, and compensating controls.</p>
+<h3>Central-bank value</h3>
+<p>The module turns institutional policy into explicit, reviewable, version-controlled rules.</p>
+<h2>Access Logs</h2>
+<h3>Purpose</h3>
+<p>Access Logs records authentication, authorization, account changes, privilege elevation, sensitive actions, and access failures.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Authentication events.</li>
+<li>Authorization decisions.</li>
+<li>Account lifecycle.</li>
+<li>Role changes.</li>
+<li>Privilege elevation.</li>
+<li>Failed access attempts.</li>
+<li>Session history.</li>
+<li>Export controls.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Timestamp.</li>
+<li>User.</li>
+<li>Effective role.</li>
+<li>Institution.</li>
+<li>Action.</li>
+<li>Object.</li>
+<li>Environment.</li>
+<li>Device.</li>
+<li>Network zone.</li>
+<li>Session ID.</li>
+<li>Result.</li>
+<li>Reason.</li>
+<li>Approval reference.</li>
+<li>Evidence hash.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Search events.</li>
+<li>Filter by user, institution, object, or time.</li>
+<li>Investigate a session.</li>
+<li>Review privilege elevation.</li>
+<li>Detect suspicious access.</li>
+<li>Link event to incident.</li>
+<li>Export evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Log viewers may investigate but may not modify records. Log administrators must be separate from system administrators and privileged operators.</p>
+<h3>Central-bank value</h3>
+<p>The module proves identity, access decision, authority, and system response for every sensitive interaction.</p>
+<h1>Settlement &amp; Configuration</h1>
+<h2>Settlement Accounts</h2>
+<h3>Purpose</h3>
+<p>Settlement Accounts manages cash and asset accounts used to complete approved transactions.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Account registry.</li>
+<li>Verification queue.</li>
+<li>Signatory list.</li>
+<li>Currency coverage.</li>
+<li>Settlement-rail mapping.</li>
+<li>Account restrictions.</li>
+<li>Balance and activity.</li>
+<li>Change history.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Account ID.</li>
+<li>Owner.</li>
+<li>Bank or custodian.</li>
+<li>Currency.</li>
+<li>Account type.</li>
+<li>Settlement purpose.</li>
+<li>Rail.</li>
+<li>Status.</li>
+<li>Verification state.</li>
+<li>Signatories.</li>
+<li>Balance.</li>
+<li>Restrictions.</li>
+<li>Last review.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Add account.</li>
+<li>Verify ownership.</li>
+<li>Assign settlement purpose.</li>
+<li>Add or remove signatory.</li>
+<li>Change rail.</li>
+<li>Suspend account.</li>
+<li>Review transactions.</li>
+<li>Export verification evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Account changes require independent verification. Signatory changes, account suspension, and settlement-purpose changes require dual approval.</p>
+<h3>Central-bank value</h3>
+<p>The module prevents misdirected payments, unauthorized account use, and settlement fraud.</p>
+<h2>System Configuration — Bonds</h2>
+<h3>Purpose</h3>
+<p>System Configuration — Bonds controls the reference-data and rules engine used for bond pricing, valuation, settlement, classification, and reporting.</p>
+<h3>Main page sections</h3>
+<ul>
+<li>Bond instrument master.</li>
+<li>Issuer master.</li>
+<li>Coupon schedules.</li>
+<li>Calendars.</li>
+<li>Day-count rules.</li>
+<li>Settlement conventions.</li>
+<li>Pricing sources.</li>
+<li>Eligibility rules.</li>
+<li>Configuration releases.</li>
+<li>Change approvals.</li>
+</ul>
+<h3>Key data</h3>
+<ul>
+<li>Instrument ID.</li>
+<li>ISIN.</li>
+<li>Issuer.</li>
+<li>Currency.</li>
+<li>Coupon.</li>
+<li>Coupon frequency.</li>
+<li>Maturity.</li>
+<li>Calendar.</li>
+<li>Day-count convention.</li>
+<li>Settlement convention.</li>
+<li>Pricing source.</li>
+<li>Eligibility.</li>
+<li>Version.</li>
+<li>Effective date.</li>
+</ul>
+<h3>Primary workflows</h3>
+<ul>
+<li>Add instrument.</li>
+<li>Correct reference data.</li>
+<li>Change pricing source.</li>
+<li>Change settlement convention.</li>
+<li>Test configuration.</li>
+<li>Approve release.</li>
+<li>Roll back configuration.</li>
+<li>Export change evidence.</li>
+</ul>
+<h3>Access and approval rules</h3>
+<p>Configuration changes must be versioned, tested, peer-reviewed, and approved before release. Developers should not directly promote unapproved changes into production.</p>
+<h3>Central-bank value</h3>
+<p>The module protects the accuracy of valuation, settlement, regulatory classification, and bond-market reporting.</p>
+<h1>Cross-Menu Team Access Model</h1>
+<h2>Role principles</h2>
+<p>Access should be based on responsibility, scope, need-to-know, and time—not only seniority.</p>
+<div class="tblwrap"><table><thead><tr>
+<th>Role</th>
+<th>View</th>
+<th>Initiate</th>
+<th>Approve</th>
+<th>Restriction</th>
+</tr></thead><tbody>
+<tr>
+<td>Central Bank Governor</td>
+<td>All supervisory data</td>
+<td>Emergency directives</td>
+<td>Final sovereign actions</td>
+<td>No shared credentials</td>
+</tr>
+<tr>
+<td>Supervisory Operator</td>
+<td>Oversight and reports</td>
+<td>Supervisory reviews</td>
+<td>Assigned workflows</td>
+<td>Cannot approve own request</td>
+</tr>
+<tr>
+<td>Compliance Officer</td>
+<td>KYC, AML, sanctions</td>
+<td>Compliance findings</td>
+<td>Compliance gates</td>
+<td>Cannot change settlement balances</td>
+</tr>
+<tr>
+<td>Risk Officer</td>
+<td>Risk, limits, stress tests</td>
+<td>Limit proposals</td>
+<td>Risk gates</td>
+<td>Cannot approve own limit change</td>
+</tr>
+<tr>
+<td>Treasury Trader</td>
+<td>Market data and positions</td>
+<td>Buy/sell requests</td>
+<td>Limited or none</td>
+<td>Cannot approve own trade</td>
+</tr>
+<tr>
+<td>Settlement Officer</td>
+<td>Payment and settlement</td>
+<td>Settlement actions</td>
+<td>Settlement confirmation</td>
+<td>Cannot change product policy</td>
+</tr>
+<tr>
+<td>Custody Officer</td>
+<td>Vault and allocated assets</td>
+<td>Custody actions</td>
+<td>Custody confirmation</td>
+<td>Cannot amend market orders</td>
+</tr>
+<tr>
+<td>Auditor</td>
+<td>Read-only evidence</td>
+<td>Audit queries</td>
+<td>None</td>
+<td>Cannot modify operations</td>
+</tr>
+<tr>
+<td>Security Administrator</td>
+<td>IAM and security logs</td>
+<td>Access requests</td>
+<td>Security changes</td>
+<td>Cannot approve own access</td>
+</tr>
+<tr>
+<td>System Administrator</td>
+<td>Technical configuration</td>
+<td>Maintenance actions</td>
+<td>None</td>
+<td>Cannot modify audit history</td>
+</tr>
+<tr>
+<td>External Reviewer</td>
+<td>Assigned evidence only</td>
+<td>Review comments</td>
+<td>Assigned reviews</td>
+<td>Cannot access unrelated institutions</td>
+</tr>
+</tbody></table></div>
+<h2>Segregation-of-duties conflicts</h2>
+<p>The system should detect and block or escalate combinations such as:</p>
+<ul>
+<li>Trader plus final trade approver.</li>
+<li>Product creator plus product approver.</li>
+<li>Compliance-policy editor plus compliance auditor.</li>
+<li>Security administrator plus audit-log administrator.</li>
+<li>Settlement initiator plus settlement confirmer.</li>
+<li>Developer plus production deployment approver.</li>
+<li>System administrator plus evidence deletion authority.</li>
+<li>User-access administrator plus independent access reviewer.</li>
+</ul>
+<h2>Access-request lifecycle</h2>
+<p>1. Request submitted.<br/>2. Business need confirmed.<br/>3. Scope and institution checked.<br/>4. SoD analysis performed.<br/>5. Risk assessed.<br/>6. First approval completed.<br/>7. Second approval completed where required.<br/>8. Access provisioned.<br/>9. User notified.<br/>10. Expiry enforced.<br/>11. Access logged.<br/>12. Periodic recertification completed.</p>
+<h1>Recommended Sidebar</h1>
+<pre><code>OPERATIONS
+Settlement Monitor
+Payments &amp; ISO 20022
+Reconciliation
+Delivery &amp; Transfers
+
+MARKETS &amp; ASSETS
+Gold Bullion
+Government Bonds
+FX &amp; Money Markets
+Custody &amp; Vaults
+Portfolio Management
+Reserve Overview
+
+RISK &amp; POLICY
+Risk Dashboard
+Exposure &amp; Limits
+Counterparties
+Stress Testing
+Compliance Dashboard
+
+ACCOUNTING &amp; REPORTING
+Statements &amp; GL
+Valuation &amp; P&amp;L
+Regulatory Reports
+Audit Center
+
+SETTLEMENT
+Settlement Accounts
+
+GOVERNANCE
+Institutions
+Users &amp; Roles
+Mandates &amp; Policies
+Access Logs
+
+CONFIGURATION
+System Configuration — Bonds</code></pre>
+<h1>Central-Bank Acceptance Criteria</h1>
+<p>The platform should not be considered production-ready until it can demonstrate:</p>
+<ul>
+<li>Clear operator identity and effective authority.</li>
+<li>Clear institution, jurisdiction, environment, and ledger status.</li>
+<li>Separate buy and sell permissions.</li>
+<li>Product-level launch gates.</li>
+<li>Named owner for every unresolved issue.</li>
+<li>Enforced four-eyes approval.</li>
+<li>No self-approval.</li>
+<li>Automatic SoD detection.</li>
+<li>Time-limited privileged access.</li>
+<li>Automatic expiry of temporary access.</li>
+<li>Protected audit logging.</li>
+<li>Immediate user and session revocation.</li>
+<li>Emergency suspension with incident history.</li>
+<li>Versioned evidence export.</li>
+<li>Periodic access recertification.</li>
+<li>Clear distinction between operational alerts and governance exceptions.</li>
+</ul>
+<p>The essential design rule is: every sensitive action must have a defined actor, authority, scope, approval path, expiry rule, evidence record, and recovery or reversal path.</p>
+</main>
+<footer>
+ Veritas Gold V1 · generated from Markdown by scripts/build-docs-pages.mjs ·
+ <a href="https://github.com/veritas-bank-system/Veritas-Gold-V1">repo</a>
+</footer>
+</body>
+</html>
