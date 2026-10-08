@@ -119,9 +119,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'vault_telemetry', label: 'Custody & Vaults', icon: Activity, badge: 'PoR Live' },
         { id: 'notaries', label: 'Settlement Monitor', icon: ShieldCheck, badge: '4/5 BFT' },
-        { id: 'iso20022_bridge', label: 'Payments & ISO 20022', icon: ArrowLeftRight, badge: 'pacs.008' },
+        { id: 'cb_iso20022', label: 'Payments & ISO 20022', icon: ArrowLeftRight, badge: 'pacs.008' },
         { id: 'logs', label: 'Reconciliation', icon: FileText, badge: 'camt.053' },
-        { id: 'trade', label: 'Delivery & Transfers', icon: TrendingUp, badge: `${offerCount} Legs` },
+        { id: 'delivery_transfers', label: 'Delivery & Transfers', icon: TrendingUp, badge: `${offerCount} Legs` },
       ],
     },
     {

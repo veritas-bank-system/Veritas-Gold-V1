@@ -494,6 +494,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         env,
         settlement_events: Arc::new(RwLock::new(genesis_events)),
         event_seq: Arc::new(AtomicU64::new(4)),
+        audit_events: Arc::new(RwLock::new(Vec::new())),
         started_at_ms,
         offers: Arc::new(RwLock::new(initial_offers)),
         transactions: Arc::new(RwLock::new(initial_txns)),

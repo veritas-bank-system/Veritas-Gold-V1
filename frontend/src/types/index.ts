@@ -84,6 +84,11 @@ export type AppSection =
   // Encrypted Chat keeps 'secure_chat'.
   | 'access_logs'
   | 'cb_supervisory_radar'
+  // CB Delivery & Transfers — own movement/custody view; institutional RFQ
+  // keeps 'trade'. CB Payments has its own message-explorer view;
+  // institutional surfaces keep 'iso20022_bridge'.
+  | 'delivery_transfers'
+  | 'cb_iso20022'
   // Workspace-scoped nav entries (Central Bank / Institutional). These are
   // persona-policy labels that resolve onto the shared views via SECTION_ALIASES.
   | 'cb_limits'
@@ -184,6 +189,40 @@ export interface RwaOffer {
   total_price_eur: string;
   status: string;
   created_at: number;
+}
+
+/** Ledger-side append-only audit journal record (hash-chained server-side). */
+export interface LedgerAuditEvent {
+  seq: number;
+  timestamp_ms: number;
+  actor: string;
+  effective_role: string;
+  institution: string;
+  action: string;
+  object: string;
+  environment: string;
+  before: string;
+  after: string;
+  correlation_id: string;
+  reason: string;
+  result: string;
+  evidence_hash: string;
+  prev_hash: string;
+}
+
+export interface AuditEventsResponse {
+  chain_verified: boolean;
+  chain_checked: number;
+  chain_broken_at_seq: number | null;
+  total_events: number;
+  events: LedgerAuditEvent[];
+}
+
+export interface AuditChainVerification {
+  chain_verified: boolean;
+  events_checked: number;
+  broken_at_seq: number | null;
+  head_hash: string | null;
 }
 
 export interface UnmaskedFlow {

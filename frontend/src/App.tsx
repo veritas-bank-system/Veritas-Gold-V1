@@ -18,6 +18,8 @@ import { RiskDashboardView } from './components/views/RiskDashboardView';
 import { ExposureLimitsView } from './components/views/ExposureLimitsView';
 import { StressTestingView } from './components/views/StressTestingView';
 import { AccessLogsView } from './components/views/AccessLogsView';
+import { Iso20022PaymentsView } from './components/views/Iso20022PaymentsView';
+import { DeliveryTransfersView } from './components/views/DeliveryTransfersView';
 import { recordSessionEvent } from './services/sessionAudit';
 import { OpsDashboard } from './components/views/OpsDashboard';
 import { RegulatorDashboard } from './components/views/RegulatorDashboard';
@@ -230,6 +232,7 @@ export function App() {
 
   const [networkStatus, setNetworkStatus] = useState<'healthy' | 'connecting' | 'offline'>('healthy');
   const [accountDataStatus, setAccountDataStatus] = useState<'loading' | 'available' | 'stale' | 'unavailable'>('loading');
+  const [txnDataStatus, setTxnDataStatus] = useState<'loading' | 'available' | 'stale' | 'unavailable'>('loading');
   const [accountsFetchedAt, setAccountsFetchedAt] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
   const fxRefreshStarted = useRef(false);
@@ -293,6 +296,7 @@ export function App() {
       setRates(rts);
       setOffers(ofrs);
       setTransactions(txns);
+      setTxnDataStatus('available');
       setCollateral(cols);
       setAuctions(aucs);
       setCorporateActions(acts);
@@ -303,6 +307,7 @@ export function App() {
       setBondContracts(bonds);
       setNetworkStatus('healthy');
     } catch {
+      setTxnDataStatus((previous) => (previous === 'available' || previous === 'stale' ? 'stale' : 'unavailable'));
       setNetworkStatus('offline');
     }
   }, [refreshFxReferenceRates]);
@@ -359,6 +364,9 @@ export function App() {
       // cb_limits / cb_stress / access_logs are now real views (Phase 2 of the
       // menu-build programme); cb_compliance_dash keeps the supervisory radar.
       cb_compliance_dash: 'cb_supervisory_radar',
+      // CB Payments & ISO 20022 is now its own message-explorer view; the
+      // FX desk keeps 'interoperability' for institutional surfaces.
+      cb_iso20022: 'cb_iso20022',
       statements_gl: 'logs',
       cb_valuation: 'logs',
       cb_reg_reports: 'logs',
@@ -560,6 +568,33 @@ export function App() {
             institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
             environment={systemEnv}
             pendingApprovals={approvals.length}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'cb_iso20022':
+        return (
+          <Iso20022PaymentsView
+            transactions={transactions}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            txnDataStatus={txnDataStatus}
+            onNavigate={setActiveSection}
+            onNotify={showToast}
+          />
+        );
+      case 'delivery_transfers':
+        return (
+          <DeliveryTransfersView
+            holdings={holdings}
+            transactions={transactions}
+            pendingApprovals={approvals}
+            personaRoleTitle={authenticatedPersona?.roleTitle || 'Unspecified'}
+            institutionName={authenticatedPersona?.institutionName || currentInstitution.name}
+            environment={systemEnv}
+            dataStatus={txnDataStatus}
             onNavigate={setActiveSection}
             onNotify={showToast}
           />

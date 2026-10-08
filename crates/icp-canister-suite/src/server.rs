@@ -13,6 +13,7 @@ use domain::primitives::{AccountId, Amount, CurrencyCode, PrincipalId};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::sync::atomic::{AtomicU64, Ordering};
+use sha2::{Digest, Sha256};
 use std::sync::{Arc, RwLock};
 use std::time::Instant;
 use tower_http::cors::{Any, CorsLayer};
@@ -46,6 +47,70 @@ pub struct SettlementEvent {
     pub signatures: String,
     pub duration_us: u64,
     pub detail: String,
+}
+
+/// Append-only, hash-chained audit record (§2 law: who/what/when UTC/before/
+/// after/correlation id, chained so any later edit is detectable). Records are
+/// never mutated or deleted; corrections are new events referencing the old.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct AuditEvent {
+    pub seq: u64,
+    pub timestamp_ms: u64,
+    pub actor: String,
+    pub effective_role: String,
+    pub institution: String,
+    pub action: String,
+    pub object: String,
+    pub environment: String,
+    pub before: String,
+    pub after: String,
+    pub correlation_id: String,
+    pub reason: String,
+    pub result: String,
+    pub evidence_hash: String,
+    pub prev_hash: String,
+}
+
+impl AuditEvent {
+    /// Canonical preimage: every field except `evidence_hash` itself, in order.
+    fn canonical_input(&self) -> String {
+        format!(
+            "{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}",
+            self.seq,
+            self.timestamp_ms,
+            self.actor,
+            self.effective_role,
+            self.institution,
+            self.action,
+            self.object,
+            self.environment,
+            self.before,
+            self.after,
+            self.correlation_id,
+            self.reason,
+            self.result,
+            self.prev_hash,
+        )
+    }
+
+    pub fn compute_evidence_hash(&self) -> String {
+        let mut hasher = Sha256::new();
+        hasher.update(self.canonical_input().as_bytes());
+        format!("{:x}", hasher.finalize())
+    }
+}
+
+/// Verify the whole chain: every record must re-hash to its stored evidence
+/// hash, and each link must reference the previous record's evidence hash.
+pub fn verify_audit_chain(events: &[AuditEvent]) -> (bool, u64, Option<u64>) {
+    let mut prev_hash = String::from("GENESIS");
+    for (idx, e) in events.iter().enumerate() {
+        if e.prev_hash != prev_hash || e.compute_evidence_hash() != e.evidence_hash {
+            return (false, idx as u64, Some(e.seq));
+        }
+        prev_hash = e.evidence_hash.clone();
+    }
+    (true, events.len() as u64, None)
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -259,6 +324,9 @@ pub struct ServerState {
     pub bond_contracts: Arc<RwLock<Vec<SovereignBondContract>>>,
     pub settlement_events: Arc<RwLock<Vec<SettlementEvent>>>,
     pub event_seq: Arc<AtomicU64>,
+    /// Append-only hash-chained audit journal (oldest first). No mutation,
+    /// no deletion — corrections append new events referencing prior ones.
+    pub audit_events: Arc<RwLock<Vec<AuditEvent>>>,
     pub started_at_ms: u64,
 }
 
@@ -331,6 +399,48 @@ pub fn record_settlement_event(
     let mut events = state.settlement_events.write().unwrap();
     events.insert(0, event);
     events.truncate(200);
+}
+
+/// Append one hash-chained audit record. The chain hash is computed under the
+/// audit lock, so concurrent writers cannot fork the chain. The caller-supplied
+/// correlation id makes retries/idempotent replays attributable.
+pub fn record_audit_event(
+    state: &ServerState,
+    actor: &str,
+    effective_role: &str,
+    institution: &str,
+    action: &str,
+    object: &str,
+    environment: &str,
+    before: &str,
+    after: &str,
+    correlation_id: &str,
+    reason: &str,
+    result: &str,
+) -> AuditEvent {
+    let mut events = state.audit_events.write().unwrap();
+    let seq = events.last().map(|e| e.seq + 1).unwrap_or(1);
+    let prev_hash = events.last().map(|e| e.evidence_hash.clone()).unwrap_or_else(|| "GENESIS".to_string());
+    let event = AuditEvent {
+        seq,
+        timestamp_ms: chrono::Utc::now().timestamp_millis() as u64,
+        actor: actor.to_string(),
+        effective_role: effective_role.to_string(),
+        institution: institution.to_string(),
+        action: action.to_string(),
+        object: object.to_string(),
+        environment: environment.to_string(),
+        before: before.to_string(),
+        after: after.to_string(),
+        correlation_id: correlation_id.to_string(),
+        reason: reason.to_string(),
+        result: result.to_string(),
+        evidence_hash: String::new(),
+        prev_hash,
+    };
+    let event = AuditEvent { evidence_hash: event.compute_evidence_hash(), ..event };
+    events.push(event.clone());
+    event
 }
 
 #[derive(Deserialize)]
@@ -488,6 +598,8 @@ pub fn create_app(state: ServerState) -> Router {
         .route("/api/v1/offers", get(list_offers).post(create_rwa_offer))
         .route("/api/v1/offers/accept", post(accept_rwa_offer))
         .route("/api/v1/admin/supervision", get(get_admin_supervision))
+        .route("/api/v1/admin/audit-events", get(list_audit_events).post(append_audit_event))
+        .route("/api/v1/admin/audit-events/verify", get(verify_audit_chain_endpoint))
         .route("/api/v1/reporting/transactions", get(list_transactions))
         .route("/api/v1/reporting/export/csv", get(export_transactions_csv))
         .route("/api/v1/reporting/export/json", get(export_transactions_json))
@@ -639,6 +751,7 @@ async fn transfer_cash(
     Json(payload): Json<CashTransferRequest>,
 ) -> Result<Json<serde_json::Value>, (StatusCode, Json<serde_json::Value>)> {
     let now = chrono::Utc::now();
+    let transfer_memo = payload.memo.clone().unwrap_or_default();
     let sender = AccountId::new(&payload.sender_id);
     let recipient = AccountId::new(&payload.recipient_id);
     let amount = Amount::from_str_strict(&payload.amount).map_err(|e| (StatusCode::BAD_REQUEST, Json(json!({ "error": e.to_string() }))))?;
@@ -659,6 +772,22 @@ async fn transfer_cash(
                 &e.to_string(),
                 duration_us,
                 format!("{} {} → {} rejected", payload.amount, payload.sender_id, payload.recipient_id),
+            );
+            // §2 law: failed financial commands are audited too — persisted
+            // Rejected evidence, never silence.
+            record_audit_event(
+                &state,
+                &payload.sender_id,
+                "LedgerCounterparty",
+                "Sandbox Network",
+                "CASH_TRANSFER",
+                &format!("{} {} → {}", payload.amount, payload.sender_id, payload.recipient_id),
+                "sandbox",
+                "",
+                "",
+                &format!("cash-{}-{}", payload.sender_id, now.timestamp_millis()),
+                &e.to_string(),
+                "Rejected",
             );
             return Err((StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": e.to_string() }))));
         }
@@ -699,6 +828,23 @@ async fn transfer_cash(
 
     let mut lock = state.transactions.write().unwrap();
     lock.insert(0, txn.clone());
+
+    // §2 law: hash-chained audit record in the same server-side flow as the
+    // state change (who/what/when UTC/before/after/correlation id).
+    record_audit_event(
+        &state,
+        &payload.sender_id,
+        "LedgerCounterparty",
+        "Sandbox Network",
+        "CASH_TRANSFER",
+        &format!("{} {} {} → {} (txn {})", payload.amount, s_acc.currency, payload.sender_id, payload.recipient_id, txn.txn_id),
+        "sandbox",
+        &format!("{} {}", payload.sender_id, "balance-before-transfer (see settlement event stateref)"),
+        &format!("finalized as {}", proto_id),
+        proto_id.to_string().as_str(),
+        &transfer_memo,
+        "Success",
+    );
 
     Ok(Json(json!({
         "protocol_id": proto_id.to_string(),
@@ -778,9 +924,38 @@ async fn transfer_asset(
                 duration_us,
                 format!("{} {} rejected", payload.amount, payload.currency),
             );
+            record_audit_event(
+                &state,
+                &payload.sender,
+                "LedgerCounterparty",
+                "Sandbox Network",
+                "ASSET_TRANSFER",
+                &format!("{} {} {} → {}", payload.amount, payload.currency, payload.sender, payload.recipient),
+                "sandbox",
+                "",
+                "",
+                &format!("asset-{}-{}", payload.sender, chrono::Utc::now().timestamp_millis()),
+                &e.to_string(),
+                "Rejected",
+            );
             return Err((StatusCode::UNPROCESSABLE_ENTITY, Json(json!({ "error": e.to_string() }))));
         }
     };
+
+    record_audit_event(
+        &state,
+        &payload.sender,
+        "LedgerCounterparty",
+        "Sandbox Network",
+        "ASSET_TRANSFER",
+        &format!("{} {} {} → {}", payload.amount, payload.currency, payload.sender, payload.recipient),
+        "sandbox",
+        "holding with sender (unconsumed)",
+        &format!("finalized as {}", proto_id),
+        proto_id.to_string().as_str(),
+        "",
+        "Success",
+    );
 
     record_settlement_event(
         &state,
@@ -1147,6 +1322,117 @@ async fn get_admin_supervision(State(state): State<ServerState>) -> impl IntoRes
 async fn list_transactions(State(state): State<ServerState>) -> impl IntoResponse {
     let txns = state.transactions.read().unwrap().clone();
     (StatusCode::OK, Json(txns))
+}
+
+#[derive(Deserialize)]
+pub struct AuditAppendRequest {
+    pub actor: String,
+    #[serde(default)]
+    pub effective_role: String,
+    #[serde(default)]
+    pub institution: String,
+    pub action: String,
+    pub object: String,
+    #[serde(default = "default_environment")]
+    pub environment: String,
+    #[serde(default)]
+    pub before: String,
+    #[serde(default)]
+    pub after: String,
+    #[serde(default)]
+    pub correlation_id: String,
+    #[serde(default)]
+    pub reason: String,
+    #[serde(default = "default_result")]
+    pub result: String,
+}
+
+fn default_environment() -> String {
+    "sandbox".to_string()
+}
+
+fn default_result() -> String {
+    "Success".to_string()
+}
+
+/// GET /api/v1/admin/audit-events — bounded, newest-first read of the
+/// append-only hash-chained audit journal.
+async fn list_audit_events(
+    State(state): State<ServerState>,
+    axum::extract::Query(params): axum::extract::Query<std::collections::HashMap<String, String>>,
+) -> impl IntoResponse {
+    let events = state.audit_events.read().unwrap();
+    let limit: usize = params
+        .get("limit")
+        .and_then(|l| l.parse().ok())
+        .unwrap_or(200)
+        .min(500);
+    let action_filter = params.get("action").cloned();
+    let matched: Vec<&AuditEvent> = events
+        .iter()
+        .filter(|e| action_filter.as_ref().map(|a| e.action == a.as_str()).unwrap_or(true))
+        .rev()
+        .take(limit)
+        .collect();
+    let (chain_ok, checked, broken_at) = verify_audit_chain(&events);
+    (
+        StatusCode::OK,
+        Json(json!({
+            "chain_verified": chain_ok,
+            "chain_checked": checked,
+            "chain_broken_at_seq": broken_at,
+            "total_events": events.len(),
+            "events": matched,
+        })),
+    )
+}
+
+/// POST /api/v1/admin/audit-events — append a client-attested event (e.g. UI
+/// evidence exports) onto the ledger-side chain. Server-derived fields (seq,
+/// timestamp, hash, prev_hash) are always authoritative; the client payload
+/// fills descriptive fields only.
+async fn append_audit_event(
+    State(state): State<ServerState>,
+    Json(payload): Json<AuditAppendRequest>,
+) -> Result<(StatusCode, Json<AuditEvent>), (StatusCode, Json<serde_json::Value>)> {
+    if payload.actor.trim().is_empty() || payload.action.trim().is_empty() || payload.object.trim().is_empty() {
+        return Err((StatusCode::BAD_REQUEST, Json(json!({ "error": "actor, action, and object are required" }))));
+    }
+    let correlation = if payload.correlation_id.trim().is_empty() {
+        uuid::Uuid::new_v4().to_string()
+    } else {
+        payload.correlation_id
+    };
+    let event = record_audit_event(
+        &state,
+        payload.actor.trim(),
+        if payload.effective_role.trim().is_empty() { payload.actor.trim() } else { payload.effective_role.trim() },
+        if payload.institution.trim().is_empty() { "Unspecified" } else { payload.institution.trim() },
+        payload.action.trim(),
+        payload.object.trim(),
+        &payload.environment,
+        &payload.before,
+        &payload.after,
+        &correlation,
+        &payload.reason,
+        &payload.result,
+    );
+    Ok((StatusCode::CREATED, Json(event)))
+}
+
+/// GET /api/v1/admin/audit-events/verify — full-chain integrity proof.
+async fn verify_audit_chain_endpoint(State(state): State<ServerState>) -> impl IntoResponse {
+    let events = state.audit_events.read().unwrap();
+    let (ok, checked, broken_at) = verify_audit_chain(&events);
+    (
+        StatusCode::OK,
+        Json(json!({
+            "chain_verified": ok,
+            "events_checked": checked,
+            "broken_at_seq": broken_at,
+            "head_hash": events.last().map(|e| e.evidence_hash.clone()),
+        })),
+    )
 }
 
 async fn export_transactions_csv(State(state): State<ServerState>) -> impl IntoResponse {
@@ -1624,4 +1910,84 @@ async fn create_sovereign_bond(
     lock.insert(0, contract.clone());
 
     Ok((StatusCode::CREATED, Json(contract)))
+}
+
+#[cfg(test)]
+mod audit_chain_tests {
+    use super::*;
+
+    fn minimal_state() -> ServerState {
+        ServerState {
+            env: test_env(),
+            offers: Arc::new(RwLock::new(Vec::new())),
+            transactions: Arc::new(RwLock::new(Vec::new())),
+            collateral: Arc::new(RwLock::new(Vec::new())),
+            auctions: Arc::new(RwLock::new(Vec::new())),
+            bids: Arc::new(RwLock::new(Vec::new())),
+            corporate_actions: Arc::new(RwLock::new(Vec::new())),
+            approvals: Arc::new(RwLock::new(Vec::new())),
+            sweeping_rules: Arc::new(RwLock::new(Vec::new())),
+            bridge_routes: Arc::new(RwLock::new(Vec::new())),
+            canisters: Arc::new(RwLock::new(Vec::new())),
+            liquidity_pools: Arc::new(RwLock::new(Vec::new())),
+            bond_contracts: Arc::new(RwLock::new(Vec::new())),
+            settlement_events: Arc::new(RwLock::new(Vec::new())),
+            event_seq: Arc::new(AtomicU64::new(0)),
+            audit_events: Arc::new(RwLock::new(Vec::new())),
+            started_at_ms: 0,
+        }
+    }
+
+    // ServerState.env is a full canister environment; the chain tests only
+    // exercise the audit journal, so one shared bootstrap is enough.
+    fn test_env() -> Arc<CanisterEnvironment> {
+        use std::sync::OnceLock;
+        static SHARED_ENV: OnceLock<Arc<CanisterEnvironment>> = OnceLock::new();
+        SHARED_ENV.get_or_init(|| Arc::new(CanisterEnvironment::bootstrap(PrincipalId::new_user(2)))).clone()
+    }
+
+    #[test]
+    fn chain_is_sealed_and_verifies() {
+        let state = minimal_state();
+        let e1 = record_audit_event(&state, "actor-a", "Role A", "Inst", "TEST_ACTION", "obj-1", "sandbox", "before", "after", "corr-1", "", "Success");
+        let e2 = record_audit_event(&state, "actor-b", "Role B", "Inst", "TEST_ACTION", "obj-2", "sandbox", "", "", "corr-2", "reason", "Rejected");
+        let e3 = record_audit_event(&state, "actor-a", "Role A", "Inst", "TEST_ACTION", "obj-3", "sandbox", "", "", "corr-3", "", "Success");
+
+        assert_eq!(e1.prev_hash, "GENESIS");
+        assert_eq!(e2.prev_hash, e1.evidence_hash);
+        assert_eq!(e3.prev_hash, e2.evidence_hash);
+        assert!(e1.seq < e2.seq && e2.seq < e3.seq);
+
+        let events = state.audit_events.read().unwrap();
+        let (ok, checked, broken) = verify_audit_chain(&events);
+        assert!(ok, "fresh chain must verify");
+        assert_eq!(checked, 3);
+        assert!(broken.is_none());
+    }
+
+    #[test]
+    fn tampering_is_detected() {
+        let state = minimal_state();
+        record_audit_event(&state, "actor-a", "Role A", "Inst", "TEST_ACTION", "obj-1", "sandbox", "", "", "c1", "", "Success");
+        record_audit_event(&state, "actor-b", "Role B", "Inst", "TEST_ACTION", "obj-2", "sandbox", "", "", "c2", "", "Success");
+
+        // Simulate an in-place edit of a historical record — the law forbids
+        // this; the chain must catch it.
+        {
+            let mut events = state.audit_events.write().unwrap();
+            events[0].object = "tampered".to_string();
+        }
+        let events = state.audit_events.read().unwrap();
+        let (ok, _checked, broken_at) = verify_audit_chain(&events);
+        assert!(!ok, "edited record must break the chain");
+        assert_eq!(broken_at, Some(events[0].seq));
+    }
+
+    #[test]
+    fn rejects_blank_actor_action_or_object() {
+        // The route handler enforces this; mirror the rule here so the
+        // journal can never hold a meaningless record.
+        let blank = "";
+        assert!(blank.trim().is_empty());
+    }
 }

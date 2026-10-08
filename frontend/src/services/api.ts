@@ -8,6 +8,8 @@ import type {
   RwaOffer,
   SettlementTelemetry,
   SupervisionData,
+  AuditEventsResponse,
+  AuditChainVerification,
   InstitutionalTxn,
   CollateralPosition,
   BondAuction,
@@ -285,6 +287,43 @@ export async function fetchSupervision(): Promise<SupervisionData> {
   const res = await fetch(`${API_BASE}/admin/supervision`);
   if (!res.ok) throw new Error('Failed to fetch supervisory data');
   return res.json();
+}
+
+/** Ledger-side, append-only hash-chained audit journal (newest first). */
+export async function fetchAuditEvents(actionFilter?: string): Promise<AuditEventsResponse> {
+  const qs = actionFilter ? `?action=${encodeURIComponent(actionFilter)}` : '';
+  const res = await fetch(`${API_BASE}/admin/audit-events${qs}`);
+  if (!res.ok) throw new Error('Failed to fetch audit events');
+  return res.json();
+}
+
+/** Verify the ledger audit chain end-to-end (server-side re-hash). */
+export async function verifyAuditChain(): Promise<AuditChainVerification> {
+  const res = await fetch(`${API_BASE}/admin/audit-events/verify`);
+  if (!res.ok) throw new Error('Failed to verify audit chain');
+  return res.json();
+}
+
+/** Append a client-attested event (e.g. evidence export) onto the ledger chain. */
+export async function appendAuditEvent(payload: {
+  actor: string;
+  effective_role?: string;
+  institution?: string;
+  action: string;
+  object: string;
+  environment?: string;
+  before?: string;
+  after?: string;
+  correlation_id?: string;
+  reason?: string;
+  result?: string;
+}): Promise<void> {
+  const res = await fetch(`${API_BASE}/admin/audit-events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Failed to append audit event');
 }
 
 export async function fetchTransactions(): Promise<InstitutionalTxn[]> {
