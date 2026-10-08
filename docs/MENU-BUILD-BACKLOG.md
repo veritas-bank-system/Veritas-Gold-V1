@@ -29,19 +29,23 @@ Legend: ✅ done · 🚧 in progress · ⬜ queued
 - ✅ `AccessLogsView` (new `access_logs` nav id; institutional chat keeps `secure_chat`) —
   filterable event table, in-session events only, "server audit trail not connected" state
 
-## Phase 3 — Remaining de-aliased views ⬜
-- ⬜ **Payments & ISO 20022** (`iso20022_bridge`, currently FX view): message explorer,
-  validation/repair queue, screening status, approvals, audit trail (needs P5 message store)
-- ⬜ **Delivery & Transfers** (`trade`, currently RFQ desk): transfer queue, chain-of-custody
-  timeline, bar-level evidence, holds/exceptions
+## Phase 3 — Remaining de-aliased views ✅ (first tranche delivered in commit 7d73d81)
+- ✅ **Payments & ISO 20022** (`cb_iso20022`, own view `Iso20022PaymentsView`; FX desk keeps
+  `interoperability`): live message explorer, screening/validation columns, repair queue,
+  evidence export, unmapped-type honest labels. P5 message store still queued.
+- ✅ **Delivery & Transfers** (`delivery_transfers`, institutional RFQ desk untouched):
+  custody inventory, movement register with finality receipts, instruction/confirmation split.
+- ✅ **Access Logs** upgraded to the **server audit chain**: `GET/POST /api/v1/admin/
+  audit-events` + `/verify` (hash-chained, append-only, in-memory until P5 persistence);
+  `AccessLogsView` reads the ledger first, source-labels rows Ledger vs Session.
 - ⬜ **Statements & GL** (`statements_gl`, currently shared accounting view): account
   hierarchy, journal queue, period close, posting approvals
 - ⬜ **Valuation & P&L** (`cb_valuation`): price-source comparison, realized/unrealized P&L,
   lock/approval workflow
 - ⬜ **Regulatory Reports** (`cb_reg_reports`): reporting calendar, validation, approval +
   submission states, corrections, evidence archive
-- ⬜ **Audit Center** (`cb_audit`): global event search, timeline, entity history, evidence
-  validation, export builder (needs P5 audit-event source)
+- 🚧 **Audit Center** (`cb_audit`, currently shared logs view): P5 audit-event source now
+  exists — needs its own de-aliased view (search, timeline, entity history, export builder)
 - ⬜ **Institutions** (`enterprise_admin`, currently enterprise-admin overview): registry,
   onboarding, scope assignment
 - ⬜ **Users & Roles** (`identity_admin`, shared with Counterparties): role matrix,
@@ -61,8 +65,10 @@ Legend: ✅ done · 🚧 in progress · ⬜ queued
 - ⬜ Role-based action gating on every sensitive control (11-role matrix from the spec)
 - ⬜ Emergency suspension panel (scope/reason/duration/incident ref/review deadline/audit)
 
-## Phase 5 — Backend sources (Rust, banking-rules review required per item) ⬜
-- ⬜ Audit/access-event endpoint (append-only, hash-chained) backing Access Logs + Audit Center
+## Phase 5 — Backend sources (Rust, banking-rules review required per item) 🚧
+- ✅ Audit/access-event endpoint (append-only, hash-chained) backing Access Logs + Audit
+  Center — shipped in `7d73d81` (in-memory; see P5 persistence item below)
+- ⬜ Audit-chain persistence (currently in-memory journal, resets on restart)
 - ⬜ Limits engine (proposals, dual approval, versioning, automatic expiry)
 - ⬜ Stress-scenario store + deterministic simulation runner
 - ⬜ ISO 20022 message store + validation/screening pipeline (banking-payment-messaging skill)
